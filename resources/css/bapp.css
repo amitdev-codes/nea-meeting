@@ -1,0 +1,23 @@
+@import './app.css';
+@import './custom.css';
+@import '../sass/app.scss';
+@import './nepalidatePicker.css';
+
+/* Vendor CSS */
+/* @import '../vendor/./vendor/libs/select2/select2.css'; */
+@import '../vendor/./vendor/libs/bs-stepper/bs-stepper.css';
+
+@import '../vendor/./vendor/libs/perfect-scrollbar/perfect-scrollbar.css';
+
+@import '../vendor/./vendor/libs/datatables-bs5/datatables-bootstrap5.css';
+@import '../vendor/./vendor/libs/datatables-responsive-bs5/responsive-bootstrap5.css';
+@import '../vendor/./vendor/libs/apex-charts/apex-charts.css';
+@import '../vendor/./vendor/libs/select2/select2-bootstrap-5-theme.min.css';
+@import '../vendor/./vendor/fonts/boxicons.css';
+
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+
+/* Load Boxicons */
+@import 'boxicons/css/boxicons.css';/* Import Font Awesome CSS */
+@import '@fortawesome/fontawesome-free/css/all.min.css';

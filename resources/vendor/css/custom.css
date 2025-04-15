@@ -1,0 +1,145 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light Theme Variables */
+:root {
+    --bg-color: white;
+    --text-color: black;
+    --header-bg: #f8f9fa; /* Light header background */
+    --sidebar-bg: #ffffff; /* Light sidebar background */
+    --footer-bg: #f1f1f1; /* Light footer background */
+    --content-bg: #ffffff; /* Light content background */
+    --sidebar-text-color: #333; /* Light sidebar text color */
+    --active-item-bg: #e9ecef; /* Active item background */
+}
+
+/* Dark Theme Variables */
+[data-bs-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: white;
+    --header-bg: #1e1e1e; /* Dark header background */
+    --sidebar-bg: #2a2a2a; /* Dark sidebar background */
+    --footer-bg: #1e1e1e; /* Dark footer background */
+    --content-bg: #1e1e1e; /* Dark content background */
+    --sidebar-text-color: #ffffff; /* Dark sidebar text color */
+    --active-item-bg: #444; /* Active item background */
+}
+
+/* Body Background and Text */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Header Styles */
+.layout-navbar {
+    background-color: var(--header-bg);
+    color: var(--text-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar Links */
+.nav-item .nav-link {
+    color: var(--sidebar-text-color);
+    transition: color 0.3s;
+}
+
+.nav-item .nav-link:hover {
+    color: var(--text-color); /* Highlight on hover */
+}
+
+/* Sidebar Styles */
+#layout-menu {
+    width: 250px; /* Adjust based on your layout */
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app-brand {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    background-color: var(--sidebar-bg);
+}
+
+.menu-header {
+    padding: 10px 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--sidebar-text-color);
+}
+
+.menu-item {
+    position: relative;
+}
+
+.menu-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    color: var(--sidebar-text-color);
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.menu-link:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Light hover effect */
+}
+
+.menu-item.active .menu-link {
+    background-color: var(--active-item-bg);
+    color: var(--sidebar-text-color);
+}
+
+/* Submenu Styles */
+.menu-sub {
+    padding-left: 20px;
+}
+
+.menu-sub .menu-item {
+    padding: 0; /* Reset padding for submenu items */
+}
+
+.menu-sub .menu-link {
+    padding: 10px 15px; /* Indent submenu items */
+}
+
+/* Content Styles */
+.main-content {
+    padding: 20px;
+    background-color: var(--content-bg);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Footer Styles */
+footer {
+    background-color: var(--footer-bg);
+    color: var(--text-color);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Badge Styles */
+.badge {
+    margin-left: auto; /* Push badges to the right */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #layout-menu {
+        width: 200px; /* Adjust width for smaller screens */
+    }
+
+    .main-content {
+        padding: 15px; /* Adjust padding for smaller screens */
+    }
+}

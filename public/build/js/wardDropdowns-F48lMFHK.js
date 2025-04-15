@@ -1,0 +1,1 @@
+import{D as d}from"./dependentDropdown-BtuqQTBX.js";function i(o,r={}){new d('select[name="localLevel_id"]','select[name="wards[]"]',o.wards,{placeholder:"Select Ward",initialValue:r.wards,customHandler:function(a){const t=a.wards||0,n=[];for(let e=1;e<=t;e++)n.push([e,`Ward-${e}`]);return n}})}export{i};

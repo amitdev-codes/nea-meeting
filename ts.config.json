@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+        "jquery": ["node_modules/@types/jquery/index.d.ts"],
+        "jQuery": ["node_modules/@types/jquery/index.d.ts"]
+      }
+    }
+  }

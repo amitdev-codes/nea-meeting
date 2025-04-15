@@ -1,0 +1,11 @@
+{
+    "name": "NeaMeeting",
+    "alias": "neameeting",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\NeaMeeting\\Providers\\NeaMeetingServiceProvider"
+    ],
+    "files": []
+}

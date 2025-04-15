@@ -1,0 +1,11 @@
+{
+    "name": "Landingpage",
+    "alias": "landingpage",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Landingpage\\Providers\\LandingpageServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,57 @@
+:root {
+    --bs-primary: #6467f2 !important; /* Green */
+    --bs-primary-rgb: 40, 167, 69 !important;
+}
+
+/* Override Bootstrap button colors */
+.btn-primary {
+    background-color: #6467f2 !important;
+    border-color: #6467f2 !important;
+}
+
+/* Override navbar color if needed */
+.navbar {
+    background-color: #fff !important;
+}
+/* Override Bootstrap primary button */
+.btn-primary {
+    background-color: #6467f2 !important;
+    border-color: #6467f2 !important;
+}
+
+/* If text color is still different */
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    color: white !important;
+    background-color: #6467f2 !important;
+    border-color: #6467f2 !important;
+}
+
+/* success stories */
+.success-stories-preview .story-item {
+    margin-bottom: 15px;
+}
+
+.success-stories-preview .story-item h5 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.success-stories-preview .story-item p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0; /* Remove extra spacing */
+}
+
+.story-thumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.success-stories-preview .btn {
+    font-size: 0.85rem;
+}

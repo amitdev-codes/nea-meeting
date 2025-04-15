@@ -1,0 +1,80 @@
+@import "../../node_modules/bootstrap/scss/functions";
+@import "../../node_modules/bootstrap/scss/variables";
+@import "../../node_modules/bootstrap/scss/mixins";
+
+
+@mixin button($bg-color, $text-color: #fff, $style: solid) {
+  @if $style == solid {
+    background-color: $bg-color;
+    color: $text-color !important;
+    border: none;
+  } @else if $style == outline {
+    background-color: transparent;
+    color: $bg-color;
+    border: 1px solid $bg-color;
+  }
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: fit-content;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  @include responsive-font($font-size-sm, $font-size-md, $font-size-lg);
+
+  &:hover {
+    @if $style == solid {
+      background-color: darken($bg-color, 10%);
+    } @else if $style == outline {
+      background-color: $bg-color;
+      color: $text-color;
+      border-color: $bg-color;
+    }
+  }
+}
+
+@mixin responsive-font($size-sm, $size-md, $size-lg) {
+  font-size: $size-sm;
+
+  @include media-breakpoint-up(md) {
+    font-size: $size-md;
+  }
+
+  @include media-breakpoint-up(lg) {
+    font-size: $size-lg;
+  }
+}
+
+@mixin responsive-width($width-sm, $width-md, $width-lg) {
+  width: $width-sm;
+
+  @include media-breakpoint-up(md) {
+    width: $width-md;
+  }
+
+  @include media-breakpoint-up(lg) {
+    width: $width-lg;
+  }
+}
+
+@mixin responsive-height($height-sm, $height-md, $height-lg) {
+  height: $height-sm;
+
+  @include media-breakpoint-up(md) {
+    height: $height-md;
+  }
+
+  @include media-breakpoint-up(lg) {
+    height: $height-lg;
+  }
+}
+
+@mixin responsive-padding($padding-sm, $padding-md, $padding-lg) {
+  padding: $padding-sm;
+
+  @include media-breakpoint-up(md) {
+    padding: $padding-md;
+  }
+
+  @include media-breakpoint-up(lg) {
+    padding: $padding-lg;
+  }
+}

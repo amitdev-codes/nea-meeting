@@ -1,0 +1,1 @@
+import{D as l}from"./dependentDropdown-BtuqQTBX.js";function c(e,i={}){new l('select[name="province_id"]','select[name="district_id"]',e.districts,{placeholder:"Select District",initialValue:i.district_id}),new l('select[name="district_id"]','select[name="localLevel_id"]',e.localLevels,{placeholder:"Select Local Level",initialValue:i.localLevel_id})}export{c as i};

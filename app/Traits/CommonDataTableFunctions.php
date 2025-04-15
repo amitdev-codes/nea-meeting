@@ -1,0 +1,765 @@
+<?php
+
+namespace App\Traits;
+
+use Yajra\DataTables\Html\Button;
+use Yajra\DataTables\Html\Column;
+use Illuminate\Support\Facades\Auth;
+
+trait CommonDataTableFunctions
+{
+   
+
+    /**
+     * Add a checkbox column to the DataTable.
+     */
+    protected function checkboxColumn(): Column
+    {
+        return Column::make('checkbox')
+            ->title('<input type="checkbox" id="select-all">')
+            ->orderable(false)
+            ->searchable(false)
+            ->exportable(false)
+            ->printable(false)
+            ->width('2%')
+            ->addClass('position-sticky start-0');
+    }
+
+    /**
+     * Add action columns (view, edit, delete) to the DataTable.
+     *
+     * @param  string  $routePrefix  The route prefix (e.g., 'admin.users')
+     */
+    protected function actionColumn(): Column
+    {
+        return Column::computed('action')
+            ->title(__('field.action'))
+            ->exportable(false)
+            ->searchable(false)
+            ->printable(false)
+            ->width('13%')
+            ->addClass('text-center action-column position-sticky end-0')
+            ->attr(['style' => 'right: 0; z-index: 1; min-width: 120px;']); 
+    }
+
+
+
+    protected function renderCheckbox($model_ids, $id): string
+    {
+        return view('components.datatables.checkbox', ['name' => $model_ids, 'id' => $id])->render();
+    }
+
+    protected function getCommonDom(): string
+    {
+        return "<'row align-items-center'<'col-md-3'l><'col-md-6 text-center'B><'col-md-3'f>>".
+               "<'row'<'col-md-12'tr>>".
+               "<'row'<'col-md-6'i><'col-md-6'p>>";
+    }
+
+    protected function generateFilename(string $modelName): string
+    {
+        return $modelName.'_'.date('YmdHis');
+    }
+        /**
+     * Get common parameters for all DataTables
+     * This includes text wrapping and action button styling
+     * 
+     * @return array Common parameters
+     */
+    protected function getCommonParameters(): array
+    {
+        return [
+            'drawCallback' => 'function() {
+                // Apply text wrapping to columns
+                $(".wrap-text").css({
+                    "white-space": "normal",
+                    "word-break": "break-word"
+                });
+                    
+                // Make action buttons display inline
+                $(".action-btn-container").css({
+                    "display": "flex",
+                    "flex-wrap": "wrap",
+                    "gap": "2px"
+                });
+                
+                // Ensure sticky columns maintain their background color for current theme
+                const isDarkMode = document.documentElement.getAttribute("data-style") === "dark";
+                const bgColor = isDarkMode ? "#222" : "white";
+                const headerBgColor = isDarkMode ? "#333" : "#f8f9fa";
+                const oddRowBgColor = isDarkMode ? "#2d2d2d" : "#f9f9f9";
+                const evenRowBgColor = isDarkMode ? "#333" : "white";
+                
+                $("table.dataTable th.position-sticky").css("background-color", headerBgColor);
+                $("table.dataTable tbody tr.odd td.position-sticky").css("background-color", oddRowBgColor);
+                $("table.dataTable tbody tr.even td.position-sticky").css("background-color", evenRowBgColor);
+            }',
+            'createdRow' => 'function(row, data, dataIndex) {
+                // Apply custom styling to the action cell
+                $("td:last", row).css("width", "100px");
+                
+                // Ensure background colors match row state and theme
+                const isDarkMode = document.documentElement.getAttribute("data-style") === "dark";
+                const oddRowBgColor = isDarkMode ? "#2d2d2d" : "#f9f9f9";
+                const evenRowBgColor = isDarkMode ? "#333" : "white";
+                
+                if ($(row).hasClass("odd")) {
+                    $("td.position-sticky", row).css("background-color", oddRowBgColor);
+                } else {
+                    $("td.position-sticky", row).css("background-color", evenRowBgColor);
+                }
+            }'  
+        ];
+    }
+    public function parameters($instance = null, array $styleOptions = [])
+    {
+        $parameters = parent::parameters($instance ?? $this);
+        if (!empty($styleOptions)) {
+            $parameters['initComplete'] = 'function() {
+                ' . $this->initDataTableStyles($styleOptions) . '
+                ' . $this->initDeleteScript() . '
+                ' . $this->initColumnSearch() . '
+            }';
+        }
+        
+        return array_merge(
+            $parameters,
+            $this->getCommonParameters(),
+            $parameters['initComplete'] ? ['initComplete' => $parameters['initComplete']] : []
+        );
+    }
+
+
+
+    /**
+     * Add a "Add New" button to the DataTable.
+     *
+     * @param  string  $route  The route for creating a new item
+     */
+    protected function addButton(string $route, string $permission = null): array
+    {
+        if ($permission && !auth()->user()->can($permission)) {
+            return [];
+        }
+    
+        return [
+            [
+                'text' => '<i class="bx bx-plus me-1"></i>'.__('field.add_new'),
+                'action' => 'function() { window.location.href = "'.route($route).'"; }',
+                'className' => 'btn-primary add-btn me-2', 
+            ],
+        ];
+    }
+
+    /**
+     * Add a bulk delete button to the DataTable.
+     *
+     * @param  string  $model  The model name (e.g., 'User')
+     */
+    protected function bulkDeleteButton(string $model): array
+    {
+        
+        $checkboxName = strtolower($model.'_ids[]');
+
+ 
+
+        return [
+            [
+                'text' => '<div class="d-flex align-items-center bulk-delete-content"><i class="bx bx-trash me-2"></i><span class="bulk-delete-label">Delete</span><span class="bulk-delete-count ms-2"></span></div>',
+                'className' => 'btn-danger btn-sm d-none',
+                'attr' => ['id' => 'bulk-delete-btn'],
+                'action' => 'function() {
+                    var selectedIds = [];
+                     $("input[name=\''.$checkboxName.'\']:checked").each(function() {
+                        selectedIds.push($(this).val());
+                    });
+
+                    if (selectedIds.length > 0) {
+                        Swal.fire({
+                            title: "Confirm Deletion",
+                            text: "Are you sure you want to delete " + selectedIds.length + " selected items?",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#dc3545",
+                            cancelButtonColor: "#6c757d",
+                            confirmButtonText: "Yes, delete them!"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $.ajax({
+                                    url: "'.route('admin.bulkDelete', ['model' => $model]).'",
+                                    method: "POST",
+                                    data: {
+                                        ids: selectedIds,
+                                        _token: "'.csrf_token().'"
+                                    },
+                                    success: function(response) {
+                                        Swal.fire(
+                                            "Deleted!",
+                                            "Selected items have been deleted.",
+                                            "success"
+                                        ).then(() => {
+                                            window.location.reload();
+                                        });
+                                    },
+                                    error: function(response) {
+                                        Swal.fire(
+                                            "Error!",
+                                            "An error occurred while deleting the items.",
+                                            "error"
+                                        );
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }',
+            ],
+        ];
+    }
+
+    /**
+     * Generate the JavaScript for handling single item deletion
+     */
+    protected function initDeleteScript(): string
+    {
+        return '
+        $(document).on("click", ".delete-item", function() {
+            var id = $(this).data("id");
+            var table = $("#" + window.LaravelDataTables[Object.keys(window.LaravelDataTables)[0]].id);
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won\'t be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: window.location.pathname + "/" + id,
+                        type: "DELETE",
+                        data: {
+                            "_token": $("meta[name=\'csrf-token\']").attr("content")
+                        },
+                        success: function(response) {
+                            Swal.fire(
+                                    "Deleted!",
+                                    "Record has been deleted.",
+                                    "success"
+                                    ).then(() => {
+                                        window.location.reload();
+                                    });
+                        },
+                        error: function(xhr) {
+                            Swal.fire(
+                                "Error!",
+                                "Something went wrong.",
+                                "error"
+                            );
+                        }
+                    });
+                }
+            });
+        });
+    ';
+    }
+
+
+    protected function initBulkDeleteScript(string $checkboxName): string
+    {
+        return '
+            $("#select-all").on("click", function() {
+                var isChecked = this.checked;
+                $("input[name=\''.$checkboxName.'\']").prop("checked", isChecked);
+                updateBulkDeleteButton();
+            });
+
+            $(document).on("change", "input[name=\''.$checkboxName.'\']", function() {
+                updateBulkDeleteButton();
+                if (!$(this).prop("checked")) {
+                    $("#select-all").prop("checked", false);
+                } else {
+                    // Check if all checkboxes are checked
+                    if ($("input[name=\''.$checkboxName.'\']").length === $("input[name=\''.$checkboxName.'\']:checked").length) {
+                        $("#select-all").prop("checked", true);
+                    }
+                }
+            });
+
+            function updateBulkDeleteButton() {
+                var checkedCount = $("input[name=\''.$checkboxName.'\']:checked").length;
+                var bulkDeleteBtn = $("#bulk-delete-btn");
+
+                if (checkedCount > 0) {
+                    bulkDeleteBtn.removeClass("d-none");
+                    $(".bulk-delete-count").html("(" + checkedCount + " selected)");
+                } else {
+                    bulkDeleteBtn.addClass("d-none");
+                    $(".bulk-delete-count").html("");
+                }
+            }
+        ';
+    }
+
+    protected function generateBadges($items, array $options = []): string
+    {
+        $defaultOptions = [
+            'cache_duration' => now()->addHours(24),
+            'cache_key' => 'badge_color_map',
+            'separator' => ' ',
+            'colors' => [
+                'bg-primary',
+                'bg-secondary',
+                'bg-success',
+                'bg-danger',
+                'bg-warning',
+                'bg-info',
+                'bg-warning text-dark',
+                'bg-info text-dark',
+                'bg-light text-dark',
+                'bg-dark',
+            ],
+        ];
+    
+        $options = array_merge($defaultOptions, $options);
+    
+        if ($items instanceof \Illuminate\Support\Collection) {
+            $items = $items->toArray();
+        }
+    
+        if (!is_array($items)) {
+            $items = [$items];
+        }
+    
+        $colorMap = cache()->remember($options['cache_key'], $options['cache_duration'], function () {
+            return [];
+        });
+    
+        return collect($items)
+            ->map(function ($item) use ($options, &$colorMap) {
+                $key = (string) $item;
+
+
+                // Check if the item represents a status (boolean-like value)
+                if ($key === 'status' || in_array($item, [true, false, 1, 0], true)) {
+                    // Determine the display text and color based on boolean value
+                    $displayText = $item ? 'Active' : 'Inactive'; // Customize as needed
+                    $color = $item ? 'bg-primary' : 'bg-danger';
+                } else {
+                    // dd('text',$key);
+                    // For non-status items, use the existing random color logic
+                    if (!isset($colorMap[$key])) {
+                        $colorMap[$key] = $options['colors'][array_rand($options['colors'])];
+                        cache()->put($options['cache_key'], $colorMap, $options['cache_duration']);
+                    }
+                    $displayText = $item;
+                    $color = $colorMap[$key];
+                }
+    
+                return view('components.datatables.badge', [
+                    'class' => $color,
+                    'text' => $displayText,
+                ])->render();
+            })
+            ->implode($options['separator']);
+    }
+    public function getStatusBadge($status, $activeText = 'सक्रिय छ', $inactiveText = 'सक्रिय छैन'): string
+    {
+        $class = $status == 1 ? 'bg-primary' : 'bg-danger';
+        $text = $status == 1 ? $activeText : $inactiveText;
+
+        return sprintf(
+            '<span class="badge %s">%s</span>',
+            $class,
+            $text
+        );
+    }
+    protected function addActionColumn(string $formType = 'modal', array $routes = [], array $permissions = [])
+    {
+        return fn ($data) => view('components.action-buttons', [
+            'formType' => $formType, // Dynamically set formType
+            'data' => $data,
+            'id' => $data->id,
+            'viewRoute' => $routes['view'] ? route($routes['view'], $data->id) : null,
+            'editRoute' => $routes['edit'] ? route($routes['edit'], $data->id) : null,
+            'deleteRoute' => $routes['delete'] ? route($routes['delete'], $data->id) : null, 
+            'viewPermission' => $permissions['view'] ?? null, 
+            'editPermission' => $permissions['edit'] ?? null, 
+            'deletePermission' => $permissions['delete'] ?? null, 
+        ]);
+    }
+
+    protected function dtActionButtons($resources,$model,array $options = [])
+    {
+        $permissions = $options['permissions'] ?? $this->getPermissions($resources);
+        $routes = $this->getRoutes();
+        $buttons = [
+            // $this->exportButtons($permissions['export'] ?? 'export-' .$resources), // Default export permission
+            $this->addButton(
+                $routes['create'] ?? route("admin." .$resources . ".create"), // Fallback route
+                $permissions['create']
+            ),
+            $this->bulkDeleteButton($model),
+        ];
+    
+        return array_filter($buttons);
+    }
+
+    protected function initDropdownSearch(array $dropdownColumns): string
+    {
+        $dropdownConfigs = [];
+        foreach ($dropdownColumns as $columnName => $config) {
+            $dropdownConfigs[] = [
+                'columnName' => $columnName,
+                'options' => $config['options'] ?? [],
+                'searchBy' => $config['searchBy'] ?? 'value'
+            ];
+        }
+    
+        $jsConfigs = json_encode($dropdownConfigs);
+    
+        return <<<JS
+            var table = this.api();
+            var dropdownConfigs = {$jsConfigs};
+    
+            //console.log('Dropdown Configs:', dropdownConfigs);
+    
+            if (!Array.isArray(dropdownConfigs)) {
+                console.warn('dropdownConfigs is not an array:', dropdownConfigs);
+                dropdownConfigs = [];
+            }
+    
+            // Get all column definitions for debugging
+            var columns = table.columns().dataSrc();
+            //console.log('Table Columns:', columns);
+    
+            $.each(dropdownConfigs, function(index, config) {
+                // Try to find the column by name
+                var column = table.column(config.columnName + ':name'); // Add ':name' to match Yajra's convention
+                if (!column) {
+                    //console.warn('Column not found by name:', config.columnName + ':name');
+                    // Fallback: Try without ':name'
+                    column = table.column(config.columnName);
+                    if (!column) {
+                        //console.warn('Column still not found by raw name:', config.columnName);
+                        return;
+                    }
+                }
+    
+                var columnIndex = column.index();
+               // console.log('Applying dropdown to', config.columnName, 'at index:', columnIndex);
+    
+                var select = $('<select class="form-control form-control-sm column-search" style="width: 100%;"><option value="">All</option></select>');
+    
+                var options = config.options || {};
+                //console.log('Options for', config.columnName, ':', options);
+                $.each(options, function(value, text) {
+                    select.append($('<option></option>').attr('value', value).text(text));
+                });
+    
+                var header = $(table.table().header());
+                var filterCell = header.find('.filter-row th:eq(' + columnIndex + ')');
+                if (filterCell.length) {
+                    filterCell.html(select);
+                    //console.log('Dropdown added to', config.columnName, 'at index:', columnIndex);
+                } else {
+                   // console.warn('Filter cell not found for index:', columnIndex);
+                }
+    
+                select.on('change', function() {
+                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                    column.search(val ? val : '', true, false).draw();
+                });
+    
+                var searchValue = column.search();
+                //console.log('Search value for', config.columnName, ':', searchValue);
+                if (searchValue && typeof searchValue === 'string') {
+                    select.val(searchValue.replace(/^|$/g, ''));
+                }
+            });
+    JS;
+    }
+    protected function initColumnSearch(): string
+    {
+        $dropdownColumns = $this->dropdownColumns??[];
+        $dropdownColumnsJson = json_encode($dropdownColumns);
+    
+        return <<<JS
+            var table = this.api();
+    
+            var header = $(table.table().header());
+            if (!header.find('.filter-row').length) {
+                header.append('<tr class="filter-row"></tr>');
+            } else {
+                header.find('.filter-row').empty();
+            }
+    
+            // Add a <th> for every column
+            table.columns().every(function(index) {
+                var th = $('<th></th>');
+                $('.filter-row').append(th);
+            });
+
+            // Apply dropdowns
+            {$this->initDropdownSearch($dropdownColumns)}
+
+            // Add text search for remaining searchable columns
+            table.columns().every(function(index) {
+                var column = this;
+                var columnData = column.dataSrc();
+                var title = $(column.header()).text();
+
+    
+                var th = header.find('.filter-row th:eq(' + index + ')');
+                if (!th.length) {
+                    return;
+                }
+    
+                const isDarkMode = document.documentElement.getAttribute('data-style') === 'dark';
+                console.log(isDarkMode);
+                // console.log(columnData);
+   
+                if (columnData === 'checkbox') {
+                    console.log('amit');
+                    // th.addClass('position-sticky start-0').attr('style', 'left: 0; z-index: 1;' + (isDarkMode ? 'background-color: #333 !important;' : ''));
+                    th.addClass('position-sticky start-0 sorting_disabled sorting_desc"').attr('style', 'left: 0; z-index: 1;background-color:#333 !important;');
+
+
+                } else if (columnData === 'action') {
+                    th.addClass('position-sticky end-0')
+                      .attr('style', 'right: 0; z-index: 1; min-width: 120px;' + (isDarkMode ? 'background-color: #333 !important;' : ''));
+                }
+    
+                var dropdownColumnsJson = {$dropdownColumnsJson};
+                var dropdownColumnNames = (dropdownColumnsJson && typeof dropdownColumnsJson === 'object') ? Object.keys(dropdownColumnsJson) : [];
+                if (['{$this->implodeSearchableColumns()}'].indexOf(columnData) === -1 || 
+                    dropdownColumnNames.indexOf(columnData) !== -1) {
+                    //console.log('Skipping text input for:', columnData);
+                    return;
+                }
+    
+                var input = $('<input type="text" class="form-control form-control-sm column-search" placeholder="Search ' + title + '"/>')
+                    .on('keyup change', function() {
+                        if (column.search() !== this.value) {
+                            column.search(this.value).draw();
+                        }
+                    });
+    
+                th.html(input);
+                //console.log('Text input added to:', columnData);
+            });
+    
+            this.api().draw();
+        JS;
+    }
+    protected function implodeSearchableColumns(): string
+    {
+        return implode("','", $this->searchableColumns);
+    }
+    public function routes(): array
+    {
+        $routes = [];
+        foreach ($this->getRoutes() as $key => $routeName) {
+            if (in_array($key, ['edit', 'delete', 'view'])) {
+                $routes[$key] = route($routeName, [':id']);
+            } else {
+                $routes[$key] = route($routeName);
+            }
+        }
+        return $routes;
+    }
+
+        /**
+     * Add CSS styles for sticky columns to DataTables initialization
+     * 
+     * @return string JavaScript for initializing sticky styles
+     */
+    protected function initStickyColumnsStyles(): string
+    {
+        return <<<JS
+            if (!document.getElementById("sticky-columns-styles")) {
+                $("<style id=\"sticky-columns-styles\">")
+                    .text(`
+                        .dataTables_wrapper {
+                            overflow-x: auto;
+                        }
+                        table.dataTable th.position-sticky,
+                        table.dataTable td.position-sticky {
+                            position: sticky !important;
+                            z-index: 1;
+                        }
+                        /* Light mode styles */
+                        html:not([data-style="dark"]) table.dataTable th.position-sticky.start-0,
+                        html:not([data-style="dark"]) table.dataTable td.position-sticky.start-0 {
+                            left: 0;
+                            box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+                            background-color: white;
+                        }
+                        html:not([data-style="dark"]) table.dataTable th.position-sticky.end-0,
+                        html:not([data-style="dark"]) table.dataTable td.position-sticky.end-0 {
+                            right: 0;
+                            box-shadow: -2px 0 5px -2px rgba(0,0,0,0.1);
+                            background-color: white;
+                        }
+                        html:not([data-style="dark"]) table.dataTable thead th.position-sticky {
+                            background-color: #f8f9fa;
+                            z-index: 2;
+                        }
+                        html:not([data-style="dark"]) table.dataTable tbody tr:hover td.position-sticky {
+                            background-color: #f5f5f5 !important;
+                        }
+                        html:not([data-style="dark"]) table.dataTable.stripe tbody tr.odd td.position-sticky {
+                            background-color: #f9f9f9;
+                        }
+                        
+                        /* Dark mode styles */
+                        html[data-style="dark"] table.dataTable th.position-sticky.start-0,
+                        html[data-style="dark"] table.dataTable td.position-sticky.start-0 {
+                            left: 0;
+                            box-shadow: 2px 0 5px -2px rgba(0,0,0,0.3);
+                            background-color: #222;
+                        }
+                        html[data-style="dark"] table.dataTable th.position-sticky.end-0,
+                        html[data-style="dark"] table.dataTable td.position-sticky.end-0 {
+                            right: 0;
+                            box-shadow: -2px 0 5px -2px rgba(0,0,0,0.3);
+                            background-color: #222;
+                        }
+                        html[data-style="dark"] table.dataTable thead th.position-sticky {
+                            background-color: #333;
+                            z-index: 2;
+                        }
+                        html[data-style="dark"] table.dataTable tbody tr:hover td.position-sticky {
+                            background-color: #2a2a2a !important;
+                        }
+                        html[data-style="dark"] table.dataTable.stripe tbody tr.odd td.position-sticky {
+                            background-color: #2d2d2d;
+                        }
+                        html[data-style="dark"] table.dataTable.stripe tbody tr.even td.position-sticky {
+                            background-color: #333;
+                        }
+                        
+                        /* Make sure checkbox and action buttons are visible in dark mode */
+                        html[data-style="dark"] table.dataTable .position-sticky .form-check-input,
+                        html[data-style="dark"] table.dataTable .position-sticky .action-btn {
+                            background-color: #444;
+                            border-color: #666;
+                        }
+                        html[data-style="dark"] table.dataTable .position-sticky .form-check-input:checked {
+                            background-color: #0d6efd;
+                        }
+                    `)
+                    .appendTo("head");
+            }
+            
+            // Add a class to DataTable wrapper for styling
+            $(this.api().table().container()).addClass('with-sticky-columns');
+            
+            // Apply appropriate styles based on current theme
+            const applyThemeStyles = function() {
+                const isDarkMode = document.documentElement.getAttribute('data-style') === 'dark';
+                const table = $(this.api().table().node());
+                const bgColor = isDarkMode ? '#222' : 'white';
+                const headerBgColor = isDarkMode ? '#333' : '#f8f9fa';
+                
+                table.find('td.position-sticky').css('background-color', bgColor);
+                table.find('th.position-sticky').css('background-color', headerBgColor);
+                
+                // Handle striped rows
+                if (isDarkMode) {
+                    table.find('tr.odd td.position-sticky').css('background-color', '#2d2d2d');
+                    table.find('tr.even td.position-sticky').css('background-color', '#333');
+                } else {
+                    table.find('tr.odd td.position-sticky').css('background-color', '#f9f9f9');
+                    table.find('tr.even td.position-sticky').css('background-color', 'white');
+                }
+            }.bind(this);
+            
+            // Apply theme styles on init
+            applyThemeStyles();
+            
+            // Reapply styles when theme changes
+            document.addEventListener('themeChanged', applyThemeStyles);
+    JS;
+    }
+    protected function getPermissions($resource): array
+    {
+        return [
+            'view' => "view-{$resource}",
+            'create' => "create-{$resource}",
+            'edit' => "edit-{$resource}",
+            'delete' => "delete-{$resource}",
+            'export' => "export-{$resource}",
+        ];
+    }
+    // starts advanced filter and column searching
+    protected function applyGlobalSearch($query, $searchValue)
+    {
+        if (!$searchValue) return $query;
+        
+        return $query->where(function ($q) use ($searchValue) {
+            foreach ($this->searchableColumns as $column) {
+                $this->applyColumnSearch($q, $column, $searchValue, true);
+            }
+        });
+    }
+    
+    protected function applyColumnSearch($query, $column, $value, $isOr = false)
+    {
+        if (empty($value)) return $query;
+        
+        $method = $isOr ? 'orWhere' : 'where';
+        
+        // Handle dropdown fields first (exact matches)
+        if (isset($this->dropdownFields[$column])) {
+            $fieldName = $this->dropdownFields[$column];
+            return $query->$method($fieldName, $value);
+        }
+        
+        // Handle relationships
+        if (isset($this->relationshipColumns[$column])) {
+            $relation = $this->relationshipColumns[$column];
+            return $query->$method(function ($q) use ($relation, $value) {
+                foreach ($relation['fields'] as $field) {
+                    $q->orWhere("{$relation['table']}.{$field}", 'like', "%{$value}%");
+                }
+            });
+        }
+        
+        // Handle multi-field columns (like name and name_np)
+        if (isset($this->multiFieldColumns[$column])) {
+            return $query->$method(function ($q) use ($column, $value) {
+                foreach ($this->multiFieldColumns[$column] as $field) {
+                    $q->orWhere($field, 'like', "%{$value}%");
+                }
+            });
+        }
+        
+        // Handle exact match columns
+        if (in_array($column, $this->exactMatchColumns)) {
+            return $query->$method("{$this->tableName}.{$column}", $value);
+        }
+        
+        // Regular column search
+        return $query->$method("{$this->tableName}.{$column}", 'like', "%{$value}%");
+    }
+    
+    protected function applyColumnSpecificSearch($query)
+    {
+        if (!request()->has('columns')) return $query;
+        
+        foreach (request('columns') as $column) {
+            $value = $column['search']['value'] ?? '';
+            if ($value === '') continue;
+            
+            $columnData = $column['data'];
+            if (!in_array($columnData, $this->searchableColumns)) continue;
+            
+            $this->applyColumnSearch($query, $columnData, $value);
+        }
+        
+        return $query;
+    }
+}

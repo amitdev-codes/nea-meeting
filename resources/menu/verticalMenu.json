@@ -1,0 +1,53 @@
+{
+    "menu": [
+        {
+            "header": "Meetings Section",
+            "items": [
+                {
+                    "name": "menu.meetings",
+                    "icon": "menu-icon tf-icons bx bx bxs-check-shield",
+                    "slug": [
+                        "admin.meetings.*"
+                    ],
+                    "url": "admin.meetings.index",
+                    "permission": "view-meetings"
+                  
+                }
+            ]
+        },
+        {
+            "header": "Super Admin Section",
+            "items": [
+                {
+                    "name": "menu.user_management",
+                    "icon": "menu-icon tf-icons bx bx bxs-check-shield",
+                    "slug": [
+                        "admin.users.*",
+                        "admin.roles.*",
+                        "admin.permissions.*"
+                    ],
+                    "submenu": [
+                        {
+                            "url": "admin.users.index",
+                            "name": "menu.users",
+                            "slug": "admin.users.*",
+                            "permission": "view-users"
+                        },
+                        {
+                            "url": "admin.roles.index",
+                            "name": "menu.roles",
+                            "slug": "admin.roles.*",
+                            "permission": "view-roles"
+                        },
+                        {
+                            "url": "admin.permissions.index",
+                            "name": "menu.permissions",
+                            "slug": "admin.permissions.*",
+                            "permission": "view-permissions"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
