@@ -15,19 +15,19 @@ class MeetingRoomDataTable extends DataTable
     use CommonDataTableFunctions;
     
     protected array $searchableColumns = [
-        'name'
+        // 'name'
     ];
     
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return datatables()
             ->eloquent($query)
-            ->addColumn('checkbox', fn ($row) => $this->renderCheckbox('meetingrooms[]', $row->id))
+            ->addColumn('checkbox', fn ($row) => $this->renderCheckbox('meetingroom_ids[]', $row->id))
             ->addColumn('status', fn ($row) => $this->getStatusBadge($row->status))
             ->addColumn('action', $this->addActionColumn(
                 'modal',
                 $this->getRoutes(),
-                $this->getPermissions('meetingrooms')
+                $this->getPermissions('meeting-rooms')
             ))
             ->rawColumns(['checkbox', 'action','status']);
     }
@@ -61,22 +61,19 @@ class MeetingRoomDataTable extends DataTable
     
     public function html(): HtmlBuilder
     {
-        $routeName = route("admin.meetingrooms.import");
         return $this->builder()
-            ->setTableId('meetingrooms-table')
+            ->setTableId('meeting-rooms-table')
             ->columns($this->getColumns())
-            ->minifiedAjax()
             ->dom($this->getCommonDom())
             ->orderBy(0)
             ->buttons(
                 array_merge(
-                    $this->dtActionModalButtons('meetingrooms', 'MeetingRoom'),
-                    $this->importButton($routeName)
+                    $this->dtActionButtons('meeting-rooms', 'MeetingRoom'),
                 )
             )
             ->parameters([
                 'initComplete' => 'function() {
-                    ' . $this->initBulkDeleteScript('meetingrooms[]') . '
+                    ' . $this->initBulkDeleteScript('meetingroom_ids[]') . '
                     ' . $this->initDeleteScript() . '
                     ' . $this->initColumnSearch() . '
                     ' . $this->initStickyColumnsStyles() . ' 
@@ -104,10 +101,10 @@ class MeetingRoomDataTable extends DataTable
     protected function getRoutes(): array
     {
         return [
-            'create' => 'admin.meetingrooms.create',
-            'view' => 'admin.meetingrooms.show',
-            'edit' => 'admin.meetingrooms.edit',
-            'delete' => 'admin.meetingrooms.destroy',
+            'create' => 'admin.meeting-rooms.create',
+            'view' => 'admin.meeting-rooms.show',
+            'edit' => 'admin.meeting-rooms.edit',
+            'delete' => 'admin.meeting-rooms.destroy',
         ];
     }
 }

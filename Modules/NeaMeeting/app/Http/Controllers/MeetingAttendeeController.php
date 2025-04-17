@@ -21,9 +21,9 @@ class MeetingAttendeeController extends BaseAdminController
     use InlineEditableTrait;
     
     protected $model = MeetingAttendee::class;
-    protected string $resourcePermission = 'meetingattendees';
-    protected string $resourceName = 'meetingattendees';
-    protected string $formView = 'neameeting::pages.meetingattendees.meetingattendeeForm';
+    protected string $resourcePermission = 'meeting-attendees';
+    protected string $resourceName = 'meeting-attendees';
+    protected string $formView = 'neameeting::pages.meeting-attendees.meetingattendeeForm';
     
     public function __construct(ResponseService $responseService)
     {
@@ -32,12 +32,12 @@ class MeetingAttendeeController extends BaseAdminController
     
     public function index(MeetingAttendeeDataTable $dataTable)
     {
-        return $this->renderDataTable($dataTable);
+        return $dataTable->render('pages.resources.index');
     }
     
     public function create(Request $request)
     {
-        return $this->renderModalForm($this->formView);
+        return $this->renderForm($this->formView);
     }
     
     public function store(StoreMeetingAttendeeRequest $request)
@@ -45,33 +45,33 @@ class MeetingAttendeeController extends BaseAdminController
         return $this->handleRequest($request, function () use ($request) {
             MeetingAttendee::create($request->validated());
             if ($request->has('save_and_add_more')) {
-                return redirect()->route('admin.meetingattendees.create')
+                return redirect()->route('admin.meeting-attendees.create')
                 ->with('success', 'Group Member created successfully. Add another one.');
             }
-        }, 'admin.meetingattendees.index', 'MeetingAttendee created successfully.', 'Failed to create the MeetingAttendee.');
+        }, 'admin.meeting-attendees.index', 'MeetingAttendee created successfully.', 'Failed to create the MeetingAttendee.');
     }
     
     public function show(MeetingAttendee $meetingattendee)
     {
-        return view('neameeting::pages.meetingattendees.show', ['resource' => $meetingattendee]);
+        return view('neameeting::pages.meeting-attendees.show', ['resource' => $meetingattendee]);
     }
     
     public function edit(MeetingAttendee $meetingattendee)
     {
-        return $this->renderModalForm($this->formView, $meetingattendee);
+        return $this->renderForm($this->formView, $meetingattendee);
     }
     
     public function update(UpdateMeetingAttendeeRequest $request, MeetingAttendee $meetingattendee)
     {
         return $this->handleRequest($request, function () use ($request, $meetingattendee) {
             $meetingattendee->update($request->validated());
-        }, 'admin.meetingattendees.index', 'MeetingAttendee updated successfully.', 'Failed to update the MeetingAttendee.');
+        }, 'admin.meeting-attendees.index', 'MeetingAttendee updated successfully.', 'Failed to update the MeetingAttendee.');
     }
     
     public function destroy(Request $request, MeetingAttendee $meetingattendee)
     {
         return $this->handleRequest($request, function () use ($meetingattendee) {
             $meetingattendee->delete();
-        }, 'admin.meetingattendees.index', 'MeetingAttendee deleted successfully.', 'Failed to delete the MeetingAttendee.');
+        }, 'admin.meeting-attendees.index', 'MeetingAttendee deleted successfully.', 'Failed to delete the MeetingAttendee.');
     }
 }

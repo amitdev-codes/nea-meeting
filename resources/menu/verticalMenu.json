@@ -17,14 +17,58 @@
                     "name": "menu.meetings",
                     "icon": "menu-icon tf-icons bx bx bxs-check-shield",
                     "slug": [
-                        "admin.meetings.*"
+                        "admin.meetings.*",
+                        "admin.meeting-attendees.*",
+                        "admin.meeting-minutes.*"
                     ],
-                    "url": "admin.meetings.index",
-                    "permission": "view-meetings"
-                  
+                    "submenu": [
+                        {
+                            "url": "admin.meetings.index",
+                            "name": "menu.meetings",
+                            "slug": "admin.meetings.*",
+                            "permission": "view-meetings"
+                        },
+                        {
+                            "url": "admin.meeting-attendees.index",
+                            "name": "menu.meeting-attendees",
+                            "slug": "admin.meeting-attendees*",
+                            "permission": "view-meeting-attendees"
+                        },
+                        {
+                            "url": "admin.meeting-minutes.index",
+                            "name": "menu.meeting-minutes",
+                            "slug": "admin.meeting-minutes*",
+                            "permission": "view-meeting-minutes"
+                        }
+                    ]
                 }
             ]
         },
+        {
+            "header": "Resources Section",
+            "items": [
+                {
+                    "name": "menu.master",
+                    "icon": "menu-icon tf-icons bx bx-cog",
+                    "slug": ["admin.organizations.*", "admin.meeting-rooms.*"],
+                    "submenu": [
+                        {
+                            "url": "admin.organizations.index",
+                            "name": "menu.organizations",
+                            "slug": "admin.organizations.*",
+                            "permission": "view-organizations"
+                        },
+                        {
+                            "url": "admin.meeting-rooms.index",
+                            "name": "menu.meeting-rooms",
+                            "slug": "admin.meeting-rooms*",
+                            "permission": "view-meeting-rooms"
+                        }
+                    ]
+                }
+            ]
+        },
+
         {
             "header": "Super Admin Section",
             "items": [

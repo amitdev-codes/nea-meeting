@@ -32,7 +32,11 @@ class PermissionsTableSeeder extends Seeder
             'import-designations','import-expenditure-categories','importer-starter-categories',
             'export-designations','export-expenditure-categories','export-starter-categories',
             'view-dashboard','view-lmbis-report','view-group-report',
+            
             'view-organizations','create-organizations','edit-organizations','delete-organizations',
+            'view-meeting-rooms','create-meeting-rooms','edit-meeting-rooms','delete-meeting-rooms',
+            'view-meeting-attendees','create-meeting-attendees','edit-meeting-attendees','delete-meeting-attendees',
+            'view-meeting-minutes','create-meeting-minutes','edit-meeting-minutes','delete-meeting-minutes',
 
       
         ];

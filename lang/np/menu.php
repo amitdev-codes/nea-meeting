@@ -126,6 +126,11 @@ return [
     'grievances-registration'=>'उजुरी दर्ता',
 
     'meetings' => 'बैठक',
+    'meeting-attendees'=>'बैठकमा सहभागीहरू',
+    'meeting-minutes'=>'बैठकको निर्णयहरू',
+    'organizations'=>'कार्यालय',
+    'meeting-rooms'=>'बैठक कोठा',
+
 
 
 ];

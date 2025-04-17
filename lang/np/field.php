@@ -576,7 +576,18 @@ return [
     'upcoming_meetings'=>'आगामी बैठकहरू',
     'meetings'=>'बैठकहरू',
     'time'=>'समय',
-    'meeting_status'=>'स्थिति'
+    'meeting_status'=>'स्थिति',
+
+    'meeting_name'=>'बैठक',
+    'username'=>'सहभागीहरु',
+    'attendance_status'=>'सहभागीहरुको स्थिति',
+    'meeting_id'=>'बैठक',
+    'content'=>'बैठक निर्णयहरू',
+    'meetingMinutes'=>'बैठक निर्णयहरू',
+    'recorded_by'=>'दर्ता गर्ने व्यक्ति',
+    'approved_by'=>'स्वीकृति गर्ने व्यक्ति',
+    'minutes'=>'निर्णयहरू',
+    'approved'=>'स्वीकृति',
 
      
 ];

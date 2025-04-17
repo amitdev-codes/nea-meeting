@@ -21,9 +21,9 @@ class MeetingRoomController extends BaseAdminController
     use InlineEditableTrait;
     
     protected $model = MeetingRoom::class;
-    protected string $resourcePermission = 'meetingrooms';
-    protected string $resourceName = 'meetingrooms';
-    protected string $formView = 'neameeting::pages.meetingrooms.meetingroomForm';
+    protected string $resourcePermission = 'meeting-rooms';
+    protected string $resourceName = 'meeting-rooms';
+    protected string $formView = 'neameeting::pages.meeting-rooms.meetingroomForm';
     
     public function __construct(ResponseService $responseService)
     {
@@ -45,15 +45,15 @@ class MeetingRoomController extends BaseAdminController
         return $this->handleRequest($request, function () use ($request) {
             MeetingRoom::create($request->validated());
             if ($request->has('save_and_add_more')) {
-                return redirect()->route('admin.meetingrooms.create')
+                return redirect()->route('admin.meeting-rooms.create')
                 ->with('success', 'Group Member created successfully. Add another one.');
             }
-        }, 'admin.meetingrooms.index', 'MeetingRoom created successfully.', 'Failed to create the MeetingRoom.');
+        }, 'admin.meeting-rooms.index', 'MeetingRoom created successfully.', 'Failed to create the MeetingRoom.');
     }
     
     public function show(MeetingRoom $meetingroom)
     {
-        return view('neameeting::pages.meetingrooms.show', ['resource' => $meetingroom]);
+        return view('neameeting::pages.meeting-rooms.show', ['resource' => $meetingroom]);
     }
     
     public function edit(MeetingRoom $meetingroom)
@@ -65,13 +65,13 @@ class MeetingRoomController extends BaseAdminController
     {
         return $this->handleRequest($request, function () use ($request, $meetingroom) {
             $meetingroom->update($request->validated());
-        }, 'admin.meetingrooms.index', 'MeetingRoom updated successfully.', 'Failed to update the MeetingRoom.');
+        }, 'admin.meeting-rooms.index', 'MeetingRoom updated successfully.', 'Failed to update the MeetingRoom.');
     }
     
     public function destroy(Request $request, MeetingRoom $meetingroom)
     {
         return $this->handleRequest($request, function () use ($meetingroom) {
             $meetingroom->delete();
-        }, 'admin.meetingrooms.index', 'MeetingRoom deleted successfully.', 'Failed to delete the MeetingRoom.');
+        }, 'admin.meeting-rooms.index', 'MeetingRoom deleted successfully.', 'Failed to delete the MeetingRoom.');
     }
 }

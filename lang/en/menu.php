@@ -127,5 +127,9 @@ return [
 'grievances-registration'=>'Grievances Registration',
 
 'meetings' => 'Meetings',
+'meeting-attendees'=>'Meeting Attendees',
+'meeting-minutes'=>'Meeting Minutes',
+'organizations'=>'Offices',
+'meeting-rooms'=>'Meeting Rooms',
 
 ];

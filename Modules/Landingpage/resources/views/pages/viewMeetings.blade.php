@@ -14,10 +14,8 @@
                 <div class="col-xl-8 col-lg-7">
                     <x-resource.detail-card title="{{ __('field.meeting_information') }}" icon="bx-group"
                         class="card h-100 shadow-sm border-0">
-
-
                         <div class="card-body">
-                            <div class="row gy-3">
+                            <div class="row gy-3 nepali_td">
                                 <x-resource.detail-item label="{{ __('field.title') }}" :value="$resource->title" class="col-12" />
                                 <x-resource.detail-item label="{{ __('field.meeting_location') }}" :value="$resource->meeting_location"
                                     class="col-12" />

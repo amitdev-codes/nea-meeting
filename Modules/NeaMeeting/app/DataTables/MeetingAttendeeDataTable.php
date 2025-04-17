@@ -15,20 +15,27 @@ class MeetingAttendeeDataTable extends DataTable
     use CommonDataTableFunctions;
     
     protected array $searchableColumns = [
-        'name',
-        'code'
+        // 'name',
+        // 'code'
     ];
     
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return datatables()
             ->eloquent($query)
-            ->addColumn('checkbox', fn ($row) => $this->renderCheckbox('meetingattendees[]', $row->id))
+            ->addColumn('checkbox', fn ($row) => $this->renderCheckbox('meeting-attendees_ids[]', $row->id))
+            ->addColumn('meeting_name', function ($row) {
+                return $row->meeting->title;
+            })
+            ->addColumn('username', function ($row) {
+                return $row->user->username;
+            })
+            
             ->addColumn('status', fn ($row) => $this->getStatusBadge($row->status))
             ->addColumn('action', $this->addActionColumn(
-                'modal',
+                'form',
                 $this->getRoutes(),
-                $this->getPermissions('meetingattendees')
+                $this->getPermissions('meeting-attendees')
             ))
             ->rawColumns(['checkbox', 'action','status']);
     }
@@ -62,22 +69,20 @@ class MeetingAttendeeDataTable extends DataTable
     
     public function html(): HtmlBuilder
     {
-        $routeName = route("admin.meetingattendees.import");
         return $this->builder()
-            ->setTableId('meetingattendees-table')
+            ->setTableId('meeting-attendees-table')
             ->columns($this->getColumns())
             ->minifiedAjax()
             ->dom($this->getCommonDom())
             ->orderBy(0)
             ->buttons(
                 array_merge(
-                    $this->dtActionModalButtons('meetingattendees', 'MeetingAttendee'),
-                    $this->importButton($routeName)
+                    $this->dtActionButtons('meeting-attendees', 'MeetingAttendee'),
                 )
             )
             ->parameters([
                 'initComplete' => 'function() {
-                    ' . $this->initBulkDeleteScript('meetingattendees[]') . '
+                    ' . $this->initBulkDeleteScript('meeting-attendees[]') . '
                     ' . $this->initDeleteScript() . '
                     ' . $this->initColumnSearch() . '
                     ' . $this->initStickyColumnsStyles() . ' 
@@ -89,10 +94,10 @@ class MeetingAttendeeDataTable extends DataTable
     {
         return [
             $this->checkboxColumn(),
-            Column::make('meeting_id')->title(__('meeting_id')),
-            Column::make('user_id')->title(__('user_id')),
-            Column::make('is_required')->title(__('is_required')),
-            Column::make('attendance_status')->title(__('attendance_status')),
+            Column::make('meeting_name')->title(__('field.meeting_name')),
+            Column::make('username')->title(__('field.username')),
+            // Column::make('is_required')->title(__('field.is_required')),
+            Column::make('attendance_status')->title(__('field.attendance_status')),
             $this->actionColumn()
         ];
     }
@@ -105,10 +110,10 @@ class MeetingAttendeeDataTable extends DataTable
     protected function getRoutes(): array
     {
         return [
-            'create' => 'admin.meetingattendees.create',
-            'view' => 'admin.meetingattendees.show',
-            'edit' => 'admin.meetingattendees.edit',
-            'delete' => 'admin.meetingattendees.destroy',
+            'create' => 'admin.meeting-attendees.create',
+            'view' => 'admin.meeting-attendees.show',
+            'edit' => 'admin.meeting-attendees.edit',
+            'delete' => 'admin.meeting-attendees.destroy',
         ];
     }
 }
