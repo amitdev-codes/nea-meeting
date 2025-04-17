@@ -2,7 +2,7 @@
 @extends('layouts/contentNavbarLayout')
 
 @section('content')
-    <div class="container-fluid m-4">
+    <div class="container-fluid m-1 p-4">
         <!-- Calendar Grid -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-light py-3">

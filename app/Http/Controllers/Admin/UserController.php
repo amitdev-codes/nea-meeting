@@ -52,7 +52,7 @@ class UserController extends BaseAdminController
     public function show(User $user)
     {
         // $this->authorizeResource('view-users');
-        $user->load('addresses.province', 'addresses.district', 'addresses.localLevel','component','subComponent');
+        // $user->load('addresses.province', 'addresses.district', 'addresses.localLevel','component','subComponent');
     
         $activities = Activity::where('subject_id', $user->id)
             ->orWhere('causer_id', $user->id)

@@ -22,6 +22,7 @@ Route::group(['prefix' => 'calendar', 'middleware' => ['locale']], function () {
     Route::get('/get-days/{year}/{month}', [CalendarController::class, 'getDays'])->name('calendar.month');
     Route::get('/get-calendar-data/{year}/{month}', [CalendarController::class, 'getCalendarData'])->name('calendar.data');
     Route::post('/get-calendar-grid-partial', [CalendarController::class, 'getCalendarGridPartial'])->name('calendar.grid');
+    Route::get('/calendar/get-meeting-counts/{year}/{month}', [CalendarController::class, 'getMeetingCounts']);
 });
 
 

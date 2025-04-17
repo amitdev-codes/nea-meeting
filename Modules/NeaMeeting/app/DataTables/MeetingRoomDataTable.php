@@ -78,6 +78,20 @@ class MeetingRoomDataTable extends DataTable
                     ' . $this->initColumnSearch() . '
                     ' . $this->initStickyColumnsStyles() . ' 
                 }',
+                'headerCallback' => 'function(thead) {
+                    $(thead).find("th").css({
+                        "font-weight": "800",
+                        "font-size": "0.85rem",
+                        "text-transform": "uppercase",
+                        "letter-spacing": "0.5px"
+                    });
+                }',
+                'columnDefs' => [
+                    [
+                        'targets' => '_all', // Applies to all columns
+                        'className' => 'dt-head-nowrap' // Prevents text wrapping in headers
+                    ]
+                ]
             ]);
     }
     
