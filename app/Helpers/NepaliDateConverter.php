@@ -126,6 +126,8 @@ class NepaliDateConverter
             ->where('month', $bsMonth)
             ->first();
 
+            // dd($record);
+
         if (!$record || $bsDay <= 0 || $bsDay > $record->days) {
             throw new \Exception('Invalid Nepali date');
         }
@@ -161,5 +163,21 @@ class NepaliDateConverter
         [$bsYear, $bsMonth, $bsDay] = explode('-', $nepaliDate);
          $data= NepaliDateConverter::toGregorianDate((int)$bsYear, (int)$bsMonth, (int)$bsDay);
          return $data['gregorian_date'];
+    }
+    public static function gregorianToNepaliYear(int $gregorianYear): int
+    {
+        // Use the first day of the Gregorian year to determine the Nepali year
+        $gregorianDate = Carbon::create($gregorianYear, 1, 1)->startOfDay();
+        $nepaliDate = self::toNepaliDate($gregorianDate);
+
+        return $nepaliDate['year'];
+    }
+    public static function gregorianToNepaliMonth(int $gregorianYear, int $gregorianMonth): string
+    {
+        // Use the first day of the Gregorian month to determine the Nepali month
+        $gregorianDate = Carbon::create($gregorianYear, $gregorianMonth, 1)->startOfDay();
+        $nepaliDate = self::toNepaliDate($gregorianDate);
+
+        return $nepaliDate['month_name'];
     }
 }

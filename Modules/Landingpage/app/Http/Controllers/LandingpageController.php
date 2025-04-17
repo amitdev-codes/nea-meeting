@@ -21,11 +21,12 @@ use Modules\NeaMeeting\DataTables\MeetingDataTable;
 class LandingpageController extends Controller
 {
 
-
     public function index()
     {
-        $meetings=Meeting::paginate(10);
-        return view('landingpage::pages.landingPage', compact('meetings'));
+        $today = now(); // Get today's date
+        $upcomingMeetings = Meeting::where('meeting_date_ad', '>=', $today)->orderBy('meeting_date_ad', 'asc')->orderBy('start_time', 'asc')->paginate(10);
+        $pastMeetings = Meeting::where('meeting_date_ad', '<', $today)->orderBy('meeting_date_ad', 'desc')->orderBy('start_time', 'desc')->paginate(10);
+        return view('landingpage::pages.landingPage', compact('upcomingMeetings', 'pastMeetings'));
     }
     public function view($id){
         $meeting=Meeting::find($id);
@@ -34,6 +35,4 @@ class LandingpageController extends Controller
         }]);
         return view('landingpage::pages.viewMeetings',['resource'=>$meeting]);
     }
-
-
 }

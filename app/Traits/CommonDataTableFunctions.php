@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Enums\MeetingStatus;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
 use Illuminate\Support\Facades\Auth;
@@ -43,7 +44,19 @@ trait CommonDataTableFunctions
     }
 
 
-
+    /**
+     * Make a column inline editable
+     * 
+     * @param string $field The field/column name
+     * @param mixed $value The field value
+     * @param mixed $id The row ID
+     * @return string HTML for the editable cell
+     */
+    protected function renderEditableCell(string $field, $value, $id, string $type = 'text', array $options = []): string
+    {
+        $optionsAttr = $type === 'select' ? 'data-options="' . htmlspecialchars(json_encode($options)) . '"' : '';
+        return '<div class="editable-cell w-100 h-100" data-field="' . $field . '" data-id="' . $id . '" data-type="' . $type . '" ' . $optionsAttr . '>' . $value . '</div>';
+    }
     protected function renderCheckbox($model_ids, $id): string
     {
         return view('components.datatables.checkbox', ['name' => $model_ids, 'id' => $id])->render();
@@ -129,7 +142,26 @@ trait CommonDataTableFunctions
         );
     }
 
-
+    /**
+     * Add export buttons to the DataTable.
+     */
+    protected function exportButtons(): array
+    {
+        return [
+            [
+                'extend' => 'collection',
+                'className' => 'btn-light export-btn me-2',
+                'text' => '<i class="bx bx-export me-1"></i> '.__('field.export'),
+                'buttons' => [
+                    ['extend' => 'excel', 'className' => 'btn-sm', 'text' => '<i class="bx bx-file me-1"></i> '.__('field.buttons.excel')],
+                    ['extend' => 'pdf', 'className' => 'btn-sm', 'text' => '<i class="bx bxs-file-pdf me-1"></i> '.__('field.buttons.pdf')],
+                    ['extend' => 'print', 'className' => 'btn-sm', 'text' => '<i class="bx bx-printer me-1"></i> '.__('field.buttons.print')],
+                    ['extend' => 'csv', 'className' => 'btn-sm', 'text' => '<i class="bx bx-file me-1"></i> '.__('field.buttons.csv')],
+                    ['extend' => 'copy', 'className' => 'btn-sm', 'text' => '<i class="bx bx-copy me-1"></i> '.__('field.buttons.copy')],
+                ],
+            ],
+        ];
+    }
 
     /**
      * Add a "Add New" button to the DataTable.
@@ -266,7 +298,138 @@ trait CommonDataTableFunctions
     ';
     }
 
+    /**
+     * Initialize the inline editing functionality for DataTables
+     * 
+     * @param string $routePrefix The route prefix (e.g., 'admin.provinces')
+     * @param string $model The model name in lowercase (e.g., 'province')
+     * @return string JavaScript for inline editing
+     */
 
+    protected function initInlineEditingScript(string $resource): string
+    {
+        return '
+        // Add styles for editable cells
+        if (!document.getElementById("inline-editing-styles")) {
+            $("<style id=\"inline-editing-styles\">")
+                .text(`
+                    .editable-cell { cursor: pointer; }
+                    .editable-cell:hover { background-color: #f8f9fa; }
+                    .editing-cell { padding: 0 !important; }
+                    .form-control-sm { width: 100%; }
+                `)
+                .appendTo("head");
+        }
+
+        // Click handler for editable cells
+        $(document).off("click", ".editable-cell").on("click", ".editable-cell", function(e) {
+            if ($(this).hasClass("being-edited")) return;
+
+            const cell = $(this);
+            const originalValue = cell.text().trim(); // Default for text/number
+            const field = cell.data("field");
+            const id = cell.data("id");
+            const type = cell.data("type");
+            const options = cell.data("options") || []; // For select type
+
+            // Create input container
+            const inputContainer = $("<div class=\"p-1\"></div>");
+            let input;
+
+            // Generate input based on type
+            if (type === "select") {
+                input = $("<select class=\"form-control form-control-sm\"></select>");
+                $.each(options, function(value, label) {
+                    input.append($("<option></option>").attr("value", value).text(label));
+                });
+                input.val(cell.data("options")[originalValue] ? originalValue : Object.keys(options)[0]); // Set default or original value
+            } else if (type === "number") {
+                input = $("<input type=\"number\" class=\"form-control form-control-sm\" />").val(originalValue);
+            } else {
+                input = $("<input type=\"text\" class=\"form-control form-control-sm\" />").val(originalValue);
+            }
+
+            // Replace cell content with input
+            cell.html(inputContainer.append(input));
+            cell.addClass("being-edited");
+            cell.parent().addClass("editing-cell");
+            input.focus();
+
+            // Function to save changes
+            function saveChanges(newValue) {
+                cell.html("<i class=\"fas fa-spinner fa-spin\"></i>"); // Loading indicator
+
+                const baseUrl = window.location.pathname.split("/").slice(0, -1).join("/");
+                const inlineEditUrl = `${baseUrl}/'.$resource.'/${id}/inline-edit`;
+
+                $.ajax({
+                    url: inlineEditUrl,
+                    method: "PATCH",
+                    headers: {
+                        "X-CSRF-TOKEN": $("meta[name=\"csrf-token\"]").attr("content")
+                    },
+                    data: {
+                        field: field,
+                        value: newValue
+                    },
+                    success: function(response) {
+                        cell.html(type === "select" ? options[newValue] : newValue); // Display label for select
+                        cell.removeClass("being-edited");
+                        cell.parent().removeClass("editing-cell");
+                        toastr.success(response.message || "Updated successfully");
+                    },
+                    error: function(xhr) {
+                        cell.html(originalValue);
+                        cell.removeClass("being-edited");
+                        cell.parent().removeClass("editing-cell");
+                        toastr.error(xhr.responseJSON?.message || "Update failed");
+                    }
+                });
+            }
+
+            // Save on blur (all types)
+            input.on("blur", function() {
+                const newValue = input.val();
+                if (newValue !== originalValue) {
+                    saveChanges(newValue);
+                } else {
+                    cell.html(originalValue);
+                    cell.removeClass("being-edited");
+                    cell.parent().removeClass("editing-cell");
+                }
+            });
+
+            // Save on Enter key (text and number)
+            if (type !== "select") {
+                input.on("keypress", function(e) {
+                    if (e.which === 13) { // Enter key
+                        const newValue = input.val();
+                        saveChanges(newValue);
+                    }
+                });
+            }
+
+            // Save on change (select)
+            if (type === "select") {
+                input.on("change", function() {
+                    const newValue = input.val();
+                    saveChanges(newValue);
+                });
+            }
+
+            // Cancel on Escape key (all types)
+            input.on("keydown", function(e) {
+                if (e.which === 27) { // Escape key
+                    cell.html(originalValue);
+                    cell.removeClass("being-edited");
+                    cell.parent().removeClass("editing-cell");
+                }
+            });
+
+            e.stopPropagation();
+        });
+        ';
+    }
     protected function initBulkDeleteScript(string $checkboxName): string
     {
         return '
@@ -396,7 +559,7 @@ trait CommonDataTableFunctions
         $permissions = $options['permissions'] ?? $this->getPermissions($resources);
         $routes = $this->getRoutes();
         $buttons = [
-            // $this->exportButtons($permissions['export'] ?? 'export-' .$resources), // Default export permission
+            $this->exportButtons($permissions['export'] ?? 'export-' .$resources), // Default export permission
             $this->addButton(
                 $routes['create'] ?? route("admin." .$resources . ".create"), // Fallback route
                 $permissions['create']
@@ -404,6 +567,31 @@ trait CommonDataTableFunctions
             $this->bulkDeleteButton($model),
         ];
     
+        return array_filter($buttons);
+    }
+
+
+    protected function dtActionModalButtons($resources, $model, array $options = [])
+    {
+        $permissions = $options['permissions'] ?? $this->getPermissions($resources);
+        $routes = $this->getRoutes() ?? []; 
+        $addButton = $this->addButton(
+            $routes['create'] ?? route("admin." . $resources . "s.create", [], false), // Fallback route
+            $permissions['create'] // Permission check
+        );
+        if (!empty($addButton)) {
+            $addButton[0] = array_merge($addButton[0], [
+                'action' => 'function(){ return false;}', // Modal-specific action
+                'className' => 'btn-primary add-btn me-2', // Override className
+            ]);
+        }
+
+        $buttons = [
+            $this->exportButtons($permissions['export'] ?? 'export-' . $resources), // Export with permission
+            $addButton, // Single modified add button
+            $this->bulkDeleteButton($model),
+        ];
+
         return array_filter($buttons);
     }
 
@@ -570,7 +758,76 @@ trait CommonDataTableFunctions
         }
         return $routes;
     }
-
+    protected function importButton(string $routeName, string $acceptedFileTypes = '.csv,.xlsx,.xls'): array
+    {
+        return [
+            [
+                'text' => '<i class="bx bx-import me-1"></i>' . __('field.import'),
+                'className' => 'btn-light import-btn me-2',
+                'attr' => ['style' => 'margin-left: 0px'],
+                'action' => 'function() {
+                    $("#import-file-input").click();
+                }',
+                'init' => 'function(btn, config) {
+                    var importInput = $("<input>")
+                        .attr({
+                            type: "file",
+                            id: "import-file-input",
+                            name: "import_file",
+                            accept: "' . $acceptedFileTypes . '",
+                            style: "display: none;"
+                        })
+                        .on("change", function(e) {
+                            var file = e.target.files[0];
+                            if (file) {
+                                var formData = new FormData();
+                                formData.append("import_file", file);
+    
+                                Swal.fire({
+                                    title: "Importing Data",
+                                    text: "Please wait while the file is being processed...",
+                                    icon: "info",
+                                    showConfirmButton: false,
+                                    allowOutsideClick: false,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                    }
+                                });
+    
+                                $.ajax({
+                                    url: "' . $routeName . '",
+                                    type: "POST",
+                                    data: formData,
+                                    processData: false,
+                                    contentType: false,
+                                    headers: {
+                                        "X-CSRF-TOKEN": $("meta[name=\'csrf-token\']").attr("content")
+                                    },
+                                    success: function(response) {
+                                        Swal.fire({
+                                            title: "Import Successful",
+                                            text: response.message || "Data imported successfully",
+                                            icon: "success"
+                                        }).then(() => {
+                                            window.location.reload();
+                                        });
+                                    },
+                                    error: function(xhr) {
+                                        Swal.fire({
+                                            title: "Import Failed",
+                                            text: xhr.responseJSON.message || "An error occurred during import",
+                                            icon: "error"
+                                        });
+                                    }
+                                });
+                            }
+                        });
+    
+                    $("body").append(importInput);
+                }'
+            ]
+        ];
+    }
         /**
      * Add CSS styles for sticky columns to DataTables initialization
      * 
@@ -761,5 +1018,27 @@ trait CommonDataTableFunctions
         }
         
         return $query;
+    }
+    public function getMeetingStatusBadge($status): string
+    {
+        // Convert string to enum if necessary
+        $status = $status instanceof MeetingStatus ? $status : MeetingStatus::from($status);
+
+        // Map enum cases to Bootstrap badge classes
+        $statusStyles = [
+            MeetingStatus::Scheduled->value => 'bg-info',
+            MeetingStatus::Ongoing->value => 'bg-warning',
+            MeetingStatus::Completed->value => 'bg-success',
+            MeetingStatus::Cancelled->value => 'bg-danger',
+        ];
+
+        $class = $statusStyles[$status->value] ?? 'bg-secondary'; // Fallback class
+        $text = ucfirst(strtolower($status->value)); // Format text (e.g., "Scheduled")
+
+        return sprintf(
+            '<span class="badge %s">%s</span>',
+            $class,
+            $text
+        );
     }
 }

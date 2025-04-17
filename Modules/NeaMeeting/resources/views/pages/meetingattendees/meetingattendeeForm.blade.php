@@ -19,6 +19,6 @@
         <x-forms.input name="response_at" :label="__('field.response_at')" :value="old('response_at', $model->response_at ?? '')" />
     </div>
     <div class="mb-3 col-md-12">
-        <x-forms.textarea name="notes" :label="__('field.notes')" :value="old('notes', $model->notes ?? '')" />
+        <x-forms.input-textarea name="notes" :label="__('field.notes')" :value="old('notes', $model->notes ?? '')" />
     </div>
 @endsection

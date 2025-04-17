@@ -1,7 +1,7 @@
 @extends('layouts/contentNavbarLayout')
 
 @section('content')
-    <div class="flex-grow-1 container-p-y">
+    <div class="flex-grow-1 container-p-4">
         {{-- Breadcrumb --}}
         <x-breadcrumb title="Meeting Information" 
             :items="[['label' => 'Meeting Information', 'route' => 'admin.meetings.index']]" 
@@ -15,7 +15,8 @@
                     <x-slot name="actions">
                         @can('edit meetings')
                             <a href="{{ route('admin.meetings.edit', $resource) }}" 
-                               class="btn btn-primary btn-sm waves-effect waves-light">
+                               class="btn btn-primary btn-sm waves-effect waves-light" 
+                               aria-label="Edit meeting">
                                 <i class="bx bx-edit me-1"></i> Edit
                             </a>
                         @endcan
@@ -44,7 +45,6 @@
                             <x-resource.detail-item label="{{ __('field.meeting_type') }}" 
                                 :value="$resource->meeting_type ?? ''" 
                                 class="col-md-6" />
-
                             <x-resource.detail-item label="{{ __('field.created_at') }}" 
                                 :value="$resource->created_at" 
                                 type="datetime" 
@@ -69,98 +69,50 @@
                                 @foreach ($resource->media->take(6) as $media)
                                     <div class="col-6">
                                         <div class="document-preview text-center">
-                                            @if (in_array($media->mime_type, ['application/pdf']))
-                                                <div class="file-preview position-relative">
+                                            @php
+                                                $mimeType = $media->mime_type;
+                                                $fileName = $media->name ?? $media->file_name;
+                                            @endphp
+                                            <div class="file-preview">
+                                                @if (in_array($mimeType, ['application/pdf']))
                                                     <div class="file-cover pdf mb-2">
                                                         <i class="bx bxs-file-pdf text-danger"></i>
                                                     </div>
-                                                    <small class="d-block text-muted text-truncate" 
-                                                           title="{{ $media->name ?? $media->file_name }}">
-                                                        {{ $media->name ?? $media->file_name }}
-                                                    </small>
-                                                    <div class="action-buttons mt-2">
-                                                        <a href="{{ $media->getUrl() }}" 
-                                                           target="_blank"
-                                                           class="btn btn-sm btn-outline-primary">
-                                                            <i class="bx bx-show me-1"></i> View
-                                                        </a>
-                                                        <a href="{{ $media->getUrl() }}" 
-                                                           download="{{ $media->file_name }}"
-                                                           class="btn btn-sm btn-outline-secondary ms-1">
-                                                            <i class="bx bx-download"></i>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            @elseif (in_array($media->mime_type, ['text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']))
-                                                <div class="file-preview position-relative">
-                                                    <div class="file-cover text mb-2">
+                                                @elseif (in_array($mimeType, ['text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']))
+                                                    <div class="file-cover doc mb-2">
                                                         <i class="bx bxs-file-doc text-primary"></i>
                                                     </div>
-                                                    <small class="d-block text-muted text-truncate" 
-                                                           title="{{ $media->name ?? $media->file_name }}">
-                                                        {{ $media->name ?? $media->file_name }}
-                                                    </small>
-                                                    <div class="action-buttons mt-2">
-                                                        <a href="{{ $media->getUrl() }}" 
-                                                           target="_blank"
-                                                           class="btn btn-sm btn-outline-primary">
-                                                            <i class="bx bx-show me-1"></i> View
-                                                        </a>
-                                                        <a href="{{ $media->getUrl() }}" 
-                                                           download="{{ $media->file_name }}"
-                                                           class="btn btn-sm btn-outline-secondary ms-1">
-                                                            <i class="bx bx-download"></i>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            @elseif (str_starts_with($media->mime_type, 'image/'))
-                                                <div class="file-preview position-relative">
+                                                @elseif (str_starts_with($mimeType, 'image/'))
                                                     <div class="image-cover mb-2">
                                                         <img src="{{ $media->getUrl() }}" 
-                                                             alt="{{ $media->name ?? $media->file_name }}"
+                                                             alt="{{ $fileName }}"
                                                              class="img-fluid rounded"
                                                              loading="lazy">
                                                     </div>
-                                                    <small class="d-block text-muted text-truncate" 
-                                                           title="{{ $media->name ?? $media->file_name }}">
-                                                        {{ $media->name ?? $media->file_name }}
-                                                    </small>
-                                                    <div class="action-buttons mt-2">
-                                                        <a href="{{ $media->getUrl() }}" 
-                                                           target="_blank"
-                                                           class="btn btn-sm btn-outline-primary">
-                                                            <i class="bx bx-show me-1"></i> View
-                                                        </a>
-                                                        <a href="{{ $media->getUrl() }}" 
-                                                           download="{{ $media->file_name }}"
-                                                           class="btn btn-sm btn-outline-secondary ms-1">
-                                                            <i class="bx bx-download"></i>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <div class="file-preview position-relative">
+                                                @else
                                                     <div class="file-cover generic mb-2">
                                                         <i class="bx bxs-file text-secondary"></i>
                                                     </div>
-                                                    <small class="d-block text-muted text-truncate" 
-                                                           title="{{ $media->name ?? $media->file_name }}">
-                                                        {{ $media->name ?? $media->file_name }}
-                                                    </small>
-                                                    <div class="action-buttons mt-2">
-                                                        <a href="{{ $media->getUrl() }}" 
-                                                           target="_blank"
-                                                           class="btn btn-sm btn-outline-primary">
-                                                            <i class="bx bx-show me-1"></i> View
-                                                        </a>
-                                                        <a href="{{ $media->getUrl() }}" 
-                                                           download="{{ $media->file_name }}"
-                                                           class="btn btn-sm btn-outline-secondary ms-1">
-                                                            <i class="bx bx-download"></i>
-                                                        </a>
-                                                    </div>
+                                                @endif
+                                                <small class="d-block text-muted text-truncate" 
+                                                       title="{{ $fileName }}">
+                                                    {{ $fileName }}
+                                                </small>
+                                                <div class="action-buttons mt-2">
+                                                    <a href="{{ $media->getUrl() }}" 
+                                                       target="_blank"
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       aria-label="View {{ $fileName }}">
+                                                        <i class="bx bx-show me-1"></i> View
+                                                    </a>
+                                                    <a href="{{ $media->getUrl() }}" 
+                                                       download="{{ $fileName }}"
+                                                       class="btn btn-sm btn-outline-secondary ms-1"
+                                                       aria-label="Download {{ $fileName }}">
+                                                        <i class="bx bx-download"></i>
+                                                    </a>
                                                 </div>
-                                            @endif
+                                            </div>
                                         </div>
                                     </div>
                                 @endforeach
@@ -185,17 +137,23 @@
     </div>
 
     <style>
+        .container-p-4 {
+            padding: 1rem;
+        }
+
         .document-preview {
             padding: 1rem;
             background: #f8f9fa;
             border-radius: 8px;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .document-preview:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         }
 
         .text-truncate {
@@ -203,6 +161,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            font-size: 0.875rem;
         }
 
         .file-cover {
@@ -212,11 +171,11 @@
             justify-content: center;
             background: #fff;
             border-radius: 6px;
-            border: 1px solid #eee;
+            border: 1px solid #e9ecef;
         }
 
         .file-cover i {
-            font-size: 3rem;
+            font-size: 2.5rem;
         }
 
         .image-cover {
@@ -227,7 +186,7 @@
             overflow: hidden;
             background: #fff;
             border-radius: 6px;
-            border: 1px solid #eee;
+            border: 1px solid #e9ecef;
         }
 
         .image-cover img {
@@ -244,18 +203,40 @@
 
         .action-buttons {
             margin-top: auto;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .file-cover.pdf {
-            background-color: rgba(255, 230, 230, 0.3);
+            background-color: rgba(255, 230, 230, 0.2);
         }
 
-        .file-cover.text {
-            background-color: rgba(230, 240, 255, 0.3);
+        .file-cover.doc {
+            background-color: rgba(230, 240, 255, 0.2);
         }
 
         .file-cover.generic {
-            background-color: rgba(240, 240, 240, 0.3);
+            background-color: rgba(240, 240, 240, 0.2);
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8125rem;
+        }
+
+        @media (max-width: 576px) {
+            .document-preview {
+                padding: 0.75rem;
+            }
+
+            .file-cover, .image-cover {
+                height: 90px;
+            }
+
+            .file-cover i {
+                font-size: 2rem;
+            }
         }
     </style>
 @endsection

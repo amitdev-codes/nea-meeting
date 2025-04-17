@@ -17,29 +17,14 @@ class UsersDataTable extends DataTable
 {
     use CommonDataTableFunctions;
 
-    protected array $searchableColumns = ['code', 'username', 'email', 'role_name', 'mobile_no', 'organization_name','section_name','role_name'];
+    protected array $searchableColumns = ['code', 'username', 'email', 'role_name', 'mobile_no', 'organization_name','role_name'];
     protected array $dropdownColumns = [
-        'organization_name' => [
-            'options' => [], // Will be populated in dataTable()
-            'searchBy' => 'id' // Search by designation_id
-        ],
-        'section_name' => [
-            'options' => [], // Will be populated in dataTable()
-            'searchBy' => 'id' // Search by caste_id
-        ],
-        'role_name' => [
-            'options' => [], // Will be populated in dataTable()
-            'searchBy' => 'id' // Search by caste_id
-        ],
-
-
 
     ];
     public function __construct()
     {
         parent::__construct();
         $this->dropdownColumns['organization_name']['options'] = Cache::get('organizations')->pluck('name', 'id')->toArray();
-        $this->dropdownColumns['section_name']['options'] = Cache::get('sections')->pluck('name', 'id')->toArray();
         $this->dropdownColumns['role_name']['options'] = Cache::get('roles')->pluck('name', 'id')->toArray();
     }
 
@@ -58,23 +43,6 @@ class UsersDataTable extends DataTable
                 return $user->organization_id 
                     ? $user->organizations->name . ' (' . ($user->organizations->name_np ?? 'N/A') . ')' 
                     : 'N/A';
-            })
-            // ->addColumn('section_name', function ($user) {
-            //     return $user->category 
-            //         ? $user->category->name . ' (' . ($user->category->name_np ?? 'N/A') . ')' 
-            //         : 'N/A';
-            // })
-            ->addColumn('cluster_name', function ($user) {
-                $clusterIds = is_string($user->clusters) ? json_decode($user->clusters, true) : $user->clusters;
-                $clusterIds = $clusterIds ?? []; 
-            
-                if (empty($clusterIds)) {
-                    return 'N/A';
-                }
-            
-                $clusterNames = Cluster::whereIn('id', $clusterIds)->pluck('name')->implode(', ');
-                // return $clusterNames ?: 'N/A'; 
-                return $this->generateBadges($clusterNames);
             })
             ->addColumn('status', fn ($row) => $this->getStatusBadge($row->status))
             ->addColumn('action', $this->addActionColumn(
@@ -139,7 +107,7 @@ class UsersDataTable extends DataTable
 
     public function html(): HtmlBuilder
     {
-        $routeName = route("admin.users.import"); // Generate the route name dynamically
+
 
         return $this->builder()
             ->setTableId('users-table')
@@ -150,7 +118,6 @@ class UsersDataTable extends DataTable
             ->buttons(
                 array_merge(
                     $this->dtActionButtons('users','User'),
-                    $this->importButton($routeName) // Pass the route name here
                 )
             )
             ->parameters([
@@ -169,8 +136,6 @@ class UsersDataTable extends DataTable
             $this->checkboxColumn(),
             Column::make('username')->title(__('field.name'))->addClass('wrap-text'),
             Column::make('organization_name')->title(__('field.organization_id'))->addClass('wrap-text'),
-            // Column::make('section_name')->title(__('field.category'))->addClass('wrap-text'),
-            Column::make('cluster_name')->title(__('field.clusters'))->addClass('wrap-text'),
             Column::make('role_name')->title(__('field.role_name'))->addClass('wrap-text')->width('1%'),
             Column::make('mobile_no')->title(__('field.mobile_no'))->addClass('wrap-text'),
             Column::make('email')->title(__('field.email'))->addClass('wrap-text'),

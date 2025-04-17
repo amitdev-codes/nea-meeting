@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Enums\MeetingType;
+use App\Enums\MeetingStatus;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -15,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('title', 200);
             $table->text('description')->nullable();
-            $table->string('meeting_type', 50);
+            $table->enum('meeting_type', MeetingType::values())->default(MeetingType::REGULAR->value);
             $table->string('meeting_date')->nullable();
             $table->date('meeting_date_ad')->nullable();
             $table->dateTime('start_time'); // Changed from timestamp to dateTime
@@ -24,7 +26,7 @@ return new class extends Migration
             $table->foreignId('meeting_room_id')->nullable()->constrained()->nullOnDelete();
             $table->boolean('is_virtual')->default(false);
             $table->string('virtual_meeting_link', 255)->nullable();
-            $table->string('status', 20)->default('scheduled');
+            $table->enum('status', MeetingStatus::values())->default(MeetingStatus::Scheduled->value);
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
         });

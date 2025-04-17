@@ -5,8 +5,12 @@ namespace Modules\NeaMeeting\Models;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Master\Models\Organization;
 use Modules\NeaMeeting\Models\MeetingRoom;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Modules\NeaMeeting\Models\MeetingAttendee;
+use Modules\NeaMeeting\Models\MeetingNotifiedUser;
+use Modules\NeaMeeting\Models\MeetingOrganization;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -21,11 +25,12 @@ class Meeting extends Model implements HasMedia
         'title',
         'description',
         'meeting_type',
-        'meeting_date', // Add this if you want to store it
+        'meeting_date',
+        'meeting_date_ad',
         'start_time',
         'end_time',
-        'meeting_room_id',
         'meeting_location',
+        'meeting_room_id',
         'is_virtual',
         'virtual_meeting_link',
         'status',
@@ -72,5 +77,22 @@ class Meeting extends Model implements HasMedia
             ->keepOriginalImageFormat()
             ->fit(Fit::Crop, 400, 400)
             ->nonQueued();
+    }
+    public function meetingOrganizations()
+    {
+        return $this->hasMany(MeetingOrganization::class);
+    }
+
+    public function organizations()
+    {
+        return $this->belongsToMany(Organization::class, 'meeting_organizations');
+    }
+    public function attendees()
+    {
+        return $this->hasMany(MeetingAttendee::class, 'meeting_id');
+    }
+    public function notifiedUsers()
+    {
+        return $this->hasMany(MeetingNotifiedUser::class, 'meeting_id');
     }
 }

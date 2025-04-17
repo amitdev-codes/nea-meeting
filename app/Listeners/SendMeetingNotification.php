@@ -2,32 +2,57 @@
 
 namespace App\Listeners;
 
-use App\Models\User;
 use App\Events\MeetingCreated;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Notifications\MeetingNotification;
+use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use Log;
 
 class SendMeetingNotification implements ShouldQueue
 {
-    /**
-     * Create the event listener.
-     */
-    public function __construct()
-    {
-        //
-    }
-
+    use InteractsWithQueue;
+    
     /**
      * Handle the event.
      */
     public function handle(MeetingCreated $event)
     {
-        // Get employees/users who should be notified
-        // This could be based on your business logic (e.g., all employees, specific department, etc.)
-        $users = User::role(['admin', 'employee'])->get();// Adjust this query as needed
-        
-        foreach ($users as $user) {
-            $user->notify(new MeetingNotification($event->meeting));
+        // Check if email notifications should be sent
+        if (!($event->options['send_email'] ?? true)) {
+            return;
+        }
+
+        // Get attendees for the meeting
+        $attendees = $event->meeting->attendees()->with('user')->get();
+
+        if ($attendees->isEmpty()) {
+            return;
+        }
+
+        // Send notifications to attendees
+        foreach ($attendees as $attendee) {
+            try {
+                $user = $attendee->user;
+                if ($user) {
+                    $user->notify(new MeetingNotification($event->meeting));
+
+                    // Update invitation_sent_at if not already set
+                    if (!$attendee->invitation_sent_at) {
+                        $attendee->update(['invitation_sent_at' => now()]);
+                    }
+
+                    // Track notified users
+                    $event->meeting->notifiedUsers()->create([
+                        'user_id' => $user->id,
+                        'notified_at' => now(),
+                        'notification_type' => 'email',
+                        'notification_status' => 'sent',
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send meeting notification for user #' . ($user->id ?? 'unknown') . ': ' . $e->getMessage());
+            }
         }
     }
 }

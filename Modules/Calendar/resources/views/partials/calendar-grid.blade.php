@@ -36,6 +36,10 @@
                 
                 $totalDaysDisplayed = $daysInMonth + $startDay;
                 $totalWeeks = ceil($totalDaysDisplayed / 7);
+
+                // Get Nepali year and month from calendarData
+                $nepaliYear = $calendarData['bs_year'] ?? NepaliDateConverter::gregorianToNepaliYear($startDate->year);
+                $nepaliMonth = $calendarData['month'] ?? NepaliDateConverter::gregorianToNepaliMonth($startDate->month);
                 
                 for ($week = 0; $week < $totalWeeks; $week++) {
                     for ($dayOfWeek = 1; $dayOfWeek <= 7; $dayOfWeek++) {
@@ -53,8 +57,12 @@
                             $englishDate = isset($calendarData['english_dates'][$day]) ? $calendarData['english_dates'][$day] : '';
                             $events = isset($calendarData['events'][$day]) ? $calendarData['events'][$day] : [];
                             $adDay = $startDate->copy()->addDays($day - 1)->day;
+
+                            // Format Nepali date as YYYY-MM-DD
+                            $nepaliDate = sprintf('%s-%s-%02d', $nepaliYear, $nepaliMonth, $day);
                             
-                            echo '<div class="col calendar-day ' . ($isToday ? 'today ' : '') . ($isSunday ? 'sunday ' : '') . ($isSaturday ? 'saturday ' : '') . '">';
+                            // Add data-nepali-date attribute
+                            echo '<div class="col calendar-day ' . ($isToday ? 'today ' : '') . ($isSunday ? 'sunday ' : '') . ($isSaturday ? 'saturday ' : '') . '" data-nepali-date="' . $nepaliDate . '">';
                             echo '<div class="day-content">';
                             echo '<div class="nepali-date">' . $nepaliDay . '</div>';
                             if(!empty($englishDate)) {
@@ -88,6 +96,7 @@
         Calendar data not available. Please select a valid year and month.
     </div>
 @endif
+
 <style>
     .calendar {
         width: 100%;
@@ -150,6 +159,25 @@
         color: #adb5bd;
     }
     
+    /* Add styles for selected date */
+    .calendar-day.selected {
+        background-color: #28a745; /* Green background for selected date */
+        border: 2px solid #218838; /* Darker green border */
+        border-radius: 4px;
+        box-shadow: 0 0 8px rgba(40, 167, 69, 0.3);
+        color: #fff; /* White text for contrast */
+    }
+    
+    .calendar-day.selected .nepali-date,
+    .calendar-day.selected .english-date,
+    .calendar-day.selected .ad-date {
+        color: #fff; /* White text for child elements */
+    }
+    
+    .calendar-day.selected .event {
+        background-color: #218838; /* Slightly darker green for events */
+    }
+    
     .day-content {
         display: flex;
         flex-direction: column;
@@ -181,7 +209,7 @@
     }
     
     .calendar-day .event {
-        background-color: #198754;
+        background-color: #52bd8b;
         color: white;
         border-radius: 3px;
         padding: 2px 5px;

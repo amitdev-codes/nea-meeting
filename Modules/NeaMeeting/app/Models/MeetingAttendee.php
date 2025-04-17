@@ -2,8 +2,11 @@
 
 namespace Modules\NeaMeeting\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User;
+use Modules\NeaMeeting\Models\Meeting;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class MeetingAttendee extends Model
 {
@@ -28,4 +31,14 @@ class MeetingAttendee extends Model
         'invitation_sent_at' => 'datetime',
         'response_at' => 'datetime'
     ];
+    public function meeting():BelongsTo
+    {
+        return $this->belongsTo(Meeting::class);
+    }
+
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

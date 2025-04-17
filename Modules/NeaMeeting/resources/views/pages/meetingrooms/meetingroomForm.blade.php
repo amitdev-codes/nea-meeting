@@ -16,6 +16,6 @@
         <x-forms.input name="has_video_conference" :label="__('field.has_video_conference')" :value="old('has_video_conference', $model->has_video_conference ?? '')" />
     </div>
     <div class="mb-3 col-md-12">
-        <x-forms.textarea name="notes" :label="__('field.notes')" :value="old('notes', $model->notes ?? '')" />
+        <x-forms.input-textarea name="notes" :label="__('field.notes')" :value="old('notes', $model->notes ?? '')" />
     </div>
 @endsection

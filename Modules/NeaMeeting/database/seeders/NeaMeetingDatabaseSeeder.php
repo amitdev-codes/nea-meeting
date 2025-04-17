@@ -23,13 +23,7 @@ class NeaMeetingDatabaseSeeder extends Seeder
         $this->call([
             MeetingRoomSeeder::class,
             MeetingSeeder::class,
-            MeetingAttendeeSeeder::class,
-            // MeetingDocumentSeeder::class,
-            MeetingMinuteSeeder::class,
-            // ActionItemSeeder::class,
-            MeetingReminderSeeder::class,
-            MeetingRecurrenceSeeder::class,
-            // NotificationSeeder::class,
+            MeetingAttendeeSeeder::class
         ]);
     }
 }

@@ -12,8 +12,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="viewport"content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
     <title>@yield('title') | {{ config('app.name') }}</title>
     <link rel="icon" href="{{ asset('img/favicon.png') }}" type="image/x-icon">
@@ -23,32 +22,29 @@
         content="{{ config('variables.templateKeyword') ? config('variables.templateKeyword') : '' }}" />
     <!-- Laravel CSRF token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <!-- Add Kalimati font from Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Kalimati&display=swap" rel="stylesheet">
-    
     <style>
-        body {
-            font-family: 'Kalimati', sans-serif !important;
+        @font-face {
+            font-family: Kalimati;
+            src: url('/fonts/kalimati.ttf');
         }
-    </style>
+        .nepali_td {
+            font-family: kalimati, serif; /* Replace 'Your-English-Font' with the desired English font */
+        }
 
+    </style>
     @include('landingpage::layouts/sections/stylesFront')
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
     @yield('navbar')
-    @yield('content')
+
+    <main class="flex-grow-1">
+        @yield('content')
+    </main>
+
     @yield('footer')
+
     @include('landingpage::layouts/sections/scriptsFront')
-    <script>
-        if (typeof require === 'undefined') {
-            window.require = function(module) {
-                console.warn(`require('${module}') called but not supported. Ensure ESM imports are used instead.`);
-                return undefined;
-            };
-        }
-    </script>
     @stack('scripts')
 </body>
 </html>

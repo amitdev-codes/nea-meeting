@@ -1,6 +1,16 @@
 {
     "menu": [
         {
+            "items": [
+                {
+                    "url": "dashboard",
+                    "name": "menu.dashboard",
+                    "icon": "menu-icon tf-icons bx bx-home-circle",
+                    "slug": "dashboard"
+                }
+            ]
+        },
+        {
             "header": "Meetings Section",
             "items": [
                 {

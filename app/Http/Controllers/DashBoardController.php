@@ -8,9 +8,12 @@ use Illuminate\Http\Request;
 use Modules\Groups\Models\Group;
 use App\Models\CumulativeProgress;
 use App\Services\DashBoardService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
+use App\Helpers\NepaliDateConverter;
 use Illuminate\Http\RedirectResponse;
 use Modules\Groups\Models\GroupMember;
+use Modules\NeaMeeting\Models\Meeting;
 use ConsoleTVs\Charts\Classes\Chartjs\Chart;
 
 
@@ -28,9 +31,87 @@ class DashBoardController extends Controller
     }
     public function dashboard()
     {
+        $today = Carbon::now();
+
+        // Total Counts
+        $todaysMeetings = Meeting::whereDate('meeting_date_ad', $today)->count();
+        $upcomingMeetings = Meeting::where('meeting_date_ad', '>', $today)->count();
+        $thisMonthMeetings = Meeting::whereYear('meeting_date_ad', $today->year)
+                                   ->whereMonth('meeting_date_ad', $today->month)
+                                   ->count();
+        $totalMeetings = Meeting::count();
+
+        // Meetings Per Nepali Month (last 6 months)
+        // dd($today);
+        $nepaliMonthsData = [];
+        $currentNepaliDate = NepaliDateConverter::toNepaliDate($today);
+        $currentNepaliYear = $currentNepaliDate['year'];
+        $currentNepaliMonth = $currentNepaliDate['month'];
+        // dd( $currentNepaliYear,     $currentNepaliMonth);
+
+                // Collect meetings for the last 6 Nepali months
+                for ($i = 5; $i >= 0; $i--) {
+                    $monthOffset = $currentNepaliMonth - $i;
+                    $year = $currentNepaliYear;
+                    if ($monthOffset <= 0) {
+                        $monthOffset += 12;
+                        $year--;
+                    }
+
+                    // dd($year,$monthOffset,1);
+
+                // Get the number of days in the Nepali month
+                $calendarRecord = DB::table('nepali_calendar')
+                ->where('bs_year', $year)
+                ->where('month', $monthOffset)
+                ->first();
+
+            if (!$calendarRecord) {
+                // Fallback if no calendar data
+                $nepaliMonthsData[] = [
+                    'label' => NepaliDateConverter::$nepaliMonths[$monthOffset],
+                    'count' => 0,
+                ];
+                continue;
+            }
+
+            $daysInMonth = $calendarRecord->days;
+
+            // Get the Gregorian date range for the Nepali month
+            $startGregorian = NepaliDateConverter::toGregorianDate($year, $monthOffset, 1)['gregorian_date'];
+            $endGregorian = NepaliDateConverter::toGregorianDate($year, $monthOffset, $daysInMonth)['gregorian_date'];
 
 
-        return view('pages.dashboard');
+            // dd($startGregorian,$endGregorian);
+
+            // Ensure the end date is within the Nepali month
+            $endNepali = NepaliDateConverter::toNepaliDate(Carbon::parse($endGregorian));
+            if ($endNepali['month'] != $monthOffset) {
+                $endGregorian = Carbon::parse($endGregorian)->subDay()->toDateString();
+            }
+
+            $count = Meeting::whereBetween('meeting_date_ad', [$startGregorian, $endGregorian])->count();
+            $nepaliMonthsData[] = [
+                'label' => NepaliDateConverter::$nepaliMonths[$monthOffset],
+                'count' => $count,
+            ];
+        }
+
+        $meetingsPerMonthLabels = array_column($nepaliMonthsData, 'label');
+        $meetingsPerMonthData = array_column($nepaliMonthsData, 'count');
+
+        // Meeting Status Distribution
+        $statusCounts = Meeting::select('status')
+            ->groupBy('status')
+            ->pluck('status')
+            ->mapWithKeys(function ($status) {
+                return [$status => Meeting::where('status', $status)->count()];
+            })->toArray();
+
+        $statusLabels = array_keys($statusCounts);
+        $statusData = array_values($statusCounts);
+
+        return view('pages.dashboard', compact('todaysMeetings','upcomingMeetings','thisMonthMeetings','totalMeetings','meetingsPerMonthLabels','meetingsPerMonthData','statusLabels','statusData'));
     }
 
 
@@ -48,105 +129,4 @@ class DashBoardController extends Controller
     }
 
         
-    private function getDashboardSettings()
-    {
-        return [
-            'showWelcome' => true,
-            'showUserLog' => true,
-            'showProgressForm' => true,
-        ];
-    }
-    
-    private function getInfoCards()
-    {
-        return [
-            [
-                'title' => 'Rules and Regulations',
-                'content' => '<p>Content for rules and regulations goes here.</p>',
-                'width' => '4'
-            ],
-            [
-                'title' => 'Publications',
-                'content' => '<p>Content for publications goes here.</p>',
-                'width' => '4'
-            ],
-            [
-                'title' => 'FAQ',
-                'content' => '<p>Content for FAQ goes here.</p>',
-                'width' => '4'
-            ],
-        ];
-    }
-    
-    private function getGalleryImages()
-    {
-        $images = [];
-        for ($i = 1; $i <= 8; $i++) {
-            $images[] = [
-                'path' => 'img/gallery/' . $i . '.jpg',
-                'alt' => 'Gallery Image ' . $i
-            ];
-        }
-        return $images;
-    }
-    
-    private function getCountryDetails()
-    {
-        return [
-            'आयोजना क्लष्‍टर इकाई, सप्तरी',
-            'आयोजना क्लष्‍टर इकाई, धनुषा',
-            'आयोजना क्लष्‍टर इकाई, सिन्धुपाल्चोक',
-            'Food and Nutrition Security Enhancement Project',
-            'आयोजना क्लष्‍टर इकाई, गोरखा'
-        ];
-    }
-    
-    private function generateChartData()
-    {
-        // Mock chart data - in a real app, this would come from database
-        return [
-            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-            'data' => [10, 20, 15, 25, 30]
-        ];
-    }
-    private function getAboutSection()
-    {
-        return [
-            'title' => 'Who We Are',
-            'content' => 'Food and Nutrition Security Enhancement Project (FANSEP) is funded by Global Agriculture and Food Security Program (GAFSP). The grant agreement between Government of Nepal (GON) and International Development Association (IDA) for the FANSEP was signed on 1st December 2023. The total Project cost is 22 million USD of which 20 million USD is GAFSP grant and 2 million USD is counterpart funding from GON. This project is implemented by Ministry of Agriculture and Livestock Development (MoALD), supervised by World Bank (WB) and Technical Assistance is provided by Food and Agriculture Organizations (FAO) of the United Nations. This project is implemented in 16 Rural Municipalities (RMs) of eight districts (Gorkha, Dhading, Sindhupalchowk, Dolakha, Dhanusha, Mahottari, Siraha and Saptari) for the duration of 3.5 years. The project aims to reach 55,000 direct beneficiaries.'
-        ];
-    }
-    
-    private function getOfficials()
-    {
-        return [
-            ['name' => 'Dr. Arun Kafle', 'title' => 'Project Director', 'img' => 'project_director.png'],
-            ['name' => 'Dr. Tapendra Bahadur Shah', 'title' => 'Information Officer', 'img' => 'information_officer.jpg'],
-            ['name' => 'Deepak Poudel', 'title' => 'Nodal Officer', 'img' => 'nodal_officer.jpg'],
-        ];
-    }
-    private function getCarouselItems()
-    {
-        // In a real application, you might fetch this from database
-        return [
-            [
-                'image' => 'assets/img/illustrations/login.jpg',
-                'title' => 'Food and Nutrition Security Enhancement Project (FANSEP)',
-                'description' => 'is funded by Global Agriculture and Food Security Program (GAFSP).',
-                'alt' => 'FANSEP Banner'
-            ],
-            [
-                'image' => 'assets/img/illustrations/banner1.jpg',
-                'title' => 'Food and Nutrition Security Enhancement Project (FANSEP)',
-                'description' => 'is funded by Global Agriculture and Food Security Program (GAFSP).',
-                'alt' => 'FANSEP Banner'
-            ],
-            [
-                'image' => 'assets/img/illustrations/login.png',
-                'title' => 'Food and Nutrition Security Enhancement Project (FANSEP)',
-                'description' => 'is funded by Global Agriculture and Food Security Program (GAFSP).',
-                'alt' => 'FANSEP Banner'
-            ],
-        ];
-    }
 }

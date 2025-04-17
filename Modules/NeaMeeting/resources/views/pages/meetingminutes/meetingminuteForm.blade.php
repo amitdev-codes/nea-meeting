@@ -4,7 +4,7 @@
         <x-forms.input name="meeting_id" :label="__('field.meeting_id')" :value="old('meeting_id', $model->meeting_id ?? '')" />
     </div>
     <div class="mb-3 col-md-12">
-        <x-forms.textarea name="content" :label="__('field.content')" :value="old('content', $model->content ?? '')" />
+        <x-forms.input-textarea name="content" :label="__('field.content')" :value="old('content', $model->content ?? '')" />
     </div>
     <div class="mb-3 col-md-4">
         <x-forms.input name="recorded_by" :label="__('field.recorded_by')" :value="old('recorded_by', $model->recorded_by ?? '')" />

@@ -19,10 +19,12 @@ class MeetingCreated
      * Create a new event instance.
      */
     public $meeting;
+    public $options;
 
-    public function __construct(Meeting $meeting)
+    public function __construct(Meeting $meeting,array $options = [])
     {
         $this->meeting = $meeting;
+        $this->options = $options;
     }
 
     /**

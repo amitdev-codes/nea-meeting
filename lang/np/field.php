@@ -544,8 +544,8 @@ return [
     'assets_id' => 'सम्पत्ति',  
     'assets_use' => 'सम्पत्तिको प्रयोग',
     'assets'=>'Assets',
-    'organization_id' => 'संस्था',
-    'organization' => 'संस्था',
+    'organization_id' => 'कार्यालय',
+    'organization' => 'कार्यालय',
     'grievance_received_date' => 'गुनासो प्राप्त मिति',
     'grievance_username' => 'गुनासो कर्ताको नाम',
     'grievance_nature_id' => 'गुनासोको प्रकृति',
@@ -560,5 +560,23 @@ return [
     'Grievances-registration'=>'उजुरी दर्ता',
     'GrievanceRegistrations'=>'उजुरी दर्ता',
     'all_grievance-registrations'=>'उजुरी दर्ता',
+
+    'virtual_meeting'=>'अनलाइन बैठक',
+    'attendees'=>'उपस्थिति',
+    'meeting_location'=>'बैठक स्थल',
+    'meeting_room_id'=>'बैठक कोठा',
+    'meeting_type'=>'बैठक प्रकार',
+    'meeting_date'=>'बैठक मिति',
+    'start_time'=>'सुरुवात समय',
+    'end_time'=>'अन्तिम समय',
+    'meetingDocuments'=>'बैठक दस्तावेज',
+    'virtual_meeting_link'=>'अनलाइन बैठक लिङ्क',
+    'organizations'=>'कार्यालयहरू',
+
+    'upcoming_meetings'=>'आगामी बैठकहरू',
+    'meetings'=>'बैठकहरू',
+    'time'=>'समय',
+    'meeting_status'=>'स्थिति'
+
      
 ];

@@ -1,5 +1,3 @@
-<!-- BEGIN: Theme CSS-->
-<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link
@@ -8,8 +6,6 @@
 
 @vite(['resources/assets/vendor/fonts/boxicons.scss'])
 @vite('resources/css/app.css')
-
-
 <link href="{{ Vite::asset('resources/assets/vendor/css/core.css') }}" rel="stylesheet" class="core-css">
 <link href="{{ Vite::asset('resources/assets/vendor/css/theme-default.css') }}" rel="stylesheet" class="theme-css">
 <link href="{{ Vite::asset('resources/assets/vendor/css/core-dark.css') }}" rel="stylesheet" class="core-dark-css"

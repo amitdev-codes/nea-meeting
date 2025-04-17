@@ -100,8 +100,8 @@
                                 <span class="dropdown-shortcuts-icon rounded-circle mb-3">
                                     <i class="bx bx-food-menu bx-26px text-heading"></i>
                                 </span>
-                                <a href="app-invoice-list.html" class="stretched-link">Invoice App</a>
-                                <small>Manage Accounts</small>
+                                <a href="{{ route('admin.meetings.index') }}" class="stretched-link">Meetings</a>
+                                <small>Manage Meetings</small>
                             </div>
                         </div>
                         <div class="row row-bordered overflow-visible g-0">
@@ -128,23 +128,15 @@
                                 <a href="{{ route('dashboard') }}" class="stretched-link">Dashboard</a>
                                 <small>User Dashboard</small>
                             </div>
-                            <div class="dropdown-shortcuts-item col">
+                            {{-- <div class="dropdown-shortcuts-item col">
                                 <span class="dropdown-shortcuts-icon rounded-circle mb-3">
                                     <i class="bx bx-cog bx-26px text-heading"></i>
                                 </span>
                                 <a href="{{ route('admin.site-settings.index') }}" class="stretched-link">Setting</a>
                                 <small>Account Settings</small>
-                            </div>
+                            </div> --}}
                         </div>
-                        <div class="row row-bordered overflow-visible g-0">
-                            <div class="dropdown-shortcuts-item col">
-                                <span class="dropdown-shortcuts-icon rounded-circle mb-3">
-                                    <i class="bx bx-window-open bx-26px text-heading"></i>
-                                </span>
-                                <a href="modal-examples.html" class="stretched-link">Modals</a>
-                                <small>Useful Popups</small>
-                            </div>
-                        </div>
+
                         <div class="ps__rail-x" style="left: 0px; bottom: 0px;">
                             <div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div>
                         </div>
@@ -267,12 +259,6 @@
                                     <small class="text-muted">
                                         {{ auth()->user()->getRoleNames()->first() ?? 'No Role' }}
                                     </small>
-                                    @if(auth()->user()->clusters)
-                                        <br>
-                                        <small class="text-muted">
-                                            {{ auth()->user()->cluster_names }}
-                                        </small>
-                                    @endif
                                 </div>
                                 
                             </div>
@@ -286,11 +272,11 @@
                             <i class="bx bx-user bx-sm me-3"></i><span>My Profile</span>
                         </a>
                     </li>
-                    <li>
+                    {{-- <li>
                         <a class="dropdown-item" href="{{ route('admin.site-settings.index') }}">
                             <i class="bx bx-cog bx-sm me-3"></i><span>Settings</span>
                         </a>
-                    </li>
+                    </li> --}}
                     <li>
                         <div class="dropdown-divider my-1"></div>
                     </li>

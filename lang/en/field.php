@@ -663,6 +663,18 @@ return [
 'nea'=>'Nepal Electricty Authority',
 'meeting_management_system'=>'Meeting Management System',
 'meeting_information'=>'Meeting Information',
-'title'=>'Title'
+'title'=>'Title',
+
+'virtual_meeting'=>'Virtual Meeting',
+'attendees'=>'Attendees',
+'meetingDocuments'=>'Meeting Documents',
+'virtual_meeting_link'=>'Virtual Meeting Link',
+'organizations'=>'Offices',
+
+'upcoming_meetings'=>'Upcoming Meetings',
+'meetings'=>'Meetings',
+'time'=>'Time',
+'meeting_status'=>'Meeting Status'
+
 
 ];

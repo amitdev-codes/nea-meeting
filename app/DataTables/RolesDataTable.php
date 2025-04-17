@@ -70,17 +70,15 @@ class RolesDataTable extends DataTable
 
     public function html(): HtmlBuilder
     {
-        $routeName = route("admin.roles.import");
+
         return $this->builder()
             ->setTableId('roles-table')
             ->columns($this->getColumns())
-            ->minifiedAjax()
             ->dom($this->getCommonDom())
             ->orderBy(0)
             ->buttons(
                 array_merge(
                     $this->dtActionButtons('roles','Role'),
-                    $this->importButton($routeName) // Pass the route name here
                 )
             )
             ->parameters([

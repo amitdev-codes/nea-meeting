@@ -27,7 +27,7 @@ class MeetingDataTable extends DataTable
                 return $row->meetingRoom->name;
             })
 
-            ->addColumn('status', fn ($row) => $this->getStatusBadge($row->status))
+            ->addColumn('status', fn ($row) => $this->getMeetingStatusBadge($row->status))
             ->addColumn('action', $this->addActionColumn(
                 'form',
                 $this->getRoutes(),
@@ -40,6 +40,15 @@ class MeetingDataTable extends DataTable
     {
         $query = $model->newQuery();
         
+        // Check if the user is authenticated and not an admin or superadmin
+        if (auth()->check() && !auth()->user()->hasRole(['admin', 'superadmin'])) {
+            // Filter meetings where the authenticated user is an attendee
+            $query->whereHas('attendees', function ($q) {
+                $q->where('user_id', auth()->id());
+            });
+        }
+        
+        // Handle global search
         if (request()->has('search') && request('search')['value']) {
             $search = request('search')['value'];
             $query->where(function ($q) use ($search) {
@@ -49,6 +58,7 @@ class MeetingDataTable extends DataTable
             });
         }
         
+        // Handle column-specific search
         if (request()->has('columns')) {
             foreach (request('columns') as $i => $column) {
                 if (isset($column['search']['value']) && $column['search']['value'] !== '') {
@@ -92,8 +102,8 @@ class MeetingDataTable extends DataTable
                 }',
                 'columnDefs' => [
                     [
-                        'targets' => '_all', // Applies to all columns
-                        'className' => 'dt-head-nowrap' // Prevents text wrapping in headers
+                        'targets' => '_all', 
+                        'className' => 'dt-head-nowrap' 
                     ]
                 ]
             ]);
@@ -107,9 +117,8 @@ class MeetingDataTable extends DataTable
             Column::make('meeting_date')->title(__('field.meeting_date')),
             Column::make('start_time')->title(__('field.start_time')),
             Column::make('end_time')->title(__('field.end_time')),
-            Column::make('description')->title(__('field.description')),
             Column::make('meeting_type')->title(__('field.meeting_type')),
-            // Column::make('status')->title(__('field.status')),
+            Column::make('status')->title(__('field.status')),
             $this->actionColumn()
         ];
     }

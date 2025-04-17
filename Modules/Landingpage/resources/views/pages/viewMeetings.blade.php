@@ -4,32 +4,11 @@
     App::setLocale('np');
 @endphp
 @section('navbar')
-<div class="bg-white shadow-sm">
-    <div class="container py-3">
-        <div class="row align-items-center">
-            <div class="col-md-2 text-center text-md-start">
-                <img src="{{ asset('assets/img/nea-logo.png') }}" alt="Government Logo" width="full" class="img-fluid" style="
-                margin-left: 171%;
-            ">
-            </div>
-            <div class="col-md-8 text-center">
-                <h3 class="text-uppercase fw-bold text-danger mb-1">{{ __('landing.government of nepal') }}</h3><br>
-                <h2 class="fw-bold text-danger mb-1">{{ __('landing.nepal electricity authority') }}</h2><br>
-                <h4 class="fw-bold text-success">{{ __('landing.meeting management system') }}</h4>
-            </div>
-
-            
-            <div class="col-md-2 text-center text-md-end">
-                <a href="{{ route('login') }}" class="btn btn-primary btn-sm">
-                    <i class="bx bx-log-in me-1"></i> Login
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+    @include('landingpage::partials.header')
 @endsection
-    @section('content')
-        <div class="flex-grow-1 container-p-y pt-4 m-4">
+@section('content')
+    <main class="main-content py-5">
+        <div class="container">
             <div class="row g-4">
                 {{-- Main Information Card --}}
                 <div class="col-xl-8 col-lg-7">
@@ -184,9 +163,48 @@
                 </div>
             </div>
         </div>
-    @endsection
-
+    </main>
+@endsection
+@section('footer')
+    @include('landingpage::partials.footer')
+@endsection
 <style>
+    /* Adjust if navbar is fixed */
+    .navbar-fixed-top {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1040;
+    }
+
+    /* Space below fixed navbar */
+    .mt-navbar {
+        margin-top: 70px;
+        /* Adjust according to navbar height */
+    }
+
+    .landing-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .footer-bottom {
+        padding: 1rem 0;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .social-links a {
+        color: inherit;
+        margin-right: 10px;
+        transition: color 0.2s;
+    }
+
+    .social-links a:hover {
+        color: #0d6efd;
+    }
+
     .document-preview {
         padding: 1rem;
         background: #f8f9fa;

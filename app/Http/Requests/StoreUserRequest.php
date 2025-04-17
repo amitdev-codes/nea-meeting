@@ -30,11 +30,8 @@ class StoreUserRequest extends FormRequest
             'mobile_no' => 'required|digits:10|numeric|unique:users,mobile_no',
             'phone' => 'nullable|digits:10|numeric',
             // Fansep Information
-            'designation_id' => 'required|exists:mst_designations,id',
-            'category_id' => 'required|exists:sections,id',
+            'organization_id' => 'required|exists:organizations,id',
             'remarks' => 'nullable|string|max:1000',
-            'clusters' => 'nullable|array', // Accept clusters as an array
-            'clusters.*' => 'exists:mst_clusters,id',
         ];
     }
     public function messages()

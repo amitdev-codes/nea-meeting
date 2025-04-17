@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('meeting_attendees', function (Blueprint $table) {
             $table->id();
             $table->foreignId('meeting_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('user_id')->constrained('users');
             $table->boolean('is_required')->default(true);
             $table->string('attendance_status', 20)->default('pending');
             $table->timestamp('invitation_sent_at')->nullable();

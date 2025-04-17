@@ -33,10 +33,7 @@ class UpdateUserRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($userId)],
             'mobile_no' => ['required', 'digits:10', 'numeric', Rule::unique('users')->ignore($userId)],
             'phone' => 'nullable|digits:10|numeric',
-            'designation_id' => 'required|exists:mst_designations,id',
-            'category_id' => 'required|exists:sections,id',
-            'clusters' => 'nullable|array', // Accept clusters as an array
-            'clusters.*' => 'exists:mst_clusters,id',
+            'organization_id' => 'required|exists:organizations,id',
             'remarks' => 'nullable|string|max:1000',
         ];
     }

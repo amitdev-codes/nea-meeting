@@ -63,17 +63,15 @@ class PermissionsDataTable extends DataTable
      */
     public function html(): HtmlBuilder
     {
-        $routeName = route("admin.permissions.import"); 
+
         return $this->builder()
             ->setTableId('permissions-table')
             ->columns($this->getColumns())
-            ->minifiedAjax()
             ->dom($this->getCommonDom())
-            ->orderBy(1)
+            ->orderBy(0)
             ->buttons(
                 array_merge(
-                    $this->dtActionModalButtons('permissions', 'Province'),
-                    $this->importButton($routeName) // Pass the route name here
+                    $this->dtActionModalButtons('permissions', 'Permission')
                 )
             )
             ->parameters([

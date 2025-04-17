@@ -70,9 +70,9 @@ class AppServiceProvider extends ServiceProvider
             return $user->hasRole('superadmin') ? true : null;
         });
 
-        // if (config('app.env') === 'production') {
-        //     URL::forceScheme('https');
-        // }
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
         $this->cacheMasterData();
         $this->shareMasterData();
         Paginator::defaultView('components.pagination');
@@ -153,7 +153,6 @@ class AppServiceProvider extends ServiceProvider
             'meeting_rooms' => Cache::get('meeting_rooms'),
             'organizations' => Cache::get('organizations'),
             'designations' => Cache::get('designations'),
-
         ]);
     }
 }

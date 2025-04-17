@@ -2,9 +2,9 @@
     <div class="app-brand py-4 px-3 border-bottom">
         <a href="{{ route('dashboard') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
-                <img src="{{ asset('img/gov.png') }}" alt="Government Logo" width="35">
+                <img src="{{ asset('assets/img/nea-logo.png') }}" alt="Nea Logo" width="80">
             </span>
-            <span class="app-brand-text ms-2 fw-bold">
+            <span class="app-brand-text ms-2 fw-bold nepali_td">
                 <span>{{ __('field.nea') }}<br> {{ __('field.meeting_management_system') }}</span>
             </span>
             

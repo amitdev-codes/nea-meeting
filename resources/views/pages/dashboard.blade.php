@@ -1,10 +1,11 @@
 @extends('layouts/contentNavbarLayout')
+
 @section('content')
     <div class="container-xxl py-2 mb-4 border-bottom breadcrumb-div">
         <nav aria-label="breadcrumb" class="d-flex justify-content-between align-middle">
             <div class="d-flex align-items-center">
                 <a href="javascript:history.back()" class="me-2"><i class="bx bx-left-arrow-alt"></i></a>
-                <h6 class="my-0 font-weight-bold">{{ __('field.dashboard') }}</h6>
+                <h6 class="my-0 fw-bold">{{ __('field.dashboard') }}</h6>
             </div>
             <ol class="breadcrumb breadcrumb-style1 mb-0 mt-1 me-4">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('field.home') }}</a></li>
@@ -16,34 +17,34 @@
     <div class="container-xxl py-4">
         <div class="row g-4 mb-4">
             <div class="col-md-3">
-                <div class="card">
+                <div class="card bg-primary text-white">
                     <div class="card-body">
-                        <h5 class="card-title">Total Meetings</h5>
-                        <h2 class="mb-0">45</h2>
+                        <h5 class="card-title text-white">Today's Meetings</h5>
+                        <h2 class="mb-0 text-white">{{ $todaysMeetings }}</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card">
+                <div class="card bg-success text-white">
                     <div class="card-body">
-                        <h5 class="card-title">Active Members</h5>
-                        <h2 class="mb-0">28</h2>
+                        <h5 class="card-title text-white">Upcoming Meetings</h5>
+                        <h2 class="mb-0 text-white">{{ $upcomingMeetings }}</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card">
+                <div class="card bg-info text-white">
                     <div class="card-body">
-                        <h5 class="card-title">Pending Actions</h5>
-                        <h2 class="mb-0">12</h2>
+                        <h5 class="card-title text-white">This Month Meetings</h5>
+                        <h2 class="mb-0 text-white">{{ $thisMonthMeetings }}</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card">
+                <div class="card bg-warning text-white">
                     <div class="card-body">
-                        <h5 class="card-title">Completed Tasks</h5>
-                        <h2 class="mb-0">87</h2>
+                        <h5 class="card-title text-white">Total Meetings</h5>
+                        <h2 class="mb-0 text-white">{{ $totalMeetings }}</h2>
                     </div>
                 </div>
             </div>
@@ -76,18 +77,19 @@
             </div>
         </div>
     </div>
+@endsection
 
-    <!-- Chart.js Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
-    <script>
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.min.js"></script>
+    <script type="module">
         // Meetings Per Month Chart
         const meetingsChart = new Chart(document.getElementById('meetingsChart'), {
             type: 'bar',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                labels: @json($meetingsPerMonthLabels),
                 datasets: [{
                     label: 'Number of Meetings',
-                    data: [5, 8, 6, 7, 4, 9],
+                    data: @json($meetingsPerMonthData),
                     backgroundColor: 'rgba(54, 162, 235, 0.5)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
@@ -106,9 +108,9 @@
         const statusChart = new Chart(document.getElementById('statusChart'), {
             type: 'pie',
             data: {
-                labels: ['Completed', 'In Progress', 'Scheduled', 'Cancelled'],
+                labels: @json($statusLabels),
                 datasets: [{
-                    data: [20, 10, 12, 3],
+                    data: @json($statusData),
                     backgroundColor: [
                         'rgba(75, 192, 192, 0.5)',
                         'rgba(255, 206, 86, 0.5)',
@@ -126,4 +128,4 @@
             }
         });
     </script>
-@endsection
+@endpush

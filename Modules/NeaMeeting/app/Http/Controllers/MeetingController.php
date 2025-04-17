@@ -2,13 +2,18 @@
 
 namespace Modules\NeaMeeting\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Events\MeetingCreated;
+use App\Events\MeetingUpdated;
 use App\Services\ResponseService;
 use App\Traits\HandlesExceptions;
 use App\Traits\BulkDeletableTrait;
+use Illuminate\Support\Facades\DB;
 use App\Traits\InlineEditableTrait;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\NepaliDateConverter;
 use Modules\NeaMeeting\Models\Meeting;
 use App\Http\Controllers\BaseAdminController;
 use Modules\NeaMeeting\DataTables\MeetingDataTable;
@@ -39,31 +44,69 @@ class MeetingController extends BaseAdminController
     
     public function create(Request $request)
     {
-        return $this->renderForm($this->formView);
+        $users=User::all();
+        return $this->renderForm($this->formView,null,['users' => $users]);
     }
     
+
     public function store(StoreMeetingRequest $request)
     {
-        return $this->handleRequest($request,function () use ($request) {
+        return $this->handleRequest($request, function () use ($request) {
+            DB::beginTransaction();
+            
+            try {
+                // Create the meeting with validated data
                 $meeting = Meeting::create($request->validated());
-                // Handle media upload if present (from previous Spatie integration)
                 
+                // Handle media upload if present
                 $this->handleMediaUploads($request, $meeting);
+                
                 if ($request->hasFile('meetingDocuments')) {
                     $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
                 }
-                // event(new MeetingCreated($meeting));
+                
+                // Save organizations if provided
+                if ($request->has('organizations') && is_array($request->organizations)) {
+                    $this->saveOrganizations($meeting, $request->organizations);
+                }
+                            // Create attendees based on organization users
+                if ($request->has('organizations') && is_array($request->organizations)) {
+                    $users = User::whereIn('organization_id', $request->organizations)->get();
+                    Log::info('Creating attendees for meeting', [
+                        'meeting_id' => $meeting->id,
+                        'organization_ids' => $request->organizations,
+                        'user_ids' => $users->pluck('id')->toArray(),
+                    ]);
+
+                    foreach ($users as $user) {
+                        $meeting->attendees()->create([
+                            'user_id' => $user->id,
+                            'is_required' => true,
+                            'attendance_status' => 'pending',
+                            'invitation_sent_at' => $request->boolean('send_email', true) ? now() : null,
+                        ]);
+                    }
+                }
+                
+                // Trigger the meeting created event
+                if ($request->boolean('send_notifications', true)) {
+                    event(new MeetingCreated($meeting, [
+                        'send_email' => $request->boolean('send_email', true),
+                        'organization_ids' => $request->organizations ?? [],
+                    ]));
+                }
+                DB::commit();
                 if ($request->has('save_and_add_more')) {
                     return redirect()
                         ->route('admin.meetings.create')
                         ->with('success', 'Meeting created successfully. Add another one.');
                 }
-            
-            },
-            'admin.meetings.index','Meeting created successfully.','Failed to create the Meeting.'
-        );
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        }, 'admin.meetings.index', 'Meeting created successfully.', 'Failed to create the Meeting.');
     }
-    
     public function show(Meeting $meeting)
     {
         $meeting->load(['media' => function($query) {
@@ -80,16 +123,43 @@ class MeetingController extends BaseAdminController
         return $this->renderForm($this->formView, $meeting);
     }
     
+
     public function update(UpdateMeetingRequest $request, Meeting $meeting)
     {
         return $this->handleRequest($request, function () use ($request, $meeting) {
-            $meeting->update($request->validated());
-            event(new MeetingCreated($meeting));
-            $this->handleMediaUploads($request, $meeting);
+            DB::beginTransaction();
             
+            try {
+                // Update meeting details
+                $meeting->update($request->validated());
+                
+                // Handle media upload if present
+                $this->handleMediaUploads($request, $meeting);
+                
+                if ($request->hasFile('meetingDocuments')) {
+                    $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
+                }
+                
+                // Save/update organizations if provided
+                if ($request->has('organizations') && is_array($request->organizations)) {
+                    $this->saveOrganizations($meeting, $request->organizations);
+                    
+                    // Check if notifications should be sent for updated meeting
+                    if ($request->boolean('send_notifications', false)) {
+                        event(new MeetingUpdated($meeting, [
+                            'send_email' => $request->boolean('send_email', true),
+                            'organization_ids' => $request->organizations,
+                        ]));
+                    }
+                }
+                
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
         }, 'admin.meetings.index', 'Meeting updated successfully.', 'Failed to update the Meeting.');
     }
-    
     public function destroy(Request $request, Meeting $meeting)
     {
         return $this->handleRequest($request, function () use ($meeting) {
@@ -118,4 +188,120 @@ class MeetingController extends BaseAdminController
             }
         }
     }
+    private function saveAttendees(Meeting $meeting, array $attendees)
+    {
+        // First, clear existing attendees if updating
+        if ($meeting->exists) {
+            $meeting->attendees()->delete();
+        }
+        
+        foreach ($attendees as $userId) {
+            $meeting->attendees()->create([
+                'user_id' => $userId,
+                'is_required' => true,
+                'attendance_status' => 'pending',
+                'invitation_sent_at' => now()
+            ]);
+        }
+    }
+    private function saveOrganizations(Meeting $meeting, array $organizationIds)
+    {
+        // First, clear existing organizations if updating
+        if ($meeting->exists) {
+            $meeting->meetingOrganizations()->delete();
+        }
+        
+        foreach ($organizationIds as $organizationId) {
+            $meeting->meetingOrganizations()->create([
+                'organization_id' => $organizationId,
+            ]);
+        }
+    }
+    //calendar meeting dates
+        /**
+     * Get meetings for a specific Nepali date
+     */
+    public function getByDate($year, $month, $day)
+    {
+        // Convert Nepali date to AD date
+        $converter = new NepaliDateConverter();
+        $adDate = $converter->toGregorianDate($year, $month, $day);
+        $formattedDate=$adDate['gregorian_date'];
+        // dd($gregorianDate);
+        
+        // Format as Y-m-d for query
+        // $formattedDate = Carbon::create($adDate['year'], $adDate['month'], $adDate['day'])->format('Y-m-d');
+        
+        // Get meetings for this date
+        $meetings = Meeting::where('meeting_date_ad', $formattedDate)
+            ->with('meetingRoom')
+            ->orderBy('start_time')
+            ->get();
+            // dd($meetings);
+            
+        return response()->json([
+            'success' => true,
+            'meetings' => $meetings,
+            'date' => [
+                'nepali' => [
+                    'year' => $year,
+                    'month' => $month,
+                    'day' => $day,
+                    'formatted' => $year . '-' . $month . '-' . $day
+                ],
+                'ad' => [
+                    'year' => $adDate['year'],
+                    'month' => $adDate['month'],
+                    'day' => $adDate['day'],
+                    'formatted' => $formattedDate
+                ]
+            ]
+        ]);
+    }
+    
+    /**
+     * Get dates that have meetings in a specific month
+     */
+    public function getMeetingDates($year, $month)
+    {
+        // First get the AD date range for this Nepali month
+        $converter = new NepaliDateConverter();
+        
+        // Get first day of the month
+        $firstDayAd = $converter->toGregorianDate($year, $month, 1);
+        
+        $firstDay = Carbon::create($firstDayAd['year'], $firstDayAd['month'], $firstDayAd['day']);
+        
+        // Get days in the nepali month
+        $daysInMonth = $converter->getNumberOfDaysInMonth($year, $month);
+        
+        // Get last day of the month
+        $lastDayAd = $converter->toGregorianDate($year, $month, $daysInMonth);
+        $lastDay = Carbon::create($lastDayAd['year'], $lastDayAd['month'], $lastDayAd['day']);
+        
+        // Get all meetings in this date range
+        $meetings = Meeting::whereBetween('meeting_date_ad', [
+                $firstDay->format('Y-m-d'),
+                $lastDay->format('Y-m-d')
+            ])
+            ->orderBy('meeting_date_ad')
+            ->get();
+        
+        // Group dates that have meetings
+        $meetingDates = [];
+        
+        foreach ($meetings as $meeting) {
+            $adDate = Carbon::parse($meeting->meeting_date_ad);
+            $bsDate = $converter->toNepaliDate($adDate->year, $adDate->month, $adDate->day);
+            
+            $dateKey = $bsDate['year'] . '-' . $bsDate['month'] . '-' . $bsDate['day'];
+            
+            if (!in_array($dateKey, $meetingDates)) {
+                $meetingDates[] = $dateKey;
+            }
+        }
+        
+        return response()->json($meetingDates);
+    }
+    
 }

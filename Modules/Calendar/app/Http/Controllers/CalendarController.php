@@ -34,6 +34,8 @@ class CalendarController extends Controller
     
         $days = $calendarData ? $calendarData['days'] : 30; // Use array syntax
         $todaysDate = NepaliDateConverter::getTodayNepaliDateTime();
+
+        // dd('test');
     
         return view('calendar::pages.calendar.nepali-calendar', compact(
             'years', 'todaysDate', 'months', 'days', 'currentBsYear', 'currentBsMonth', 'currentNepaliDay', 'calendarData'

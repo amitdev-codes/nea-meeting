@@ -20,9 +20,7 @@ return new class extends Migration
             $table->string('locale')->default('np');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->foreignId('designation_id')->constrained('mst_designations')->onDelete('cascade');
-            $table->foreignId('section_id')->constrained('sections')->onDelete('cascade');
-            $table->json('clusters');
+            $table->foreignId('designation_id')->nullable()->constrained('mst_designations')->onDelete('cascade');
             $table->foreignId('organization_id')->constrained('organizations')->nullable()->onDelete('cascade');
             $table->string('office_email')->nullable();
             $table->string('office_mobile_no')->nullable();

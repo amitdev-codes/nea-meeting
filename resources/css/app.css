@@ -3,6 +3,7 @@
     --bs-primary-rgb: 40, 167, 69 !important;
 }
 
+  
 /* Override Bootstrap button colors */
 .btn-primary {
     background-color: #6467f2 !important;
