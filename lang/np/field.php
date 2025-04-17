@@ -588,6 +588,13 @@ return [
     'approved_by'=>'स्वीकृति गर्ने व्यक्ति',
     'minutes'=>'निर्णयहरू',
     'approved'=>'स्वीकृति',
+    'capacity'=>'क्षमता',
+    'has_video_conference'=>'भिडियो सम्मेलन सुविधा छ',
+    'has_projector'=>'प्रोजेक्टर सुविधा छ',
+    'notes'=>'नोटहरू',
+    'all_meeting-rooms'=>'बैठक कोठहरू',
+    'MeetingRooms'=>'बैठक कोठहरू',
+    'Meeting-rooms'=>'बैठक कोठहरू',
 
      
 ];

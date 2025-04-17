@@ -16,7 +16,7 @@ class StoreOrganizationRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'name_np' => 'nullable|string|max:255',
-            'code' => 'required|string|max:50|unique:{{table}},code',
+            'code' => 'required|string|max:50|unique:organizations,code',
             'status' => 'boolean'
         ];
     }

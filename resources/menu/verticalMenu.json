@@ -28,12 +28,7 @@
                             "slug": "admin.meetings.*",
                             "permission": "view-meetings"
                         },
-                        {
-                            "url": "admin.meeting-attendees.index",
-                            "name": "menu.meeting-attendees",
-                            "slug": "admin.meeting-attendees*",
-                            "permission": "view-meeting-attendees"
-                        },
+
                         {
                             "url": "admin.meeting-minutes.index",
                             "name": "menu.meeting-minutes",

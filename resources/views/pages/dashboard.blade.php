@@ -54,24 +54,24 @@
         <div class="row g-4">
             <!-- Meetings Per Month Bar Chart -->
             <div class="col-md-6">
-                <div class="card">
+                <div class="card chart-card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Meetings Per Month</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="meetingsChart"></canvas>
+                        <canvas id="meetingsChart" class="chart-canvas" width="400" height="300"></canvas>
                     </div>
                 </div>
             </div>
 
             <!-- Meeting Status Pie Chart -->
             <div class="col-md-6">
-                <div class="card">
+                <div class="card chart-card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Meeting Status Distribution</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="statusChart"></canvas>
+                        <canvas id="statusChart" class="chart-canvas" width="400" height="300"></canvas>
                     </div>
                 </div>
             </div>
@@ -79,8 +79,39 @@
     </div>
 @endsection
 
+@push('styles')
+    <style>
+        .chart-card {
+            height: 400px; /* Fixed height for both cards */
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-card .card-body {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .chart-canvas {
+            width: 100% !important;
+            height: 300px !important;
+            max-width: 400px; /* Match canvas width */
+            max-height: 300px; /* Match canvas height */
+        }
+        @media (max-width: 768px) {
+            .chart-canvas {
+                max-width: 100%;
+                height: 250px !important; /* Slightly smaller for mobile */
+            }
+            .chart-card {
+                height: 350px;
+            }
+        }
+    </style>
+@endpush
+
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.min.js"></script>
     <script type="module">
         // Meetings Per Month Chart
         const meetingsChart = new Chart(document.getElementById('meetingsChart'), {
@@ -100,7 +131,9 @@
                     y: {
                         beginAtZero: true
                     }
-                }
+                },
+                maintainAspectRatio: false, // Disable aspect ratio to respect canvas size
+                responsive: true
             }
         });
 
@@ -125,6 +158,10 @@
                     ],
                     borderWidth: 1
                 }]
+            },
+            options: {
+                maintainAspectRatio: false, // Disable aspect ratio to respect canvas size
+                responsive: true
             }
         });
     </script>

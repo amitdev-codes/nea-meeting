@@ -25,7 +25,7 @@ class MeetingRoomDataTable extends DataTable
             ->addColumn('checkbox', fn ($row) => $this->renderCheckbox('meetingroom_ids[]', $row->id))
             ->addColumn('status', fn ($row) => $this->getStatusBadge($row->status))
             ->addColumn('action', $this->addActionColumn(
-                'modal',
+                'form',
                 $this->getRoutes(),
                 $this->getPermissions('meeting-rooms')
             ))
