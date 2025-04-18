@@ -19,7 +19,7 @@ class StoreMeetingRequest extends FormRequest
         $startTime = $this->input('start_time'); // Expected format: h:i A (e.g., 1:00 PM)
         $endTime = $this->input('end_time'); // Expected format: h:i A (e.g., 3:00 PM)
 
-        if ($meetingDate && $startTime && $endTime) {
+        if ($meetingDate && $startTime) {
             try {
                 // Parse Nepali date (YYYY-MM-DD)
                 [$bsYear, $bsMonth, $bsDay] = explode('-', $meetingDate);
@@ -33,14 +33,17 @@ class StoreMeetingRequest extends FormRequest
 
                 // Parse full datetime values
                 $startDateTime = Carbon::createFromFormat('Y-m-d h:i A', "$gregorianDate $startTime");
-                $endDateTime = Carbon::createFromFormat('Y-m-d h:i A', "$gregorianDate $endTime");
-
-                // Merge converted data
-                $this->merge([
+                // $endDateTime = Carbon::createFromFormat('Y-m-d h:i A', "$gregorianDate $endTime");
+                $mergeData = [
                     'meeting_date_ad' => $gregorianDate, // Store Gregorian date
                     'start_time' => $startDateTime->toDateTimeString(),
-                    'end_time' => $endDateTime->toDateTimeString(),
-                ]);
+                ];
+                if ($endTime) {
+                    $endDateTime = Carbon::createFromFormat('Y-m-d h:i A', "$gregorianDate $endTime");
+                    $mergeData['end_time'] = $endDateTime->toDateTimeString();
+                }
+                $this->merge($mergeData);
+
             } catch (\Exception $e) {
                 \Log::error('Nepali date conversion failed: ' . $e->getMessage());
                 // Let validation fail if conversion fails
@@ -70,7 +73,7 @@ class StoreMeetingRequest extends FormRequest
             'meeting_date' => 'nullable|regex:/^\d{4}-\d{2}-\d{2}$/', // Validate Nepali date format (YYYY-MM-DD)
             'meeting_date_ad' => 'required|date', // Validate Gregorian date
             'start_time' => 'required|date', // Already converted to full datetime
-            'end_time' => 'nullable|date|after:start_time',
+            'end_time' => 'nullable|date',
             'meeting_room_id' => 'nullable|exists:meeting_rooms,id',
             'meeting_location' => 'nullable|string|max:255',
             'is_virtual' => 'boolean',
@@ -88,7 +91,7 @@ class StoreMeetingRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'start_time.date' => 'The start time must be a valid time (e.g., 1:00 PM).',
+          
             'created_by.required' => 'The creator ID is required.',
             'organizations.*.exists' => 'One or more selected organizations do not exist.',
         ];

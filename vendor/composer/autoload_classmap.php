@@ -64,6 +64,7 @@ return array(
     'App\\Http\\Middleware\\CheckResourcePermissions' => $baseDir . '/app/Http/Middleware/CheckResourcePermissions.php',
     'App\\Http\\Middleware\\CheckUserLocked' => $baseDir . '/app/Http/Middleware/CheckUserLocked.php',
     'App\\Http\\Middleware\\Locale' => $baseDir . '/app/Http/Middleware/Locale.php',
+    'App\\Http\\Middleware\\SecretCodeMiddleware' => $baseDir . '/app/Http/Middleware/SecretCodeMiddleware.php',
     'App\\Http\\Requests\\Auth\\LoginRequest' => $baseDir . '/app/Http/Requests/Auth/LoginRequest.php',
     'App\\Http\\Requests\\Auth\\NewPasswordRequest' => $baseDir . '/app/Http/Requests/Auth/NewPasswordRequest.php',
     'App\\Http\\Requests\\Auth\\PasswordResetLinkRequest' => $baseDir . '/app/Http/Requests/Auth/PasswordResetLinkRequest.php',

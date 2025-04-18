@@ -877,6 +877,7 @@ class ComposerStaticInit34a66aff6d6ace15390a51061e4fbb0b
         'App\\Http\\Middleware\\CheckResourcePermissions' => __DIR__ . '/../..' . '/app/Http/Middleware/CheckResourcePermissions.php',
         'App\\Http\\Middleware\\CheckUserLocked' => __DIR__ . '/../..' . '/app/Http/Middleware/CheckUserLocked.php',
         'App\\Http\\Middleware\\Locale' => __DIR__ . '/../..' . '/app/Http/Middleware/Locale.php',
+        'App\\Http\\Middleware\\SecretCodeMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/SecretCodeMiddleware.php',
         'App\\Http\\Requests\\Auth\\LoginRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Auth/LoginRequest.php',
         'App\\Http\\Requests\\Auth\\NewPasswordRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Auth/NewPasswordRequest.php',
         'App\\Http\\Requests\\Auth\\PasswordResetLinkRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Auth/PasswordResetLinkRequest.php',

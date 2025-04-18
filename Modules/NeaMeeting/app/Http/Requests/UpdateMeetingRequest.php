@@ -19,7 +19,7 @@ class UpdateMeetingRequest extends FormRequest
         $startTime = $this->input('start_time');
         $endTime = $this->input('end_time');
         
-        if ($meetingDate && $startTime && $endTime) {
+        if ($meetingDate && $startTime) {
             try {
                 // Convert from custom calendar to Gregorian
                 $gregorianYear = (int)substr($meetingDate, 0, 4) - 57;
@@ -27,13 +27,16 @@ class UpdateMeetingRequest extends FormRequest
                 
                 // Parse full datetime values
                 $startDateTime = Carbon::createFromFormat('Y-m-d h:i A', "$gregorianDate $startTime");
-                $endDateTime = Carbon::createFromFormat('Y-m-d h:i A', "$gregorianDate $endTime");
-                
-                $this->merge([
+               
+                $mergeData = [
+                    'meeting_date_ad' => $gregorianDate, // Store Gregorian date
                     'start_time' => $startDateTime->toDateTimeString(),
-                    'end_time' => $endDateTime->toDateTimeString(),
-                    'gregorian_date' => $gregorianDate, // Optional: store converted date for reference
-                ]);
+                ];
+                if ($endTime) {
+                    $endDateTime = Carbon::createFromFormat('Y-m-d h:i A', "$gregorianDate $endTime");
+                    $mergeData['end_time'] = $endDateTime->toDateTimeString();
+                }
+                $this->merge($mergeData);
             } catch (\Exception $e) {
                 \Log::error('Time parsing failed: ' . $e->getMessage());
                 // Don't merge invalid data, let validation catch it
@@ -60,7 +63,7 @@ class UpdateMeetingRequest extends FormRequest
             'meeting_type' => 'required|string|max:50',
             'meeting_date' => 'nullable|string', // Not stored in DB
             'start_time' => 'required|date', // Changed from date_format:H:i:s to date
-            'end_time' => 'nullable|date|after:start_time', // Changed to date
+            'end_time' => 'nullable|date', // Changed to date
             'meeting_room_id' => 'nullable|exists:meeting_rooms,id',
             'meeting_location' => 'nullable|string|max:255',
             'is_virtual' => 'boolean',
