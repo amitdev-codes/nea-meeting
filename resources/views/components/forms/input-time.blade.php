@@ -1,8 +1,15 @@
-<!-- resources/views/components/forms/input-time.blade.php -->
+@props([
+    'name',
+    'id',
+    'label',
+    'value' => '',
+    'placeholder' => '',
+    'required' => false
+])
 <div class="mb-3">
     <label for="{{ $id }}" class="form-label">
         {{ $label }}
-        @if ($required)
+        @if($required)
             <span class="text-danger">*</span>
         @endif
     </label>

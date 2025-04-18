@@ -11,9 +11,6 @@
                     </div>
                     <!-- Text Content -->
                     <div class="header-text d-flex flex-column gap-1 text-center">
-                        <div class="w-100 text-center">
-                            <span class="text-uppercase fw-bold text-danger nepali_td">{{ __('landing.government of nepal') }}</span>
-                        </div>
                         <div class="w-100">
                             <span class="fw-bold text-danger fs-4 text-start nepali_td">{{ __('landing.nepal electricity authority') }}</span>
                         </div>

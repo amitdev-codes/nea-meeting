@@ -67,3 +67,5 @@ group,beneficiary_name,name_np,unique householdid,unique id for beneficiary,desi
 
 # for bulk delete to workout always in render checkbox and initbulkdeletescript keep strlower model name foolowed by ids
   like component_ids[] and for mix keep indicatorsector_ids[] if table is indicator_sectors and model is IndicatorSector
+
+  # accessUrl= http://127.0.0.1:8000/meetings/?code=admin

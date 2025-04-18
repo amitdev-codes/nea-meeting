@@ -21,13 +21,14 @@ return new class extends Migration
             $table->string('meeting_date')->nullable();
             $table->date('meeting_date_ad')->nullable();
             $table->dateTime('start_time'); // Changed from timestamp to dateTime
-            $table->dateTime('end_time');   // Changed from timestamp to dateTime
+            $table->dateTime('end_time')->nullable();   // Changed from timestamp to dateTime
             $table->string('meeting_location',255)->nullable();
             $table->foreignId('meeting_room_id')->nullable()->constrained()->nullOnDelete();
             $table->boolean('is_virtual')->default(false);
             $table->string('virtual_meeting_link', 255)->nullable();
             $table->json('organizations')->nullable();
             $table->enum('status', MeetingStatus::values())->default(MeetingStatus::Scheduled->value);
+            $table->boolean('is_external')->default(false);
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });

@@ -11,7 +11,9 @@ use App\Http\Controllers\CumulativeProgressController;
 
 Route::middleware(['locale'])->group(function () {
     Route::get('language/{locale}', [LanguageController::class, 'switch'])->name('language.switcher');
-    
+    Route::get('/', function () {
+        return redirect()->route('login');
+    });
     Route::middleware(['auth'])->group(function () {
         Route::middleware('verified')->group(function () {
             Route::get('/dashboard', [DashBoardController::class, 'dashboard'])->name('dashboard');

@@ -60,10 +60,11 @@ class UpdateMeetingRequest extends FormRequest
             'meeting_type' => 'required|string|max:50',
             'meeting_date' => 'nullable|string', // Not stored in DB
             'start_time' => 'required|date', // Changed from date_format:H:i:s to date
-            'end_time' => 'required|date|after:start_time', // Changed to date
+            'end_time' => 'nullable|date|after:start_time', // Changed to date
             'meeting_room_id' => 'nullable|exists:meeting_rooms,id',
             'meeting_location' => 'nullable|string|max:255',
             'is_virtual' => 'boolean',
+            'is_external' => 'boolean',
             'virtual_meeting_link' => 'nullable|string|max:255|required_if:is_virtual,1',
             'status' => 'string|in:scheduled,completed,cancelled',
             'created_by' => 'required|exists:users,id',
@@ -79,10 +80,16 @@ class UpdateMeetingRequest extends FormRequest
     {
         return [
             'start_time.date' => 'The start time must be a valid time (e.g., 1:00 PM).',
-            'end_time.date' => 'The end time must be a valid time (e.g., 3:00 PM).',
-            'end_time.after' => 'The end time must be after the start time.',
             'created_by.required' => 'The creator ID is required.',
             'organizations.*.exists' => 'One or more selected organizations do not exist.',
         ];
+    }
+    public function validated($key = null, $default = null)
+    {
+        $validated = parent::validated();
+        $validated['is_external'] = $this->has('is_external') ? 1 : 0;
+        $validated['is_virtual'] = $this->has('is_virtual') ? 1 : 0;
+
+        return $key ? data_get($validated, $key, $default) : $validated;
     }
 }

@@ -13,11 +13,11 @@
                 return [$meeting_room->id, $meeting_room->name ?? ''];
             })
             ->toArray()" :value="old('meeting_room_id', isset($model) ? $model->meeting_room_id ?? '' : '')"
-            placeholder="{{ __('Select Meeting Room') }}" required />
+            placeholder="{{ __('Select Meeting Room') }}"  />
     </div>
     <div class="mb-3 col-md-3">
         <x-forms.input-select2 name="meeting_type" :options="\App\Enums\MeetingType::toArray()" :value="old('meeting_type', isset($model) ? $model->meeting_type ?? '' : '')"
-            placeholder="{{ __('Select Meeting Type') }}" required />
+            placeholder="{{ __('Select Meeting Type') }}"  />
     </div>
 
 
@@ -37,12 +37,16 @@
             'end_time',
             isset($model) ? $model->end_time ?? \Carbon\Carbon::parse($model->end_time)->format('H:i') : '',
         )"
-            placeholder="Select End Time" required />
+            placeholder="Select End Time" />
     </div>
 
     <!-- Add Virtual Meeting Option -->
     <div class="mb-3 col-md-4">
         <x-forms.input-switch name="is_virtual" :label="__('virtual_meeting')" :checked="old('is_virtual', $model->is_virtual ?? false)" />
+    </div>
+    <!-- Add Virtual Meeting Option -->
+    <div class="mb-3 col-md-4">
+        <x-forms.input-switch name="is_external" :label="__('is_meeting_external')" :checked="old('is_external', $model->is_external ?? false)" />
     </div>
 
     <!-- Virtual Meeting Link (conditionally displayed) -->

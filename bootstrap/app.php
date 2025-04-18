@@ -1,16 +1,17 @@
 <?php
 
-use App\Console\Commands\DatabaseSetUp;
-use App\Console\Commands\UnlockUser;
-use App\Http\Middleware\CheckDynamicPermission;
-use App\Http\Middleware\CheckPasswordExpiry;
-use App\Http\Middleware\CheckResourcePermissions;
 use App\Http\Middleware\Locale;
+use App\Console\Commands\UnlockUser;
 use Illuminate\Foundation\Application;
+use App\Console\Commands\DatabaseSetUp;
+use App\Http\Middleware\CheckPasswordExpiry;
+use App\Http\Middleware\SecretCodeMiddleware;
+use App\Http\Middleware\CheckDynamicPermission;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use App\Http\Middleware\CheckResourcePermissions;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
-use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -31,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.permission' => CheckDynamicPermission::class,
             'resource.permission' => CheckResourcePermissions::class,
             'locale' => Locale::class,
+            'secretCode' => SecretCodeMiddleware::class,
         ]);
         $middleware->web([
             CheckPasswordExpiry::class,

@@ -16,6 +16,6 @@ use Modules\Landingpage\Http\Controllers\LandingPageMenuController;
 |
 */
 
-Route::get('',[LandingpageController::class,'index'])->name('admin.landingPage.index');
+Route::get('meetings',[LandingpageController::class,'index'])->name('admin.landingPage.index')->middleware('secretCode');
 Route::get('/view/{id}', [LandingpageController::class, 'view'])->name('admin.landingPage.view');
 

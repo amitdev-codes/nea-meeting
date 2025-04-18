@@ -49,6 +49,9 @@ class UsersTableSeeder extends Seeder
         if (isset($roles['admin'])) {
             $adminPermissions = [
                 'view-users', 'create-users', 'edit-users', 'delete-users',
+                'view-meetings', 'create-meetings', 'edit-meetings', 'delete-meetings',
+                'view-meeting-minutes', 'create-meeting-minutes', 'edit-meeting-minutes', 'delete-meeting-minutes',
+                'view-meeting-rooms', 'create-meeting-rooms', 'edit-meeting-rooms', 'delete-meeting-rooms',
                 'view-roles', 'edit-roles',
                 'view-permissions',
                 'view-logs',
@@ -77,7 +80,7 @@ class UsersTableSeeder extends Seeder
             ],
             [
                 'name' => 'Admin User',
-                'email' => 'admin@dryice.com',
+                'email' => 'admin@nea.com',
                 'mobile_no' => '9876543211',
                 'role' => 'admin',
             ],
@@ -86,6 +89,12 @@ class UsersTableSeeder extends Seeder
                 'email' => 'guest@admin.com',
                 'mobile_no' => '9876543212',
                 'role' => 'guest',
+            ],
+            [
+                'name' => 'user',
+                'email' => 'user@admin.com',
+                'mobile_no' => '9886543212',
+                'role' => 'user',
             ],
         ];
 
@@ -109,30 +118,30 @@ class UsersTableSeeder extends Seeder
             }
         }
          // Create 20 guest users
-         for ($i = 1; $i <= 20; $i++) {
-            $firstName = $faker->firstName;
-            $lastName = $faker->lastName;
-            $fullName = $firstName . ' ' . $lastName;
-            $email = strtolower($firstName . '.' . $lastName) . '@example.com';
-            $mobileNo = '98' . $faker->numberBetween(10000000, 99999999);
+        //  for ($i = 1; $i <= 20; $i++) {
+        //     $firstName = $faker->firstName;
+        //     $lastName = $faker->lastName;
+        //     $fullName = $firstName . ' ' . $lastName;
+        //     $email = strtolower($firstName . '.' . $lastName) . '@example.com';
+        //     $mobileNo = '98' . $faker->numberBetween(10000000, 99999999);
 
-            $user = User::create([
-                'username' => $fullName,
-                'email' => $email,
-                'mobile_no' => $mobileNo,
-                'office_email' => $email,
-                'office_mobile_no' => $mobileNo,
-                'password' => Hash::make('password'),
-                'status' => true,
-                'password_changed_at' => now(),
-                'locale' => 'np',
-                'designation_id' => fake()->numberBetween(2, 10), // Assuming 2-10 are regular designations
-                'organization_id' => fake()->numberBetween(1, 9)
-            ]);
+        //     $user = User::create([
+        //         'username' => $fullName,
+        //         'email' => $email,
+        //         'mobile_no' => $mobileNo,
+        //         'office_email' => $email,
+        //         'office_mobile_no' => $mobileNo,
+        //         'password' => Hash::make('password'),
+        //         'status' => true,
+        //         'password_changed_at' => now(),
+        //         'locale' => 'np',
+        //         'designation_id' => fake()->numberBetween(2, 10), // Assuming 2-10 are regular designations
+        //         'organization_id' => fake()->numberBetween(1, 9)
+        //     ]);
 
-            if (isset($roles['user'])) {
-                $user->assignRole($roles['user']);
-            }
-        }
+        //     if (isset($roles['user'])) {
+        //         $user->assignRole($roles['user']);
+        //     }
+        // }
     }
 }

@@ -32,6 +32,7 @@ class Meeting extends Model implements HasMedia
         'meeting_location',
         'meeting_room_id',
         'is_virtual',
+        'is_external',
         'virtual_meeting_link',
         'status',
         'created_by',
@@ -43,7 +44,8 @@ class Meeting extends Model implements HasMedia
         'start_time' => 'string', // or 'time' if using Laravel 9+
         'end_time' => 'string',
         'meeting_room_id' => 'integer',
-        'is_virtual' => 'boolean', // Should be boolean, not integer
+        'is_virtual' => 'boolean', 
+        'is_external' => 'boolean', 
         'created_by' => 'integer',
         'status' => 'string', // Status should be string, not boolean
     ];
