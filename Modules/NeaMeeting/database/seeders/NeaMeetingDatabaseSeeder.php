@@ -23,7 +23,7 @@ class NeaMeetingDatabaseSeeder extends Seeder
         $this->call([
             MeetingRoomSeeder::class,
             MeetingSeeder::class,
-            MeetingAttendeeSeeder::class
+            // MeetingAttendeeSeeder::class
         ]);
     }
 }

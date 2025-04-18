@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use App\Traits\InlineEditableTrait;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\NepaliDateConverter;
+use Illuminate\Support\Facades\Auth;
 use Modules\NeaMeeting\Models\Meeting;
 use App\Http\Controllers\BaseAdminController;
 use Modules\NeaMeeting\DataTables\MeetingDataTable;
@@ -63,29 +64,6 @@ class MeetingController extends BaseAdminController
                 
                 if ($request->hasFile('meetingDocuments')) {
                     $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
-                }
-                
-                // Save organizations if provided
-                if ($request->has('organizations') && is_array($request->organizations)) {
-                    $this->saveOrganizations($meeting, $request->organizations);
-                }
-                            // Create attendees based on organization users
-                if ($request->has('organizations') && is_array($request->organizations)) {
-                    $users = User::whereIn('organization_id', $request->organizations)->get();
-                    Log::info('Creating attendees for meeting', [
-                        'meeting_id' => $meeting->id,
-                        'organization_ids' => $request->organizations,
-                        'user_ids' => $users->pluck('id')->toArray(),
-                    ]);
-
-                    foreach ($users as $user) {
-                        $meeting->attendees()->create([
-                            'user_id' => $user->id,
-                            'is_required' => true,
-                            'attendance_status' => 'pending',
-                            'invitation_sent_at' => $request->boolean('send_email', true) ? now() : null,
-                        ]);
-                    }
                 }
                 
                 // Trigger the meeting created event
@@ -188,57 +166,23 @@ class MeetingController extends BaseAdminController
             }
         }
     }
-    private function saveAttendees(Meeting $meeting, array $attendees)
-    {
-        // First, clear existing attendees if updating
-        if ($meeting->exists) {
-            $meeting->attendees()->delete();
-        }
-        
-        foreach ($attendees as $userId) {
-            $meeting->attendees()->create([
-                'user_id' => $userId,
-                'is_required' => true,
-                'attendance_status' => 'pending',
-                'invitation_sent_at' => now()
-            ]);
-        }
-    }
-    private function saveOrganizations(Meeting $meeting, array $organizationIds)
-    {
-        // First, clear existing organizations if updating
-        if ($meeting->exists) {
-            $meeting->meetingOrganizations()->delete();
-        }
-        
-        foreach ($organizationIds as $organizationId) {
-            $meeting->meetingOrganizations()->create([
-                'organization_id' => $organizationId,
-            ]);
-        }
-    }
-    //calendar meeting dates
-        /**
-     * Get meetings for a specific Nepali date
-     */
+
     public function getByDate($year, $month, $day)
     {
-        // Convert Nepali date to AD date
         $converter = new NepaliDateConverter();
         $adDate = $converter->toGregorianDate($year, $month, $day);
         $formattedDate=$adDate['gregorian_date'];
-        // dd($gregorianDate);
-        
-        // Format as Y-m-d for query
-        // $formattedDate = Carbon::create($adDate['year'], $adDate['month'], $adDate['day'])->format('Y-m-d');
-        
-        // Get meetings for this date
-        $meetings = Meeting::where('meeting_date_ad', $formattedDate)
-            ->with('meetingRoom')
-            ->orderBy('start_time')
-            ->get();
-            // dd($meetings);
-            
+        $user=Auth::user();
+        $today = Carbon::today()->toDateString(); 
+
+        $meetings = DB::table('meetings')
+        ->whereDate('meeting_date_ad', '=', $formattedDate)
+        ->when(!$user->hasAnyRole(['admin', 'superadmin']), function ($query) use ($user) {
+            return $query->whereJsonContains('meetings.organizations', (string) $user->organization_id);
+        })
+        ->orderBy('start_time')
+        ->get();
+ 
         return response()->json([
             'success' => true,
             'meetings' => $meetings,
@@ -264,14 +208,11 @@ class MeetingController extends BaseAdminController
      */
     public function getMeetingDates($year, $month)
     {
-        // First get the AD date range for this Nepali month
+     
         $converter = new NepaliDateConverter();
-        
         // Get first day of the month
         $firstDayAd = $converter->toGregorianDate($year, $month, 1);
-        
         $firstDay = Carbon::create($firstDayAd['year'], $firstDayAd['month'], $firstDayAd['day']);
-        
         // Get days in the nepali month
         $daysInMonth = $converter->getNumberOfDaysInMonth($year, $month);
         
@@ -280,12 +221,9 @@ class MeetingController extends BaseAdminController
         $lastDay = Carbon::create($lastDayAd['year'], $lastDayAd['month'], $lastDayAd['day']);
         
         // Get all meetings in this date range
-        $meetings = Meeting::whereBetween('meeting_date_ad', [
-                $firstDay->format('Y-m-d'),
-                $lastDay->format('Y-m-d')
-            ])
-            ->orderBy('meeting_date_ad')
-            ->get();
+        $meetings = Meeting::whereBetween('meeting_date_ad', [$today->format('Y-m-d'), $lastDay->format('Y-m-d')])
+        ->orderBy('meeting_date_ad')
+        ->get();
         
         // Group dates that have meetings
         $meetingDates = [];

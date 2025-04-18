@@ -57,19 +57,15 @@ class UsersTableSeeder extends Seeder
         }
         // User permissions
         if (isset($roles['user'])) {
-            $userPermissions = [
-                'view-meetings','view-meeting-minutes'
-            ];
+            $userPermissions = ['view-meetings','view-meeting-minutes'];
             $roles['user']->syncPermissions($userPermissions);
         }
-
-        // Assign permissions for other roles
-        $restrictedPermissions = [ 'view-logs'];
-        foreach ($roles as $key => $role) {
-            if (!in_array($key, ['superadmin', 'admin', 'guest'])) {
-                $role->syncPermissions($restrictedPermissions);
-            }
+        if (isset($roles['guest'])) {
+            $userPermissions = ['view-meetings','view-meeting-minutes'];
+            $roles['guest']->syncPermissions($userPermissions);
         }
+
+
 
         // Seed Admin Users
         $adminUsers = [

@@ -39,7 +39,15 @@ class UpdateMeetingRequest extends FormRequest
                 // Don't merge invalid data, let validation catch it
             }
         }
-        
+                // Process organizations input to ensure it's an array
+                if ($this->has('organizations')) {
+                    $organizations = $this->input('organizations');
+                    
+                    // If organizations is provided as a string (like a comma-separated list), convert it to array
+                    if (is_string($organizations) && !empty($organizations)) {
+                        $this->merge(['organizations' => explode(',', $organizations)]);
+                    }
+                }
         if (!$this->has('created_by')) {
             $this->merge(['created_by' => auth()->id()]);
         }
@@ -62,6 +70,8 @@ class UpdateMeetingRequest extends FormRequest
             'meeting_documents' => 'nullable|array',
             // Adjust for filenames instead of files if using Dropzone
             'meeting_documents.*' => 'string', // Temporary filenames, not files
+            'organizations' => 'nullable|array', // Add validation for organizations as array
+            'organizations.*' => 'integer|exists:organizations,id', // Ensure each organization ID exists
         ];
     }
 
@@ -72,6 +82,7 @@ class UpdateMeetingRequest extends FormRequest
             'end_time.date' => 'The end time must be a valid time (e.g., 3:00 PM).',
             'end_time.after' => 'The end time must be after the start time.',
             'created_by.required' => 'The creator ID is required.',
+            'organizations.*.exists' => 'One or more selected organizations do not exist.',
         ];
     }
 }

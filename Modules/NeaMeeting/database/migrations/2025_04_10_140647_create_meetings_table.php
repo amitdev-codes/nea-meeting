@@ -26,6 +26,7 @@ return new class extends Migration
             $table->foreignId('meeting_room_id')->nullable()->constrained()->nullOnDelete();
             $table->boolean('is_virtual')->default(false);
             $table->string('virtual_meeting_link', 255)->nullable();
+            $table->json('organizations')->nullable();
             $table->enum('status', MeetingStatus::values())->default(MeetingStatus::Scheduled->value);
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamps();

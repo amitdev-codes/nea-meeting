@@ -35,9 +35,11 @@ class Meeting extends Model implements HasMedia
         'virtual_meeting_link',
         'status',
         'created_by',
+        'organizations',
     ];
 
     protected $casts = [
+        'organizations' => 'array',
         'start_time' => 'string', // or 'time' if using Laravel 9+
         'end_time' => 'string',
         'meeting_room_id' => 'integer',
@@ -83,10 +85,7 @@ class Meeting extends Model implements HasMedia
         return $this->hasMany(MeetingOrganization::class);
     }
 
-    public function organizations()
-    {
-        return $this->belongsToMany(Organization::class, 'meeting_organizations');
-    }
+
     public function attendees()
     {
         return $this->hasMany(MeetingAttendee::class, 'meeting_id');

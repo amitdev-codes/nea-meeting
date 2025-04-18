@@ -42,11 +42,10 @@ class MeetingDataTable extends DataTable
         
         // Check if the user is authenticated and not an admin or superadmin
         if (auth()->check() && !auth()->user()->hasRole(['admin', 'superadmin'])) {
-            // Filter meetings where the authenticated user is an attendee
-            $query->whereHas('attendees', function ($q) {
-                $q->where('user_id', auth()->id());
-            });
+            $organizationId = auth()->user()->organization_id;
+            $query->whereRaw('JSON_CONTAINS(organizations, ?)', [json_encode((string)$organizationId)]);
         }
+
         
         // Handle global search
         if (request()->has('search') && request('search')['value']) {

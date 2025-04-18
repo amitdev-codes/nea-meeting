@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\NepaliDateConverter;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class CalendarController extends Controller
 {
@@ -33,24 +34,25 @@ class CalendarController extends Controller
         $daysInMonth = $calendarData['days'] ?? 30;
         $meetingCounts = [];
         $today = Carbon::today()->toDateString(); // Get today's date in YYYY-MM-DD format
-        
+        $user=Auth::user();
         for ($day = 1; $day <= $daysInMonth; $day++) {
             // Format the Nepali date
             $nepaliDate = sprintf('%s-%s-%02d', $years, $currentBsMonth, $day);
-        
             // Convert Nepali date to English (Gregorian) date
             $englishDate = NepaliDateConverter::toGregorianDate($currentBsYear, $currentBsMonth, $day);
             $gregorianDate = $englishDate['gregorian_date'];
-        
+           
             // Query meetings for this English date, only for today or future dates
             $count = DB::table('meetings')
-                ->whereDate('meeting_date_ad', $gregorianDate)
-                ->whereDate('meeting_date_ad', '>=', $today) // Only count today or upcoming meetings
-                ->count();
+            ->whereDate('meeting_date_ad', $gregorianDate)
+            ->whereDate('meeting_date_ad', '>=', $today)
+            ->when(!$user->hasAnyRole(['admin', 'superadmin']), function ($query) use ($user) {
+                return $query->whereJsonContains('meetings.organizations', (string) $user->organization_id);
+            })
+            ->count();
         
             $meetingCounts[$day] = $count;
         }
-        
         // Add meeting counts to the calendar data
         $calendarData['meeting_counts'] = $meetingCounts;
         $months = DB::table('nepali_calendar')
@@ -60,9 +62,6 @@ class CalendarController extends Controller
     
         $days = $calendarData ? $calendarData['days'] : 30; // Use array syntax
         $todaysDate = NepaliDateConverter::getTodayNepaliDateTime();
-
-        // dd('test');
-    
         return view('calendar::pages.calendar.nepali-calendar', compact(
             'years', 'todaysDate', 'months', 'days', 'currentBsYear', 'currentBsMonth', 'currentNepaliDay', 'calendarData'
         ));
@@ -98,6 +97,7 @@ class CalendarController extends Controller
 
     public function getCalendarData($year, $month)
     {
+        // dd('test');
         $calendarData = DB::table('nepali_calendar')
             ->where('bs_year', $year)
             ->where('month', $month)
@@ -139,6 +139,7 @@ class CalendarController extends Controller
     }
     public function getMeetingCounts($year, $month)
     {
+
         // Get all days in the month
         $daysInMonth = DB::table('nepali_calendar')
             ->where('bs_year', $year)
@@ -146,17 +147,14 @@ class CalendarController extends Controller
             ->value('days') ?? 30;
         
         $meetingCounts = [];
-        
         // For each day, get meeting count
         for ($day = 1; $day <= $daysInMonth; $day++) {
             // Format the date as YYYY-MM-DD
             $nepaliDate = sprintf('%s-%s-%02d', $year, $month, $day);
-            
             // Count meetings for this date
             $count = DB::table('meetings')
                 ->where('nepali_date', $nepaliDate)
                 ->count();
-            
             $meetingCounts[$day] = $count;
         }
         

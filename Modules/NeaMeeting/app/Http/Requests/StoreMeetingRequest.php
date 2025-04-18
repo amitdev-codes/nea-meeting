@@ -12,37 +12,7 @@ class StoreMeetingRequest extends FormRequest
     {
         return true; // Adjust as needed
     }
-    // protected function prepareForValidation()
-    // {
-    //     $meetingDate = $this->input('meeting_date');
-    //     $startTime = $this->input('start_time');
-    //     $endTime = $this->input('end_time');
-        
-    //     if ($meetingDate && $startTime && $endTime) {
-    //         try {
-    //             // Convert from custom calendar to Gregorian
-    //             $gregorianYear = (int)substr($meetingDate, 0, 4) - 57;
-    //             $gregorianDate = "$gregorianYear-" . substr($meetingDate, 5);
-                
-    //             // Parse full datetime values
-    //             $startDateTime = Carbon::createFromFormat('Y-m-d h:i A', "$gregorianDate $startTime");
-    //             $endDateTime = Carbon::createFromFormat('Y-m-d h:i A', "$gregorianDate $endTime");
-                
-    //             $this->merge([
-    //                 'start_time' => $startDateTime->toDateTimeString(),
-    //                 'end_time' => $endDateTime->toDateTimeString(),
-    //                 'gregorian_date' => $gregorianDate, // Optional: store converted date for reference
-    //             ]);
-    //         } catch (\Exception $e) {
-    //             \Log::error('Time parsing failed: ' . $e->getMessage());
-    //             // Don't merge invalid data, let validation catch it
-    //         }
-    //     }
-        
-    //     if (!$this->has('created_by')) {
-    //         $this->merge(['created_by' => auth()->id()]);
-    //     }
-    // }
+
     protected function prepareForValidation()
     {
         $meetingDate = $this->input('meeting_date'); // Expected format: YYYY-MM-DD (e.g., 2082-04-05)
@@ -76,31 +46,21 @@ class StoreMeetingRequest extends FormRequest
                 // Let validation fail if conversion fails
             }
         }
+            // Process organizations input to ensure it's an array
+            if ($this->has('organizations')) {
+                $organizations = $this->input('organizations');
+                
+                // If organizations is provided as a string (like a comma-separated list), convert it to array
+                if (is_string($organizations) && !empty($organizations)) {
+                    $this->merge(['organizations' => explode(',', $organizations)]);
+                }
+            }
 
         if (!$this->has('created_by')) {
             $this->merge(['created_by' => auth()->id()]);
         }
     }
-    // public function rules(): array
-    // {
-    //     return [
-    //         'title' => 'required|string|max:200',
-    //         'description' => 'nullable|string',
-    //         'meeting_type' => 'required|string|max:50',
-    //         'meeting_date' => 'nullable|string', // Not stored in DB
-    //         'start_time' => 'required|date', // Changed from date_format:H:i:s to date
-    //         'end_time' => 'required|date|after:start_time', // Changed to date
-    //         'meeting_room_id' => 'nullable|exists:meeting_rooms,id',
-    //         'meeting_location' => 'nullable|string|max:255',
-    //         'is_virtual' => 'boolean',
-    //         'virtual_meeting_link' => 'nullable|string|max:255|required_if:is_virtual,1',
-    //         'status' => 'string|in:scheduled,completed,cancelled',
-    //         'created_by' => 'required|exists:users,id',
-    //         'meeting_documents' => 'nullable|array',
-    //         // Adjust for filenames instead of files if using Dropzone
-    //         'meeting_documents.*' => 'string', // Temporary filenames, not files
-    //     ];
-    // }
+
     public function rules(): array
     {
         return [
@@ -119,6 +79,8 @@ class StoreMeetingRequest extends FormRequest
             'created_by' => 'required|exists:users,id',
             'meeting_documents' => 'nullable|array',
             'meeting_documents.*' => 'string', // Temporary filenames for Dropzone
+            'organizations' => 'nullable|array', // Add validation for organizations as array
+            'organizations.*' => 'integer|exists:organizations,id', 
         ];
     }
 
@@ -129,6 +91,7 @@ class StoreMeetingRequest extends FormRequest
             'end_time.date' => 'The end time must be a valid time (e.g., 3:00 PM).',
             'end_time.after' => 'The end time must be after the start time.',
             'created_by.required' => 'The creator ID is required.',
+            'organizations.*.exists' => 'One or more selected organizations do not exist.',
         ];
     }
 }
