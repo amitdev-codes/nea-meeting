@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('meeting_id')->unique()->constrained()->cascadeOnDelete();
             $table->text('content');
-            $table->foreignId('recorded_by')->constrained('users');
+            $table->foreignId('recorded_by')->constrained('users')->cascadeOnDelete();
             $table->boolean('approved')->default(false);
-            $table->foreignId('approved_by')->nullable()->constrained('users');
+            $table->foreignId('approved_by')->nullable()->constrained('users')->cascadeOnDelete();
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();
         });

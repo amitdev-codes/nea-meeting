@@ -18,7 +18,6 @@ return new class extends Migration
             $table->boolean('status')->default(false);
             $table->softDeletes();
             $table->timestamps();
-            
             $table->unique(['meeting_id', 'organization_id']);
         });
     }

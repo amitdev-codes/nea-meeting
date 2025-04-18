@@ -37,7 +37,7 @@ class UsersDataTable extends DataTable
     {
         return datatables()
             ->eloquent($query)
-            ->addColumn('checkbox', fn ($user) => $this->renderCheckbox('users_ids[]', $user->id))
+            ->addColumn('checkbox', fn ($user) => $this->renderCheckbox('user_ids[]', $user->id))
             ->addColumn('role_name', fn ($user) => $this->generateBadges($user->roles->pluck('name')))
             ->addColumn('organization_name', function ($user) {
                 return $user->organization_id 
@@ -121,7 +121,7 @@ class UsersDataTable extends DataTable
             )
             ->parameters([
                 'initComplete' => 'function() {
-                    ' . $this->initBulkDeleteScript('users_ids[]') . '
+                    ' . $this->initBulkDeleteScript('user_ids[]') . '
                     ' . $this->initDeleteScript() . '
                     ' . $this->initColumnSearch() . '
                     ' . $this->initStickyColumnsStyles() . ' 

@@ -37,6 +37,7 @@ class PermissionsTableSeeder extends Seeder
             'view-meeting-rooms','create-meeting-rooms','edit-meeting-rooms','delete-meeting-rooms',
             'view-meeting-attendees','create-meeting-attendees','edit-meeting-attendees','delete-meeting-attendees',
             'view-meeting-minutes','create-meeting-minutes','edit-meeting-minutes','delete-meeting-minutes',
+            'view-meetings','create-meetings','edit-meetings','delete-meetings',
 
       
         ];

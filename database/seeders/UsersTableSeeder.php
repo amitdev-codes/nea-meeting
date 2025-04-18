@@ -30,7 +30,7 @@ class UsersTableSeeder extends Seeder
         DB::table('role_has_permissions')->truncate();
         DB::table('addresses')->truncate(); // Truncate addresses table
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        $roleNames = ['superadmin' => 'superadmin','admin' => 'admin','guest' => 'guest','User' => 'user'];
+        $roleNames = ['superadmin' => 'superadmin','admin' => 'admin','guest' => 'guest','user' => 'user'];
         
         $roles = [];
         foreach ($roleNames as $name => $code) {
@@ -54,6 +54,13 @@ class UsersTableSeeder extends Seeder
                 'view-logs',
             ];
             $roles['admin']->syncPermissions($adminPermissions);
+        }
+        // User permissions
+        if (isset($roles['user'])) {
+            $userPermissions = [
+                'view-meetings','view-meeting-minutes'
+            ];
+            $roles['user']->syncPermissions($userPermissions);
         }
 
         // Assign permissions for other roles
@@ -127,8 +134,8 @@ class UsersTableSeeder extends Seeder
                 'organization_id' => fake()->numberBetween(1, 9)
             ]);
 
-            if (isset($roles['guest'])) {
-                $user->assignRole($roles['guest']);
+            if (isset($roles['user'])) {
+                $user->assignRole($roles['user']);
             }
         }
     }
