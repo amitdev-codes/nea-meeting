@@ -33,10 +33,11 @@
             placeholder="Select Start Time" required />
     </div>
     <div class="mb-3 col-md-4">
-        <x-forms.input-time name="end_time" id="endTime" :label="__('field.end_time')" :value="old(
-            'end_time',
-            isset($model) ? $model->end_time ?? \Carbon\Carbon::parse($model->end_time)->format('H:i') : '',
-        )"
+        <x-forms.input-time 
+            name="end_time" 
+            id="endTime" 
+            :label="__('field.end_time')" 
+            :value="old('end_time', isset($model->end_time) ? \Carbon\Carbon::parse($model->end_time)->format('H:i') : '')"
             placeholder="Select End Time" />
     </div>
 
@@ -62,16 +63,11 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-12 mb-3">
-                    <x-forms.input-select2 name="organizations" :label="__('Select Offices')" :options="$organizations
-                        ->map(function ($organization) {
-                            return [$organization->id, $organization->name . ' (' . $organization->name_np . ')'];
-                        })
-                        ->toArray()" :value="old(
-                        'organizations',
-                        isset($model) ? $model->meetingOrganizations->pluck('organization_id')->toArray() : [],
-                    )"
-                        placeholder="Select Offices" multiple />
+                <div class="mb-3 col-md-4">
+                    <x-forms.input-select2 name="organizations" id="select2Organization" class="select2 form-select" required
+                        :options="$organizations
+                            ->map(fn($organization) => [$organization->id, $organization->name . ' - ' . $organization->name_np])
+                            ->toArray()" :value="old('organizations', isset($model) ? (is_array($model->organizations) ? $model->organizations : json_decode($model->organizations, true)) : [])" placeholder="{{ __('Select Local Levels') }}" multiple />
                 </div>
 
                 <div class="col-12 mb-3">

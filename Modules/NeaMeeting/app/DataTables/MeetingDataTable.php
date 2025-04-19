@@ -23,7 +23,7 @@ class MeetingDataTable extends DataTable
         return datatables()
             ->eloquent($query)
             ->addColumn('checkbox', fn ($row) => $this->renderCheckbox('meeting_ids[]', $row->id))
-            ->addColumn('meeting_location', function ($row) {
+            ->addColumn('meeting_room', function ($row) {
                 return $row->meetingRoom->name;
             })
 
@@ -68,7 +68,7 @@ class MeetingDataTable extends DataTable
                 }
             }
         }
-        
+        $query->orderBy('meeting_date_ad', 'asc')->orderBy('start_time', 'asc');
         return $query;
     }
     
@@ -89,7 +89,6 @@ class MeetingDataTable extends DataTable
                     ' . $this->initBulkDeleteScript('meeting_ids[]') . '
                     ' . $this->initDeleteScript() . '
                     ' . $this->initColumnSearch() . '
-                    ' . $this->initStickyColumnsStyles() . ' 
                 }',
                 'headerCallback' => 'function(thead) {
                     $(thead).find("th").css({
@@ -99,12 +98,6 @@ class MeetingDataTable extends DataTable
                         "letter-spacing": "0.5px"
                     });
                 }',
-                'columnDefs' => [
-                    [
-                        'targets' => '_all', 
-                        'className' => 'dt-head-nowrap' 
-                    ]
-                ]
             ]);
     }
     public function getColumns(): array
@@ -113,12 +106,13 @@ class MeetingDataTable extends DataTable
             $this->checkboxColumn(),
             Column::make('title')->title(__('field.title')),
             Column::make('meeting_location')->title(__('field.meeting_location')),
+            // Column::make('meeting_room')->title(__('field.meeting_room')),
             Column::make('meeting_date')->title(__('field.meeting_date')),
             Column::make('start_time')->title(__('field.start_time')),
             Column::make('end_time')->title(__('field.end_time')),
             Column::make('meeting_type')->title(__('field.meeting_type')),
             Column::make('status')->title(__('field.status')),
-            $this->actionColumn()
+            $this->actionColumn('admin.meetings')
         ];
     }
     

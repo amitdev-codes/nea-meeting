@@ -89,6 +89,7 @@
                     </div>
                     <div class="dropdown-shortcuts-list scrollable-container ps">
                         <div class="row row-bordered overflow-visible g-0">
+                            @hasanyrole('user|admin|superadmin')
                             <div class="dropdown-shortcuts-item col">
                                 <span class="dropdown-shortcuts-icon rounded-circle mb-3">
                                     <i class="bx bx-calendar bx-26px text-heading"></i>
@@ -96,6 +97,8 @@
                                 <a href="{{ route('admin.calendar') }}" class="stretched-link">Calendar</a>
                                 <small>Appointments</small>
                             </div>
+                            @endhasanyrole
+                            @hasanyrole('admin|superadmin')
                             <div class="dropdown-shortcuts-item col">
                                 <span class="dropdown-shortcuts-icon rounded-circle mb-3">
                                     <i class="bx bx-food-menu bx-26px text-heading"></i>
@@ -103,7 +106,9 @@
                                 <a href="{{ route('admin.meetings.index') }}" class="stretched-link">Meetings</a>
                                 <small>Manage Meetings</small>
                             </div>
+                            @endhasanyrole
                         </div>
+                        @hasanyrole('admin|superadmin')
                         <div class="row row-bordered overflow-visible g-0">
                             <div class="dropdown-shortcuts-item col">
                                 <span class="dropdown-shortcuts-icon rounded-circle mb-3">
@@ -120,6 +125,8 @@
                                 <small>Permission</small>
                             </div>
                         </div>
+                        @endhasanyrole
+                        @hasanyrole('admin|superadmin')
                         <div class="row row-bordered overflow-visible g-0">
                             <div class="dropdown-shortcuts-item col">
                                 <span class="dropdown-shortcuts-icon rounded-circle mb-3">
@@ -128,14 +135,8 @@
                                 <a href="{{ route('dashboard') }}" class="stretched-link">Dashboard</a>
                                 <small>User Dashboard</small>
                             </div>
-                            {{-- <div class="dropdown-shortcuts-item col">
-                                <span class="dropdown-shortcuts-icon rounded-circle mb-3">
-                                    <i class="bx bx-cog bx-26px text-heading"></i>
-                                </span>
-                                <a href="{{ route('admin.site-settings.index') }}" class="stretched-link">Setting</a>
-                                <small>Account Settings</small>
-                            </div> --}}
                         </div>
+                        @endhasanyrole
 
                         <div class="ps__rail-x" style="left: 0px; bottom: 0px;">
                             <div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div>

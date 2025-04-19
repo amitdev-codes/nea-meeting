@@ -2,6 +2,7 @@
 
 namespace Modules\Landingpage\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Slider;
 use App\Models\Contact;
 use App\Mail\ContactMail;
@@ -23,7 +24,7 @@ class LandingpageController extends Controller
 
     public function index()
     {
-        $today = now(); // Get today's date
+        $today = Carbon::today()->toDateString();// Get today's date
         $upcomingMeetings = Meeting::where('meeting_date_ad', '>=', $today)->orderBy('meeting_date_ad', 'asc')->orderBy('start_time', 'asc')->paginate(10);
         $pastMeetings = Meeting::where('meeting_date_ad', '<', $today)->orderBy('meeting_date_ad', 'desc')->orderBy('start_time', 'desc')->paginate(10);
         return view('landingpage::pages.landingPage', compact('upcomingMeetings', 'pastMeetings'));

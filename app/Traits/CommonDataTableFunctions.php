@@ -22,8 +22,7 @@ trait CommonDataTableFunctions
             ->searchable(false)
             ->exportable(false)
             ->printable(false)
-            ->width('2%')
-            ->addClass('position-sticky start-0');
+            ->width('1%');
     }
 
     /**
@@ -38,9 +37,7 @@ trait CommonDataTableFunctions
             ->exportable(false)
             ->searchable(false)
             ->printable(false)
-            ->width('13%')
-            ->addClass('text-center action-column position-sticky end-0')
-            ->attr(['style' => 'right: 0; z-index: 1; min-width: 120px;']); 
+            ->width('10%');
     }
 
 
@@ -96,16 +93,12 @@ trait CommonDataTableFunctions
                     "gap": "2px"
                 });
                 
-                // Ensure sticky columns maintain their background color for current theme
                 const isDarkMode = document.documentElement.getAttribute("data-style") === "dark";
                 const bgColor = isDarkMode ? "#222" : "white";
                 const headerBgColor = isDarkMode ? "#333" : "#f8f9fa";
                 const oddRowBgColor = isDarkMode ? "#2d2d2d" : "#f9f9f9";
                 const evenRowBgColor = isDarkMode ? "#333" : "white";
-                
-                $("table.dataTable th.position-sticky").css("background-color", headerBgColor);
-                $("table.dataTable tbody tr.odd td.position-sticky").css("background-color", oddRowBgColor);
-                $("table.dataTable tbody tr.even td.position-sticky").css("background-color", evenRowBgColor);
+
             }',
             'createdRow' => 'function(row, data, dataIndex) {
                 // Apply custom styling to the action cell
@@ -115,12 +108,7 @@ trait CommonDataTableFunctions
                 const isDarkMode = document.documentElement.getAttribute("data-style") === "dark";
                 const oddRowBgColor = isDarkMode ? "#2d2d2d" : "#f9f9f9";
                 const evenRowBgColor = isDarkMode ? "#333" : "white";
-                
-                if ($(row).hasClass("odd")) {
-                    $("td.position-sticky", row).css("background-color", oddRowBgColor);
-                } else {
-                    $("td.position-sticky", row).css("background-color", evenRowBgColor);
-                }
+            
             }'  
         ];
     }
@@ -710,9 +698,7 @@ trait CommonDataTableFunctions
                 // console.log(columnData);
    
                 if (columnData === 'checkbox') {
-                    console.log('amit');
-                    // th.addClass('position-sticky start-0').attr('style', 'left: 0; z-index: 1;' + (isDarkMode ? 'background-color: #333 !important;' : ''));
-                    th.addClass('position-sticky start-0 sorting_disabled sorting_desc"').attr('style', 'left: 0; z-index: 1;background-color:#333 !important;');
+                    th.addClass('position-sticky start-0 sorting_disabled sorting_desc"').attr('style', 'left: 0; z-index: 1');
 
 
                 } else if (columnData === 'action') {
@@ -833,6 +819,106 @@ trait CommonDataTableFunctions
      * 
      * @return string JavaScript for initializing sticky styles
      */
+
+    protected function getPermissions($resource): array
+    {
+        return [
+            'view' => "view-{$resource}",
+            'create' => "create-{$resource}",
+            'edit' => "edit-{$resource}",
+            'delete' => "delete-{$resource}",
+            'export' => "export-{$resource}",
+        ];
+    }
+    // starts advanced filter and column searching
+    protected function applyGlobalSearch($query, $searchValue)
+    {
+        if (!$searchValue) return $query;
+        
+        return $query->where(function ($q) use ($searchValue) {
+            foreach ($this->searchableColumns as $column) {
+                $this->applyColumnSearch($q, $column, $searchValue, true);
+            }
+        });
+    }
+    
+    protected function applyColumnSearch($query, $column, $value, $isOr = false)
+    {
+        if (empty($value)) return $query;
+        
+        $method = $isOr ? 'orWhere' : 'where';
+        
+        // Handle dropdown fields first (exact matches)
+        if (isset($this->dropdownFields[$column])) {
+            $fieldName = $this->dropdownFields[$column];
+            return $query->$method($fieldName, $value);
+        }
+        
+        // Handle relationships
+        if (isset($this->relationshipColumns[$column])) {
+            $relation = $this->relationshipColumns[$column];
+            return $query->$method(function ($q) use ($relation, $value) {
+                foreach ($relation['fields'] as $field) {
+                    $q->orWhere("{$relation['table']}.{$field}", 'like', "%{$value}%");
+                }
+            });
+        }
+        
+        // Handle multi-field columns (like name and name_np)
+        if (isset($this->multiFieldColumns[$column])) {
+            return $query->$method(function ($q) use ($column, $value) {
+                foreach ($this->multiFieldColumns[$column] as $field) {
+                    $q->orWhere($field, 'like', "%{$value}%");
+                }
+            });
+        }
+        
+        // Handle exact match columns
+        if (in_array($column, $this->exactMatchColumns)) {
+            return $query->$method("{$this->tableName}.{$column}", $value);
+        }
+        
+        // Regular column search
+        return $query->$method("{$this->tableName}.{$column}", 'like', "%{$value}%");
+    }
+    
+    protected function applyColumnSpecificSearch($query)
+    {
+        if (!request()->has('columns')) return $query;
+        
+        foreach (request('columns') as $column) {
+            $value = $column['search']['value'] ?? '';
+            if ($value === '') continue;
+            
+            $columnData = $column['data'];
+            if (!in_array($columnData, $this->searchableColumns)) continue;
+            
+            $this->applyColumnSearch($query, $columnData, $value);
+        }
+        
+        return $query;
+    }
+    public function getMeetingStatusBadge($status): string
+    {
+        // Convert string to enum if necessary
+        $status = $status instanceof MeetingStatus ? $status : MeetingStatus::from($status);
+        // Map enum cases to Bootstrap badge classes
+        $statusStyles = [
+            MeetingStatus::Scheduled->value => 'bg-info',
+            MeetingStatus::Ongoing->value => 'bg-warning',
+            MeetingStatus::Completed->value => 'bg-success',
+            MeetingStatus::Cancelled->value => 'bg-danger',
+        ];
+
+        $class = $statusStyles[$status->value] ?? 'bg-secondary'; // Fallback class
+        $text = ucfirst(strtolower($status->value)); // Format text (e.g., "Scheduled")
+
+        return sprintf(
+            '<span class="badge %s">%s</span>',
+            $class,
+            $text
+        );
+    }
     protected function initStickyColumnsStyles(): string
     {
         return <<<JS
@@ -941,104 +1027,5 @@ trait CommonDataTableFunctions
             document.addEventListener('themeChanged', applyThemeStyles);
     JS;
     }
-    protected function getPermissions($resource): array
-    {
-        return [
-            'view' => "view-{$resource}",
-            'create' => "create-{$resource}",
-            'edit' => "edit-{$resource}",
-            'delete' => "delete-{$resource}",
-            'export' => "export-{$resource}",
-        ];
-    }
-    // starts advanced filter and column searching
-    protected function applyGlobalSearch($query, $searchValue)
-    {
-        if (!$searchValue) return $query;
-        
-        return $query->where(function ($q) use ($searchValue) {
-            foreach ($this->searchableColumns as $column) {
-                $this->applyColumnSearch($q, $column, $searchValue, true);
-            }
-        });
-    }
-    
-    protected function applyColumnSearch($query, $column, $value, $isOr = false)
-    {
-        if (empty($value)) return $query;
-        
-        $method = $isOr ? 'orWhere' : 'where';
-        
-        // Handle dropdown fields first (exact matches)
-        if (isset($this->dropdownFields[$column])) {
-            $fieldName = $this->dropdownFields[$column];
-            return $query->$method($fieldName, $value);
-        }
-        
-        // Handle relationships
-        if (isset($this->relationshipColumns[$column])) {
-            $relation = $this->relationshipColumns[$column];
-            return $query->$method(function ($q) use ($relation, $value) {
-                foreach ($relation['fields'] as $field) {
-                    $q->orWhere("{$relation['table']}.{$field}", 'like', "%{$value}%");
-                }
-            });
-        }
-        
-        // Handle multi-field columns (like name and name_np)
-        if (isset($this->multiFieldColumns[$column])) {
-            return $query->$method(function ($q) use ($column, $value) {
-                foreach ($this->multiFieldColumns[$column] as $field) {
-                    $q->orWhere($field, 'like', "%{$value}%");
-                }
-            });
-        }
-        
-        // Handle exact match columns
-        if (in_array($column, $this->exactMatchColumns)) {
-            return $query->$method("{$this->tableName}.{$column}", $value);
-        }
-        
-        // Regular column search
-        return $query->$method("{$this->tableName}.{$column}", 'like', "%{$value}%");
-    }
-    
-    protected function applyColumnSpecificSearch($query)
-    {
-        if (!request()->has('columns')) return $query;
-        
-        foreach (request('columns') as $column) {
-            $value = $column['search']['value'] ?? '';
-            if ($value === '') continue;
-            
-            $columnData = $column['data'];
-            if (!in_array($columnData, $this->searchableColumns)) continue;
-            
-            $this->applyColumnSearch($query, $columnData, $value);
-        }
-        
-        return $query;
-    }
-    public function getMeetingStatusBadge($status): string
-    {
-        // Convert string to enum if necessary
-        $status = $status instanceof MeetingStatus ? $status : MeetingStatus::from($status);
 
-        // Map enum cases to Bootstrap badge classes
-        $statusStyles = [
-            MeetingStatus::Scheduled->value => 'bg-info',
-            MeetingStatus::Ongoing->value => 'bg-warning',
-            MeetingStatus::Completed->value => 'bg-success',
-            MeetingStatus::Cancelled->value => 'bg-danger',
-        ];
-
-        $class = $statusStyles[$status->value] ?? 'bg-secondary'; // Fallback class
-        $text = ucfirst(strtolower($status->value)); // Format text (e.g., "Scheduled")
-
-        return sprintf(
-            '<span class="badge %s">%s</span>',
-            $class,
-            $text
-        );
-    }
 }

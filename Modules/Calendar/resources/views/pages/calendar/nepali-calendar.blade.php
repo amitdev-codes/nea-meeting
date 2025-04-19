@@ -271,15 +271,46 @@
                     if (data.meetings && data.meetings.length > 0) {
                         let html = `<div class="list-group">`;
 
+                        // data.meetings.forEach(meeting => {
+                        //     const startTime = new Date(meeting.start_time).toLocaleTimeString([], {
+                        //         hour: '2-digit',
+                        //         minute: '2-digit'
+                        //     });
+                        //     const endTime = new Date(meeting.end_time).toLocaleTimeString([], {
+                        //         hour: '2-digit',
+                        //         minute: '2-digit'
+                        //     });
+
+                        //     html += `
+                        //         <a href="/meetings/meetings/${meeting.id}" class="list-group-item list-group-item-action meeting-list-item ${meeting.status}">
+                        //             <div class="d-flex w-100 justify-content-between">
+                        //                 <h6 class="mb-1">${meeting.title}</h6>
+                        //                 <span class="badge bg-${getStatusBadgeColor(meeting.status)}">${meeting.status}</span>
+                        //             </div>
+                        //             <div class="mb-1 meeting-time">
+                        //                 <i class="bx bx-time-five me-1"></i> ${startTime} - ${endTime}
+                        //             </div>
+                        //             <div class="meeting-location">
+                        //                 ${meeting.is_virtual ? 
+                        //                     `<i class="bx bx-video me-1"></i> Virtual Meeting` : 
+                        //                     `<i class="bx bx-map me-1"></i> ${meeting.meeting_location || meeting.meeting_room?.name || 'Location not specified'}`
+                        //                 }
+                        //             </div>
+                        //         </a>
+                        //     `;
+                        // });
                         data.meetings.forEach(meeting => {
                             const startTime = new Date(meeting.start_time).toLocaleTimeString([], {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             });
-                            const endTime = new Date(meeting.end_time).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
+                            // Only format endTime if meeting.end_time exists
+                            const endTime = meeting.end_time 
+                                ? new Date(meeting.end_time).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) 
+                                : '';
 
                             html += `
                                 <a href="/meetings/meetings/${meeting.id}" class="list-group-item list-group-item-action meeting-list-item ${meeting.status}">
@@ -288,7 +319,7 @@
                                         <span class="badge bg-${getStatusBadgeColor(meeting.status)}">${meeting.status}</span>
                                     </div>
                                     <div class="mb-1 meeting-time">
-                                        <i class="bx bx-time-five me-1"></i> ${startTime} - ${endTime}
+                                        <i class="bx bx-time-five me-1"></i> ${startTime}${endTime ? ` - ${endTime}` : ''}
                                     </div>
                                     <div class="meeting-location">
                                         ${meeting.is_virtual ? 

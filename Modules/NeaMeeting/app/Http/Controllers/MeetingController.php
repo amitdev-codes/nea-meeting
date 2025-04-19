@@ -108,27 +108,20 @@ class MeetingController extends BaseAdminController
             DB::beginTransaction();
             
             try {
-                // Update meeting details
-                $meeting->update($request->validated());
-                
+            // Get validated data
+            $validated = $request->validated();
+
+            // Explicitly set end_time to null if empty
+            if (empty($validated['end_time'])) {
+                $validated['end_time'] = null;
+            }
+
+            // Update meeting details
+            $meeting->update($validated);
                 // Handle media upload if present
                 $this->handleMediaUploads($request, $meeting);
-                
                 if ($request->hasFile('meetingDocuments')) {
                     $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
-                }
-                
-                // Save/update organizations if provided
-                if ($request->has('organizations') && is_array($request->organizations)) {
-                    $this->saveOrganizations($meeting, $request->organizations);
-                    
-                    // Check if notifications should be sent for updated meeting
-                    if ($request->boolean('send_notifications', false)) {
-                        event(new MeetingUpdated($meeting, [
-                            'send_email' => $request->boolean('send_email', true),
-                            'organization_ids' => $request->organizations,
-                        ]));
-                    }
                 }
                 
                 DB::commit();
@@ -182,6 +175,8 @@ class MeetingController extends BaseAdminController
         })
         ->orderBy('start_time')
         ->get();
+
+        // dd($meetings);
  
         return response()->json([
             'success' => true,

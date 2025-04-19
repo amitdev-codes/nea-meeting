@@ -674,7 +674,8 @@ return [
 'upcoming_meetings'=>'Upcoming Meetings',
 'meetings'=>'Meetings',
 'time'=>'Time',
-'meeting_status'=>'Meeting Status'
+'meeting_status'=>'Meeting Status',
+'meeting_room'=>'Meeting Room',
 
 
 ];
