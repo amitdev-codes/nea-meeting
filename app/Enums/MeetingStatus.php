@@ -5,7 +5,7 @@ enum MeetingStatus: string
 {
     case Scheduled = 'Scheduled';
     case Ongoing = 'Ongoing';
-    case Completed = 'Completed'; // Fixed typo and consistency
+    case Completed = 'Completed';
     case Cancelled = 'Cancelled';
 
 

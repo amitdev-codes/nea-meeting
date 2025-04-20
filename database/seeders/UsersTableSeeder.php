@@ -30,7 +30,7 @@ class UsersTableSeeder extends Seeder
         DB::table('role_has_permissions')->truncate();
         DB::table('addresses')->truncate(); // Truncate addresses table
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        $roleNames = ['superadmin' => 'superadmin','admin' => 'admin','guest' => 'guest','user' => 'user'];
+        $roleNames = ['superadmin' => 'superadmin','admin' => 'admin','guest' => 'guest','user' => 'user','md'=>'md'];
         
         $roles = [];
         foreach ($roleNames as $name => $code) {
@@ -55,17 +55,22 @@ class UsersTableSeeder extends Seeder
                 'view-roles', 'edit-roles',
                 'view-permissions',
                 'view-logs',
+                "view-dashboard"
             ];
             $roles['admin']->syncPermissions($adminPermissions);
         }
         // User permissions
         if (isset($roles['user'])) {
-            $userPermissions = ['view-meetings','view-meeting-minutes'];
+            $userPermissions = ['view-meetings','view-meeting-minutes','view-dashboard'];
             $roles['user']->syncPermissions($userPermissions);
         }
         if (isset($roles['guest'])) {
-            $userPermissions = ['view-meetings','view-meeting-minutes'];
+            $userPermissions = ['view-meetings','view-meeting-minutes','view-dashboard'];
             $roles['guest']->syncPermissions($userPermissions);
+        }
+        if (isset($roles['md'])) {
+            $userPermissions = ['view-dashboard'];
+            $roles['md']->syncPermissions($userPermissions);
         }
 
 
@@ -96,6 +101,12 @@ class UsersTableSeeder extends Seeder
                 'mobile_no' => '9886543212',
                 'role' => 'user',
             ],
+            [
+                'name' => 'md',
+                'email' => 'md@neamms.com',
+                'mobile_no' => '9856543212',
+                'role' => 'md',
+            ],
         ];
 
         foreach ($adminUsers as $adminUser) {
@@ -117,31 +128,5 @@ class UsersTableSeeder extends Seeder
                 $user->assignRole($roles[$adminUser['role']]);
             }
         }
-         // Create 20 guest users
-        //  for ($i = 1; $i <= 20; $i++) {
-        //     $firstName = $faker->firstName;
-        //     $lastName = $faker->lastName;
-        //     $fullName = $firstName . ' ' . $lastName;
-        //     $email = strtolower($firstName . '.' . $lastName) . '@example.com';
-        //     $mobileNo = '98' . $faker->numberBetween(10000000, 99999999);
-
-        //     $user = User::create([
-        //         'username' => $fullName,
-        //         'email' => $email,
-        //         'mobile_no' => $mobileNo,
-        //         'office_email' => $email,
-        //         'office_mobile_no' => $mobileNo,
-        //         'password' => Hash::make('password'),
-        //         'status' => true,
-        //         'password_changed_at' => now(),
-        //         'locale' => 'np',
-        //         'designation_id' => fake()->numberBetween(2, 10), // Assuming 2-10 are regular designations
-        //         'organization_id' => fake()->numberBetween(1, 9)
-        //     ]);
-
-        //     if (isset($roles['user'])) {
-        //         $user->assignRole($roles['user']);
-        //     }
-        // }
     }
 }

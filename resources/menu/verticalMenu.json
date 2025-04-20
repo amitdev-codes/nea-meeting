@@ -6,7 +6,8 @@
                     "url": "dashboard",
                     "name": "menu.dashboard",
                     "icon": "menu-icon tf-icons bx bx-home-circle",
-                    "slug": "dashboard"
+                    "slug": "dashboard",
+                    "permission": "view-dashboard"
                 }
             ]
         },

@@ -23,9 +23,20 @@
             
             <!-- Login Button (Right Aligned) -->
             <div class="flex-shrink-0">
-                <a href="{{ route('login') }}" class="btn btn-primary btn-sm rounded-pill px-4">
-                    <i class="bx bx-log-in me-1"></i> {{ __('Login') }}
-                </a>
+                @auth
+                    <a href="{{ route('logout') }}" class="btn btn-primary btn-sm rounded-pill px-4" 
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="bx bx-log-out me-1"></i> {{ __('Logout') }}
+                    </a>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
+                @endauth
+                @guest
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-sm rounded-pill px-4">
+                        <i class="bx bx-log-in me-1"></i> {{ __('Login') }}
+                    </a>
+                @endguest
             </div>
         </div>
     </div>

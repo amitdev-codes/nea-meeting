@@ -48,6 +48,7 @@ class DashBoardController extends Controller
         $statusData = [];
         $userMeetingsPerDayLabels = [];
         $userMeetingsPerDayData = [];
+        $todayDate = Carbon::today()->toDateString();
     
         if ($user->hasRole(['admin', 'superadmin'])) {
             // Total Counts for Admin/Superadmin
@@ -114,7 +115,11 @@ class DashBoardController extends Controller
     
             $statusLabels = array_keys($statusCounts);
             $statusData = array_values($statusCounts);
-        } elseif ($user->hasRole(['user', 'guest'])) {
+        }elseif ($user->hasRole('md')) {
+            $upcomingMeetings = Meeting::where('meeting_date_ad', '>=', $todayDate)->orderBy('meeting_date_ad', 'asc')->orderBy('start_time', 'asc')->paginate(10);
+            return view('partials.meetings', compact('upcomingMeetings'));
+        }
+         elseif ($user->hasRole(['user', 'guest'])) {
             // Total Counts for User (based on organization)
             $todaysMeetings = Meeting::whereDate('meeting_date_ad', $today)
                                     ->whereJsonContains('meetings.organizations', (string) $user->organization_id)
@@ -175,7 +180,8 @@ class DashBoardController extends Controller
             'statusLabels',
             'statusData',
             'userMeetingsPerDayLabels',
-            'userMeetingsPerDayData'
+            'userMeetingsPerDayData',
+            
         ));
     }
     public function locale(Request $request): RedirectResponse

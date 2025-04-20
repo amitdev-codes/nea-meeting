@@ -2,13 +2,15 @@
 
 namespace Modules\NeaMeeting\DataTables;
 
-use Modules\NeaMeeting\Models\Meeting;
-use App\Traits\CommonDataTableFunctions;
-use Illuminate\Database\Eloquent\Builder as QueryBuilder;
-use Yajra\DataTables\EloquentDataTable;
-use Yajra\DataTables\Html\Builder as HtmlBuilder;
+use Carbon\Carbon;
+use App\Enums\MeetingStatus;
 use Yajra\DataTables\Html\Column;
+use Modules\NeaMeeting\Models\Meeting;
+use Yajra\DataTables\EloquentDataTable;
+use App\Traits\CommonDataTableFunctions;
 use Yajra\DataTables\Services\DataTable;
+use Yajra\DataTables\Html\Builder as HtmlBuilder;
+use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 
 class MeetingDataTable extends DataTable
 {
@@ -24,18 +26,51 @@ class MeetingDataTable extends DataTable
             ->eloquent($query)
             ->addColumn('checkbox', fn ($row) => $this->renderCheckbox('meeting_ids[]', $row->id))
             ->addColumn('meeting_room', function ($row) {
-                return $row->meetingRoom->name;
+                return isset($row->meetingRoom) ? $row->meetingRoom->name : null;
             })
+            ->addColumn('status', function ($row) {
+                // Get current date and time
+                $now = Carbon::now();
 
-            ->addColumn('status', fn ($row) => $this->getMeetingStatusBadge($row->status))
+                // Parse meeting date
+                $meetingDate = Carbon::parse($row->meeting_date_ad);
+
+                // Extract time from start_time and end_time
+                $startTime = Carbon::parse($row->start_time)->format('H:i:s'); // Get only time (e.g., '00:00:00')
+                $endTime = $row->end_time ? Carbon::parse($row->end_time)->format('H:i:s') : null;
+
+                // Combine meeting_date_ad with time to create full DateTime
+                $startDateTime = Carbon::parse($row->meeting_date_ad . ' ' . $startTime);
+                $endDateTime = $endTime ? Carbon::parse($row->meeting_date_ad . ' ' . $endTime) : null;
+
+                // Determine the status
+                $calculatedStatus = $row->status; // Default to current status
+
+                if ($row->status !== MeetingStatus::Cancelled->value) { // Respect Cancelled status
+                    if ($now->lessThan($startDateTime)) {
+                        $calculatedStatus = MeetingStatus::Scheduled->value;
+                    } elseif ($endDateTime && $now->greaterThanOrEqualTo($startDateTime) && $now->lessThan($endDateTime)) {
+                        $calculatedStatus = MeetingStatus::Ongoing->value;
+                    } elseif ($endDateTime && $now->greaterThanOrEqualTo($endDateTime)) {
+                        $calculatedStatus = MeetingStatus::Completed->value;
+                    }
+                }
+
+                // Update the database if the status has changed
+                if ($row->status !== $calculatedStatus) {
+                    $row->update(['status' => $calculatedStatus]);
+                }
+
+                // Return the badge for the calculated status
+                return $this->getMeetingStatusBadge($calculatedStatus);
+            })
             ->addColumn('action', $this->addActionColumn(
                 'form',
                 $this->getRoutes(),
                 $this->getPermissions('meetings')
             ))
-            ->rawColumns(['checkbox', 'action','status']);
+            ->rawColumns(['checkbox', 'action', 'status']);
     }
-    
     public function query(Meeting $model): QueryBuilder
     {
         $query = $model->newQuery();

@@ -64,7 +64,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="mb-3 col-md-4">
-                    <x-forms.input-select2 name="organizations" id="select2Organization" class="select2 form-select" required
+                    <x-forms.input-select2 name="organizations" id="select2Organization" class="select2 form-select"
                         :options="$organizations
                             ->map(fn($organization) => [$organization->id, $organization->name . ' - ' . $organization->name_np])
                             ->toArray()" :value="old('organizations', isset($model) ? (is_array($model->organizations) ? $model->organizations : json_decode($model->organizations, true)) : [])" placeholder="{{ __('Select Local Levels') }}" multiple />

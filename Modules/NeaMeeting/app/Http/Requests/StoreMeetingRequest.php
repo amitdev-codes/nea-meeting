@@ -69,7 +69,7 @@ class StoreMeetingRequest extends FormRequest
         return [
             'title' => 'required|string|max:200',
             'description' => 'nullable|string',
-            'meeting_type' => 'required|string|max:50',
+            'meeting_type' => 'nullable|string|max:50',
             'meeting_date' => 'nullable|regex:/^\d{4}-\d{2}-\d{2}$/', // Validate Nepali date format (YYYY-MM-DD)
             'meeting_date_ad' => 'required|date', // Validate Gregorian date
             'start_time' => 'required|date', // Already converted to full datetime

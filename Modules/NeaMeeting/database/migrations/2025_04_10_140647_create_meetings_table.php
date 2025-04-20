@@ -17,7 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('title', 200);
             $table->text('description')->nullable();
-            $table->enum('meeting_type', MeetingType::values())->default(MeetingType::REGULAR->value);
+            // $table->enum('meeting_type', MeetingType::values())->default(MeetingType::REGULAR->value);
+            $table->enum('meeting_type', MeetingType::values())->nullable();
             $table->string('meeting_date')->nullable();
             $table->date('meeting_date_ad')->nullable();
             $table->dateTime('start_time'); // Changed from timestamp to dateTime

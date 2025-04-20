@@ -60,7 +60,7 @@ class UpdateMeetingRequest extends FormRequest
         return [
             'title' => 'required|string|max:200',
             'description' => 'nullable|string',
-            'meeting_type' => 'required|string|max:50',
+            'meeting_type' => 'nullable|string|max:50',
             'meeting_date' => 'nullable|string', // Not stored in DB
             'start_time' => 'required|date', // Changed from date_format:H:i:s to date
             'end_time' => 'nullable|date', // Changed to date
