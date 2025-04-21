@@ -7,13 +7,16 @@
     <div class="mb-3 col-md-3">
         <x-forms.input name="meeting_location" :label="__('field.meeting_location')" :value="old('meeting_location', $model->meeting_location ?? '')" />
     </div>
-    <div class="mb-3 col-md-3">
+    {{-- <div class="mb-3 col-md-3">
         <x-forms.input-select2 name="meeting_room_id" :options="$meeting_rooms
             ->map(function ($meeting_room) {
                 return [$meeting_room->id, $meeting_room->name ?? ''];
             })
             ->toArray()" :value="old('meeting_room_id', isset($model) ? $model->meeting_room_id ?? '' : '')"
             placeholder="{{ __('Select Meeting Room') }}"  />
+    </div> --}}
+    <div class="mb-3 col-md-3">
+        <x-forms.input name="meeting_rooms" :label="__('field.meeting_rooms')" :value="old('meeting_rooms', $model->meeting_rooms ?? '')" />
     </div>
     <div class="mb-3 col-md-3">
         <x-forms.input-select2 name="meeting_type" :options="\App\Enums\MeetingType::toArray()" :value="old('meeting_type', isset($model) ? $model->meeting_type ?? '' : '')"
@@ -25,13 +28,18 @@
         label="{{ __('field.meeting_date') }}" value="{{ old('meeting_date', $model->meeting_date ?? '') }}"
         placeholder="Select Meeting Date" required />
 
-    <div class="mb-3 col-md-4">
-        <x-forms.input-time name="start_time" id="startTime" :label="__('field.start_time')" :value="old(
-            'start_time',
-            isset($model) ? $model->start_time ?? \Carbon\Carbon::parse($model->start_time)->format('H:i') : '',
-        )"
-            placeholder="Select Start Time" required />
-    </div>
+        {{-- @dd($model); --}}
+
+        <div class="mb-3 col-md-4">
+            <x-forms.input-time
+                name="start_time"
+                id="startTime"
+                :label="__('field.start_time')"
+                :value="old('start_time', isset($model) && $model->start_time ? \Carbon\Carbon::parse($model->start_time)->format('H:i') : '')"
+                placeholder="Select Start Time"
+                required
+            />
+        </div>
     <div class="mb-3 col-md-4">
         <x-forms.input-time 
             name="end_time" 

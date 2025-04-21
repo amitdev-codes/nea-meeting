@@ -79,6 +79,12 @@ class OrganizationsTableSeeder extends Seeder
                 'name_np' => 'परियोजना व्यवस्थापन निर्देशनालय',
                 'status' => true,
             ],
+            [
+                'code' => 'PMD',
+                'name' => 'Information Technology Department',
+                'name_np' => 'सूचना प्रविधि विभाग',
+                'status' => true,
+            ],
         ];
     
         DB::table('organizations')->insert($organizations);

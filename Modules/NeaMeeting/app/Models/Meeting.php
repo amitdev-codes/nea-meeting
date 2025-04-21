@@ -30,6 +30,7 @@ class Meeting extends Model implements HasMedia
         'start_time',
         'end_time',
         'meeting_location',
+        'meeting_rooms',
         'meeting_room_id',
         'is_virtual',
         'is_external',

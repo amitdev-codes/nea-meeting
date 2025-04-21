@@ -66,6 +66,7 @@ class UpdateMeetingRequest extends FormRequest
             'end_time' => 'nullable|date', // Changed to date
             'meeting_room_id' => 'nullable|exists:meeting_rooms,id',
             'meeting_location' => 'nullable|string|max:255',
+            'meeting_rooms' => 'nullable|string|max:255',
             'is_virtual' => 'boolean',
             'is_external' => 'boolean',
             'virtual_meeting_link' => 'nullable|string|max:255|required_if:is_virtual,1',

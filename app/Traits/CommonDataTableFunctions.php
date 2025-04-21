@@ -420,38 +420,41 @@ trait CommonDataTableFunctions
     }
     protected function initBulkDeleteScript(string $checkboxName): string
     {
-        return '
-            $("#select-all").on("click", function() {
-                var isChecked = this.checked;
-                $("input[name=\''.$checkboxName.'\']").prop("checked", isChecked);
-                updateBulkDeleteButton();
-            });
+        if(auth()->user()->hasRole(['admin', 'superadmin'])) {
+            return '
+                $("#select-all").on("click", function() {
+                    var isChecked = this.checked;
+                    $("input[name=\''.$checkboxName.'\']").prop("checked", isChecked);
+                    updateBulkDeleteButton();
+                });
 
-            $(document).on("change", "input[name=\''.$checkboxName.'\']", function() {
-                updateBulkDeleteButton();
-                if (!$(this).prop("checked")) {
-                    $("#select-all").prop("checked", false);
-                } else {
-                    // Check if all checkboxes are checked
-                    if ($("input[name=\''.$checkboxName.'\']").length === $("input[name=\''.$checkboxName.'\']:checked").length) {
-                        $("#select-all").prop("checked", true);
+                $(document).on("change", "input[name=\''.$checkboxName.'\']", function() {
+                    updateBulkDeleteButton();
+                    if (!$(this).prop("checked")) {
+                        $("#select-all").prop("checked", false);
+                    } else {
+                        // Check if all checkboxes are checked
+                        if ($("input[name=\''.$checkboxName.'\']").length === $("input[name=\''.$checkboxName.'\']:checked").length) {
+                            $("#select-all").prop("checked", true);
+                        }
+                    }
+                });
+
+                function updateBulkDeleteButton() {
+                    var checkedCount = $("input[name=\''.$checkboxName.'\']:checked").length;
+                    var bulkDeleteBtn = $("#bulk-delete-btn");
+
+                    if (checkedCount > 0) {
+                        bulkDeleteBtn.removeClass("d-none");
+                        $(".bulk-delete-count").html("(" + checkedCount + " selected)");
+                    } else {
+                        bulkDeleteBtn.addClass("d-none");
+                        $(".bulk-delete-count").html("");
                     }
                 }
-            });
-
-            function updateBulkDeleteButton() {
-                var checkedCount = $("input[name=\''.$checkboxName.'\']:checked").length;
-                var bulkDeleteBtn = $("#bulk-delete-btn");
-
-                if (checkedCount > 0) {
-                    bulkDeleteBtn.removeClass("d-none");
-                    $(".bulk-delete-count").html("(" + checkedCount + " selected)");
-                } else {
-                    bulkDeleteBtn.addClass("d-none");
-                    $(".bulk-delete-count").html("");
-                }
-            }
-        ';
+            ';
+        }
+        return '';
     }
 
     protected function generateBadges($items, array $options = []): string

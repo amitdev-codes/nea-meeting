@@ -76,6 +76,7 @@ class StoreMeetingRequest extends FormRequest
             'end_time' => 'nullable|date',
             'meeting_room_id' => 'nullable|exists:meeting_rooms,id',
             'meeting_location' => 'nullable|string|max:255',
+            'meeting_rooms' => 'nullable|string|max:255',
             'is_virtual' => 'nullable|boolean',
             'is_external' => 'nullable|boolean',
             'virtual_meeting_link' => 'nullable|string|max:255|required_if:is_virtual,1',
