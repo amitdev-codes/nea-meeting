@@ -1,39 +1,53 @@
 @extends('landingpage::layouts/frontMaster')
+
 @php
     $locale = Session::get('locale');
     App::setLocale('np');
 @endphp
+
 @section('navbar')
     @include('landingpage::partials.header')
 @endsection
+
 @section('content')
-    <main class="main-content py-5">
-        <div class="container">
+    <main class="main-content py-5" style="min-height: calc(100vh - 140px);">
+        <div class="container-fluid px-4">
             <div class="row g-4">
                 {{-- Main Information Card --}}
                 <div class="col-xl-8 col-lg-7">
                     <x-resource.detail-card title="{{ __('field.meeting_information') }}" icon="bx-group"
-                        class="card h-100 shadow-sm border-0">
-                        <div class="card-body">
-                            <div class="row gy-3 nepali_td">
-                                <x-resource.detail-item label="{{ __('field.title') }}" :value="$resource->title" class="col-12" />
-                                <x-resource.detail-item label="{{ __('field.meeting_location') }}" :value="$resource->meeting_location"
-                                    class="col-12" />
-                                <x-resource.detail-item label="{{ __('field.meeting_date') }}" :value="$resource->meeting_date . ' (' . $resource->meeting_date_ad . ')' ?? 'N/A'"
-                                    class="col-md-6" />
-                                <x-resource.detail-item label="{{ __('field.start_time') }}" :value="$resource->start_time ?? ''"
-                                    class="col-md-3" />
-                                <x-resource.detail-item label="{{ __('field.end_time') }}" :value="$resource->end_time ?? ''"
-                                    class="col-md-3" />
-                                <x-resource.detail-item label="{{ __('field.meeting_room_id') }}" :value="$resource->meetingRoom->name ?? 'N/A'"
-                                    class="col-md-6" />
-                                <x-resource.detail-item label="{{ __('field.meeting_type') }}" :value="$resource->meeting_type ?? ''"
-                                    class="col-md-6" />
-
-                                <x-resource.detail-item label="{{ __('field.created_at') }}" :value="$resource->created_at"
-                                    type="datetime" class="col-md-6" />
-                                <x-resource.detail-item label="{{ __('field.updated_at') }}" :value="$resource->updated_at"
-                                    type="datetime" class="col-md-6" />
+                        class="card h-100 shadow-sm border-0" style="border-radius: 12px;">
+                        <div class="card-body p-4 nepali_td">
+                            <div class="row gy-3">
+                                <x-resource.detail-item label="{{ __('field.title') }}"
+                                    :value="$resource->title" class="col-12">
+                                    <i class="bx bx-text me-2"></i>
+                                </x-resource.detail-item>
+                                <x-resource.detail-item label="{{ __('field.meeting_location') }}"
+                                    :value="$resource->meeting_location" class="col-12">
+                                    <i class="bx bx-map me-2"></i>
+                                </x-resource.detail-item>
+                                <x-resource.detail-item label="{{ __('field.meeting_date') }}"
+                                    :value="$resource->meeting_date . ' (' . $resource->meeting_date_ad . ')' ?? 'N/A'"
+                                    class="col-md-6">
+                                    <i class="bx bx-calendar me-2"></i>
+                                </x-resource.detail-item>
+                                <x-resource.detail-item label="{{ __('field.start_time') }}"
+                                    :value="$resource->start_time ?? ''" class="col-md-3">
+                                    <i class="bx bx-time me-2"></i>
+                                </x-resource.detail-item>
+                                <x-resource.detail-item label="{{ __('field.end_time') }}"
+                                    :value="$resource->end_time ?? ''" class="col-md-3">
+                                    <i class="bx bx-time-five me-2"></i>
+                                </x-resource.detail-item>
+                                <x-resource.detail-item label="{{ __('field.meeting_room_id') }}"
+                                    :value="$resource->meetingRoom->name ?? 'N/A'" class="col-md-6">
+                                    <i class="bx bx-door-open me-2"></i>
+                                </x-resource.detail-item>
+                                <x-resource.detail-item label="{{ __('field.meeting_type') }}"
+                                    :value="$resource->meeting_type ?? ''" class="col-md-6">
+                                    <i class="bx bx-category me-2"></i>
+                                </x-resource.detail-item>
                             </div>
                         </div>
                     </x-resource.detail-card>
@@ -41,8 +55,9 @@
 
                 {{-- Documents Sidebar --}}
                 <div class="col-xl-4 col-lg-5">
-                    <x-resource.detail-card title="Meeting Documents" icon="bx-file" class="card h-100 shadow-sm border-0">
-                        <div class="card-body">
+                    <x-resource.detail-card title="{{ __('field.meeting_documents') }}" icon="bx-file"
+                        class="card h-100 shadow-sm border-0" style="border-radius: 12px;">
+                        <div class="card-body p-4">
                             @if ($resource->media->isNotEmpty())
                                 <div class="row g-3">
                                     @foreach ($resource->media->take(6) as $media)
@@ -70,10 +85,10 @@
                                                         </div>
                                                     </div>
                                                 @elseif (in_array($media->mime_type, [
-                                                        'text/plain',
-                                                        'application/msword',
-                                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                                                    ]))
+                                                    'text/plain',
+                                                    'application/msword',
+                                                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                                ]))
                                                     <div class="file-preview position-relative">
                                                         <div class="file-cover text mb-2">
                                                             <i class="bx bxs-file-doc text-primary"></i>
@@ -153,7 +168,7 @@
                             @else
                                 <div class="text-center py-4">
                                     <i class="bx bx-file-blank text-secondary mb-3" style="font-size: 3rem;"></i>
-                                    <p class="text-muted mb-0">No documents available</p>
+                                    <p class="text-muted mb-0">{{ __('field.no_documents') }}</p>
                                 </div>
                             @endif
                         </div>
@@ -163,116 +178,163 @@
         </div>
     </main>
 @endsection
+
 @section('footer')
     @include('landingpage::partials.footer')
 @endsection
-<style>
-    /* Adjust if navbar is fixed */
-    .navbar-fixed-top {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 1040;
-    }
 
-    /* Space below fixed navbar */
-    .mt-navbar {
-        margin-top: 70px;
-        /* Adjust according to navbar height */
-    }
+@section('styles')
+    <style>
+        /* Full-Screen Layout */
+        .main-content {
+            background-color: #f5f6fa;
+            padding: 40px 20px;
+        }
 
-    .landing-footer {
-        background-color: #f8f9fa;
-        border-top: 1px solid #dee2e6;
-    }
+        /* Card Styling */
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
 
-    .footer-bottom {
-        padding: 1rem 0;
-        font-size: 0.875rem;
-        color: #6c757d;
-    }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+        }
 
-    .social-links a {
-        color: inherit;
-        margin-right: 10px;
-        transition: color 0.2s;
-    }
+        .card-header {
+            border-bottom: none;
+            font-size: 1.25rem;
+        }
 
-    .social-links a:hover {
-        color: #0d6efd;
-    }
+        .card-body {
+            font-size: 0.95rem;
+        }
 
-    .document-preview {
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        height: 100%;
-    }
+        /* Bold Labels with Icons */
+        .detail-item label {
+            font-weight: 700 !important;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
 
-    .document-preview:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
+        .detail-item .bx {
+            font-size: 1.2rem;
+            color: #555;
+        }
 
-    .text-truncate {
-        max-width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
+        .detail-item p, .detail-item .form-control-plaintext {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
 
-    .file-cover {
-        height: 110px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #fff;
-        border-radius: 6px;
-        border: 1px solid #eee;
-    }
+        /* Document Preview */
+        .document-preview {
+            padding: 1rem;
+            background: #ffffff;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            height: 100%;
+            border: 1px solid #e9ecef;
+        }
 
-    .file-cover i {
-        font-size: 3rem;
-    }
+        .document-preview:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        }
 
-    .image-cover {
-        height: 110px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        background: #fff;
-        border-radius: 6px;
-        border: 1px solid #eee;
-    }
+        .file-cover {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
 
-    .image-cover img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+        .file-cover i {
+            font-size: 3.5rem;
+        }
 
-    .file-preview {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
+        .image-cover {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
 
-    .action-buttons {
-        margin-top: auto;
-    }
+        .image-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-    .file-cover.pdf {
-        background-color: rgba(255, 230, 230, 0.3);
-    }
+        .file-preview {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
 
-    .file-cover.text {
-        background-color: rgba(230, 240, 255, 0.3);
-    }
+        .action-buttons {
+            margin-top: auto;
+        }
 
-    .file-cover.generic {
-        background-color: rgba(240, 240, 240, 0.3);
-    }
-</style>
+        .file-cover.pdf {
+            background-color: rgba(255, 230, 230, 0.2);
+        }
+
+        .file-cover.text {
+            background-color: rgba(230, 240, 255, 0.2);
+        }
+
+        .file-cover.generic {
+            background-color: rgba(240, 240, 240, 0.2);
+        }
+
+        .text-truncate {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Button Styling */
+        .btn-outline-primary, .btn-outline-secondary {
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .card-header h5 {
+                font-size: 1.1rem;
+            }
+            .file-cover, .image-cover {
+                height: 100px;
+            }
+            .file-cover i {
+                font-size: 2.5rem;
+            }
+            .col-lg-3, .col-lg-9 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+@endsection

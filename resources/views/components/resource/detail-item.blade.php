@@ -1,19 +1,24 @@
 @props(['label', 'value', 'type' => 'text'])
 
-<div class="row mb-3">
-    <div class="col-lg-3">
-        <label>{{ $label }}:</label>
+<div class="row mb-3 align-items-center">
+    <div class="col-lg-3 col-md-4 col-sm-12">
+        <label class="fw-bold d-flex align-items-center">
+            @if (isset($slot))
+                {{ $slot }}
+            @else
+                <i class="bx bx-info-circle me-2"></i>
+            @endif
+            {{ $label }}:
+        </label>
     </div>
-    <div class="col-lg-9">
+    <div class="col-lg-9 col-md-8 col-sm-12">
         @switch($type)
             @case('date')
-              <div class="form-control-plaintext"> {{ $value ? $value->format('M d, Y') : '-' }}</div>
+                <div class="form-control-plaintext">{{ $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-' }}</div>
             @break
 
             @case('datetime')
-            <div class="form-control-plaintext">   {{ $value ? $value->format('M d, Y H:i') : '-' }}</div>
-
-              
+                <div class="form-control-plaintext">{{ $value ? \Carbon\Carbon::parse($value)->format('M d, Y H:i') : '-' }}</div>
             @break
 
             @case('boolean')
@@ -36,16 +41,14 @@
 
             @case('image')
                 @if ($value)
-                    <img src="{{ $value }}" alt="Image" class="img-fluid rounded" style="max-height: 100px">
+                    <img src="{{ $value }}" alt="Image" class="img-fluid rounded" style="max-height: 100px;">
                 @else
                     -
                 @endif
             @break
 
             @default
-            <div class="form-control-plaintext">    {{ $value ?? '-' }}</div>
-
-              
+                <div class="form-control-plaintext">{{ $value ?? '-' }}</div>
         @endswitch
     </div>
 </div>

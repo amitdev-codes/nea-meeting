@@ -597,6 +597,7 @@ return [
     'Meeting-rooms'=>'बैठक कोठहरू',
     'is_meeting_external'=>'Is Meeting External',
     'meeting_room'=>'बैठक कोठा',
+    'is_external'=>'Is External',
 
      
 ];

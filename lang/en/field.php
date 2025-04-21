@@ -676,6 +676,7 @@ return [
 'time'=>'Time',
 'meeting_status'=>'Meeting Status',
 'meeting_room'=>'Meeting Room',
+'is_external'=>'Is External',
 
 
 ];

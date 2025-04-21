@@ -99,10 +99,10 @@ class MeetingRoomDataTable extends DataTable
     {
         return [
             $this->checkboxColumn(),
-            Column::make('name')->title(__('name')),
-            Column::make('location')->title(__('location')),
-            Column::make('capacity')->title(__('capacity')),
-            Column::make('has_projector')->title(__('has_projector')),
+            Column::make('name')->title(__('field.name')),
+            Column::make('location')->title(__('field.location')),
+            Column::make('capacity')->title(__('field.capacity')),
+            Column::make('has_projector')->title(__('field.has_projector')),
             $this->actionColumn()
         ];
     }

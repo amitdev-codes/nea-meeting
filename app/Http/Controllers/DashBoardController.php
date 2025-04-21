@@ -116,8 +116,69 @@ class DashBoardController extends Controller
             $statusLabels = array_keys($statusCounts);
             $statusData = array_values($statusCounts);
         }elseif ($user->hasRole('md')) {
-            $upcomingMeetings = Meeting::where('meeting_date_ad', '>=', $todayDate)->orderBy('meeting_date_ad', 'asc')->orderBy('start_time', 'asc')->paginate(10);
-            return view('partials.meetings', compact('upcomingMeetings'));
+            // Total Counts for User (based on organization)
+            $todaysMeetings = Meeting::whereDate('meeting_date_ad', $today)
+                                    ->whereJsonContains('meetings.organizations', (string) $user->organization_id)
+                                    ->count();
+            $comingMeetings = Meeting::where('meeting_date_ad', '>', $today)
+                                      ->whereJsonContains('meetings.organizations', (string) $user->organization_id)
+                                      ->count();
+            $thisMonthMeetings = Meeting::whereYear('meeting_date_ad', $today->year)
+                                       ->whereMonth('meeting_date_ad', $today->month)
+                                       ->whereJsonContains('meetings.organizations', (string) $user->organization_id)
+                                       ->count();
+            $totalMeetings = Meeting::whereJsonContains('meetings.organizations', (string) $user->organization_id)
+                                    ->count();
+
+                                    // dd($upcomingMeetings);
+
+            // Meetings by Date for User’s Organization (in Nepali format)
+            $userMeetingsPerDate = Meeting::whereJsonContains('meetings.organizations', (string) $user->organization_id)
+                ->selectRaw('meeting_date_ad, COUNT(*) as meeting_count')
+                ->groupBy('meeting_date_ad')
+                ->orderBy('meeting_date_ad', 'asc')
+                ->get()
+                ->map(function ($item) {
+                    $nepaliDate = NepaliDateConverter::toNepaliDate(Carbon::parse($item->meeting_date_ad));
+                    return [
+                        'label' => sprintf(
+                            '%s %s',
+                            $nepaliDate['month_name'],
+                            NepaliDateConverter::toNepaliDigits($nepaliDate['day'])
+                        ),
+                        'count' => $item->meeting_count,
+                    ];
+                })->toArray();
+    
+            $userMeetingsPerDayLabels = array_column($userMeetingsPerDate, 'label');
+            $userMeetingsPerDayData = array_column($userMeetingsPerDate, 'count');
+    
+            // Meeting Status Distribution for User’s Organization
+            $statusCounts = Meeting::whereJsonContains('meetings.organizations', (string) $user->organization_id)
+                ->select('status')
+                ->groupBy('status')
+                ->pluck('status')
+                ->mapWithKeys(function ($status) use ($user) {
+                    return [$status => Meeting::where('status', $status)
+                                            ->whereJsonContains('meetings.organizations', (string) $user->organization_id)
+                                            ->count()];
+                })->toArray();
+    
+            $statusLabels = array_keys($statusCounts);
+            $statusData = array_values($statusCounts);
+                $upcomingMeetings = Meeting::where('meeting_date_ad', '>=', $todayDate)->orderBy('meeting_date_ad', 'asc')->orderBy('start_time', 'asc')->paginate(10);
+                return view('partials.meetings', compact(
+                'todaysMeetings',
+                'upcomingMeetings',
+                'comingMeetings',
+                'thisMonthMeetings',
+                'totalMeetings',
+                'meetingsPerMonthLabels',
+                'meetingsPerMonthData',
+                'statusLabels',
+                'statusData',
+                'userMeetingsPerDayLabels',
+                'userMeetingsPerDayData'));
         }
          elseif ($user->hasRole(['user', 'guest'])) {
             // Total Counts for User (based on organization)
