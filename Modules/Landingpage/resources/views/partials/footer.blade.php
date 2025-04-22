@@ -21,26 +21,6 @@
                         {{ __('Last Modified') }}:
                         <span class="fw-semibold" id="last-modified">{{ date('F j, Y') }}</span>
                     </div>
-                    <div class="social-links d-flex gap-2">
-                        @php
-                            $socialLinks = [
-                                'github' => ['icon' => 'bxl-github', 'color' => 'text-white'],
-                                'facebook' => ['icon' => 'bxl-facebook', 'color' => 'text-primary'],
-                                'twitter' => ['icon' => 'bxl-twitter', 'color' => 'text-info'],
-                                'instagram' => ['icon' => 'bxl-instagram', 'color' => 'text-danger'],
-                                'linkedin' => ['icon' => 'bxl-linkedin', 'color' => 'text-primary'],
-                            ];
-                        @endphp
-                        @foreach ($socialLinks as $platform => $data)
-                            @if (!empty($siteSettings['social_account_settings'][$platform]))
-                                <a href="{{ $siteSettings['social_account_settings'][$platform] }}" target="_blank"
-                                    class="{{ $data['color'] }} hover-opacity" data-bs-toggle="tooltip"
-                                    title="{{ ucfirst($platform) }}">
-                                    <i class="bx {{ $data['icon'] }} fs-5"></i>
-                                </a>
-                            @endif
-                        @endforeach
-                    </div>
                 </div>
             </div>
         </div>
