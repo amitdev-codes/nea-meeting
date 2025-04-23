@@ -679,6 +679,7 @@ return [
 'is_external'=>'Is External',
 'is_meeting_external'=>'Is Meeting External',
 'meeting_rooms'=>'Meeting Rooms',
+'calendar'=>'Calendar',
 
 
 ];

@@ -8,65 +8,48 @@ use Illuminate\Support\Facades\DB;
 use App\Helpers\NepaliDateConverter;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Modules\Calendar\Services\NepaliCalendarService;
 
 class CalendarController extends Controller
 {
-    public function index()
+
+    protected $calendarService;
+    
+    /**
+     * Constructor to inject the calendar service
+     */
+    public function __construct(NepaliCalendarService $calendarService)
     {
-        $years = DB::table('nepali_calendar')->distinct()->pluck('bs_year');
-        $today = Carbon::now();
-        $nepaliDate = NepaliDateConverter::toNepaliDate($today);
-        $currentBsYear = $nepaliDate['year']; // e.g., 2081
-        $currentBsMonth = $nepaliDate['month']; // e.g., 12 (Chaitra)
-        $currentNepaliDay = $nepaliDate['day']; // e.g., 2
-    
-        $calendarData = DB::table('nepali_calendar')
-            ->where('bs_year', $currentBsYear)
-            ->where('month', $currentBsMonth)
-            ->first();
-        
-        // Convert to array for consistency
-        $calendarData = $calendarData ? (array) $calendarData : [];
-
-        $calendarData = (array) $calendarData;
-
-        // Get meeting counts for each day in the month
-        $daysInMonth = $calendarData['days'] ?? 30;
-        $meetingCounts = [];
-        $today = Carbon::today()->toDateString(); // Get today's date in YYYY-MM-DD format
-        $user=Auth::user();
-        for ($day = 1; $day <= $daysInMonth; $day++) {
-            // Format the Nepali date
-            $nepaliDate = sprintf('%s-%s-%02d', $years, $currentBsMonth, $day);
-            // Convert Nepali date to English (Gregorian) date
-            $englishDate = NepaliDateConverter::toGregorianDate($currentBsYear, $currentBsMonth, $day);
-            $gregorianDate = $englishDate['gregorian_date'];
-           
-            // Query meetings for this English date, only for today or future dates
-            $count = DB::table('meetings')
-            ->whereDate('meeting_date_ad', $gregorianDate)
-            ->whereDate('meeting_date_ad', '>=', $today)
-            ->when(!$user->hasAnyRole(['admin', 'superadmin']), function ($query) use ($user) {
-                return $query->whereJsonContains('meetings.organizations', (string) $user->organization_id);
-            })
-            ->count();
-        
-            $meetingCounts[$day] = $count;
-        }
-        // Add meeting counts to the calendar data
-        $calendarData['meeting_counts'] = $meetingCounts;
-        $months = DB::table('nepali_calendar')
-            ->where('bs_year', $currentBsYear)
-            ->distinct()
-            ->pluck('month');
-    
-        $days = $calendarData ? $calendarData['days'] : 30; // Use array syntax
-        $todaysDate = NepaliDateConverter::getTodayNepaliDateTime();
-        return view('calendar::pages.calendar.nepali-calendar', compact(
-            'years', 'todaysDate', 'months', 'days', 'currentBsYear', 'currentBsMonth', 'currentNepaliDay', 'calendarData'
-        ));
+        $this->calendarService = $calendarService;
     }
+    
 
+
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        // Get year and month from request if provided
+        $year = $request->input('year');
+        $month = $request->input('month');
+        // Get all calendar data from the service
+        $calendarData = $this->calendarService->getCompleteCalendarData($user, $year, $month);
+        return view('calendar::pages.calendar.nepali-calendar', $calendarData);
+    }
+    
+    public function getMonthData(Request $request)
+    {
+        $user = Auth::user();
+        $year = $request->input('year');
+        $month = $request->input('month');
+        
+        if (!$year || !$month) {
+            return response()->json(['error' => 'Year and month are required'], 400);
+        }
+        
+        $calendarData = $this->calendarService->getCompleteCalendarData($user, $year, $month);
+        
+        return response()->json($calendarData);
+    }
     public function getMonths($year)
     {
         $months = DB::table('nepali_calendar')

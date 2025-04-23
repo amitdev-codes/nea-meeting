@@ -31,30 +31,6 @@ Route::middleware(['locale'])->group(function () {
         });
     });
 
-    Route::post('/convert-image-to-base64', function (Request $request) {
-        $imageUrl = $request->input('image_url');
-
-        // Ensure full URL
-        if (! str_starts_with($imageUrl, 'http')) {
-            $imageUrl = url($imageUrl);
-        }
-
-        // Download and convert image
-        try {
-            $imageData = file_get_contents($imageUrl);
-            $base64 = base64_encode($imageData);
-            $mime = mime_content_type($imageUrl) ?: 'image/jpeg';
-
-            return response()->json([
-                'base64' => "data:$mime;base64,$base64",
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'base64' => null,
-                'error' => $e->getMessage(),
-            ], 400);
-        }
-    });
 
     require __DIR__.'/auth.php';
 });

@@ -40,6 +40,14 @@
                                         {{ __('field.dashboard') }}
                                     </button>
                                 </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="calendar-tab" data-bs-toggle="tab"
+                                        data-bs-target="#calendar" type="button" role="tab" aria-controls="calendar"
+                                        aria-selected="false">
+                                        <i class="bx bx-calendar me-2"></i>
+                                        {{ __('field.calendar') }}
+                                    </button>
+                                </li>
                             </ul>
                         </div>
 
@@ -277,7 +285,6 @@
                                 </div>
 
                                 <!-- Charts Section -->
-                                <!-- Charts Section -->
                                 <div class="row g-4">
                                     @if (auth()->user()->hasRole(['admin', 'superadmin']))
                                         <!-- Meetings Per Month Bar Chart for Admin/Superadmin -->
@@ -352,7 +359,25 @@
                                     @endif
                                 </div>
                             </div>
+
+                            <!-- Calendar View Tab -->
+                            <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab">
+                                <div class="p-4">
+                                    <h5 class="mb-4">{{ __('Calendar View') }}</h5>
+                                    <!-- Option 1: Redirect to the calendar route -->
+                                    <p class="text-center">
+                                        <a href="{{ route('admin.calendar') }}" class="btn btn-primary rounded-pill px-4">
+                                            <i class="bx bx-calendar me-2"></i>
+                                            {{ __('View Calendar') }}
+                                        </a>
+                                    </p>
+                                    <div id="calendar-content" class="calendar-container">
+                                        <!-- Calendar content will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
                         <!-- Pagination for Meetings Tab -->
                         @if ($upcomingMeetings->hasPages())
                             <div class="card-footer bg-light py-3">
@@ -389,6 +414,7 @@
         const statusData = @json($statusData ?? [0]);
         const userMeetingsPerDayLabels = @json($userMeetingsPerDayLabels ?? []);
         const userMeetingsPerDayData = @json($userMeetingsPerDayData ?? []);
+
         // Meetings Per Day Chart for User
         new Chart(document.getElementById('userMeetingsChart'), {
             type: 'bar',
@@ -460,21 +486,39 @@
                 responsive: true
             }
         });
+
+        // Optional: Load calendar content dynamically via AJAX
+        document.getElementById('calendar-tab').addEventListener('click', function () {
+            const calendarContent = document.getElementById('calendar-content');
+            calendarContent.innerHTML = '<p class="text-center">Loading calendar...</p>';
+
+            // Example AJAX call to load calendar content
+            fetch('{{ route('admin.calendar') }}')
+                .then(response => response.text())
+                .then(data => {
+                    calendarContent.innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Error loading calendar:', error);
+                    calendarContent.innerHTML = '<p class="text-center text-danger">Failed to load calendar.</p>';
+                });
+        });
     </script>
 @endpush
+
 <style>
+    .nav-link {
+        font-weight: bold; /* Makes all tab headers bold */
+        color: #fff; /* Ensures text is visible on the gradient background */
+    }
 
-        .nav-link {
-            font-weight: bold; /* Makes all tab headers bold */
-            color: #fff; /* Ensures text is visible on the gradient background */
-        }
+    /* Style for the active tab */
+    .nav-link.active {
+        background-color: rgba(0, 0, 0, 0.3) !important; /* Darker background for active tab */
+        font-weight: bold; /* Reinforce bold font for active tab */
+        color: #fff !important; /* White text for contrast */
+    }
 
-        /* Style for the active tab */
-        .nav-link.active {
-            background-color: rgba(0, 0, 0, 0.3) !important; /* Darker background for active tab */
-            font-weight: bold; /* Reinforce bold font for active tab */
-            color: #fff !important; /* White text for contrast */
-        }
     .nav-tabs .nav-link {
         color: #fff;
         background: transparent;
@@ -522,5 +566,10 @@
         .chart-placeholder canvas {
             max-height: 150px;
         }
+    }
+
+    /* Calendar container styling */
+    .calendar-container {
+        min-height: 400px;
     }
 </style>

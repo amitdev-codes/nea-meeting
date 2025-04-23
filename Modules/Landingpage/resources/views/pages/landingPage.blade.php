@@ -28,6 +28,7 @@
                             @endif
                         </div>
                     </div>
+
                     <div class="card-body p-0">
                         @if($upcomingMeetings->isNotEmpty())
                             <!-- Large screen table view -->

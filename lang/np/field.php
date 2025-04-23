@@ -599,6 +599,7 @@ return [
     'meeting_room'=>'बैठक कोठा',
     'is_external'=>'Is External',
     'meeting_rooms'=>'बैठक कोठाहरू',
+    'calendar'=>'कालेन्डर',
 
      
 ];
