@@ -131,5 +131,6 @@ return [
 'meeting-minutes'=>'Meeting Minutes',
 'organizations'=>'Offices',
 'meeting-rooms'=>'Meeting Rooms',
+'calendar'=>'Calendar'
 
 ];

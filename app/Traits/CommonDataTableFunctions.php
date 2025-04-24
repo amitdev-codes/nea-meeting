@@ -519,10 +519,11 @@ trait CommonDataTableFunctions
             })
             ->implode($options['separator']);
     }
-    public function getStatusBadge($status, $activeText = 'सक्रिय छ', $inactiveText = 'सक्रिय छैन'): string
+    public function getStatusBadge($status): string
     {
         $class = $status == 1 ? 'bg-primary' : 'bg-danger';
-        $text = $status == 1 ? $activeText : $inactiveText;
+        $text = $status == 1 ? __('field.active') : __('field.inactive');
+        // $text = $status == 1 ? $activeText : $inactiveText;
 
         return sprintf(
             '<span class="badge %s">%s</span>',

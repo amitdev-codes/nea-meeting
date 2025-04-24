@@ -676,10 +676,18 @@ return [
 'time'=>'Time',
 'meeting_status'=>'Meeting Status',
 'meeting_room'=>'Meeting Room',
-'is_external'=>'Is External',
+
 'is_meeting_external'=>'Is Meeting External',
 'meeting_rooms'=>'Meeting Rooms',
 'calendar'=>'Calendar',
+'active'=>'Active',
+'inactive'=>'InActive',
+'yes'=>'Yes',
+'no'=>'No',
+
+'is_virtual_meeting'=>'Is Virtual Meeting',
+'is_external'=>'Is External',
+
 
 
 ];

@@ -3595,7 +3595,7 @@ fieldset:disabled .btn {
     --bs-nav-tabs-border-color: #e4e6e8;
     --bs-nav-tabs-border-radius: var(--bs-border-radius);
     --bs-nav-tabs-link-hover-border-color: var(--bs-secondary-bg) var(--bs-secondary-bg) #e4e6e8;
-    --bs-nav-tabs-link-active-color: #006933;
+    --bs-nav-tabs-link-active-color: #fff;
     --bs-nav-tabs-link-active-bg: #fff;
     --bs-nav-tabs-link-active-border-color: #006933;
     border-bottom: var(--bs-nav-tabs-border-width) solid var(--bs-nav-tabs-border-color);

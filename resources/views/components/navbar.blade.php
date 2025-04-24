@@ -89,7 +89,7 @@
                     </div>
                     <div class="dropdown-shortcuts-list scrollable-container ps">
                         <div class="row row-bordered overflow-visible g-0">
-                            @hasanyrole('user|admin|superadmin')
+                            @hasanyrole('superadmin')
                             <div class="dropdown-shortcuts-item col">
                                 <span class="dropdown-shortcuts-icon rounded-circle mb-3">
                                     <i class="bx bx-calendar bx-26px text-heading"></i>
@@ -241,7 +241,7 @@
                 <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);"
                     data-bs-toggle="dropdown">
                     <div class="avatar avatar-online">
-                        <img src="../../assets/img/avatars/1.png" alt=""
+                        <img src="../../assets/img/avatars/8.png" alt=""
                             class="w-px-30 h-auto rounded-circle">
                     </div>
                 </a>
@@ -251,7 +251,7 @@
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online">
-                                        <img src="../../assets/img/avatars/1.png" alt=""
+                                        <img src="../../assets/img/avatars/8.png" alt=""
                                             class="w-px-30 h-auto rounded-circle">
                                     </div>
                                 </div>
@@ -273,11 +273,6 @@
                             <i class="bx bx-user bx-sm me-3"></i><span>My Profile</span>
                         </a>
                     </li>
-                    {{-- <li>
-                        <a class="dropdown-item" href="{{ route('admin.site-settings.index') }}">
-                            <i class="bx bx-cog bx-sm me-3"></i><span>Settings</span>
-                        </a>
-                    </li> --}}
                     <li>
                         <div class="dropdown-divider my-1"></div>
                     </li>

@@ -4,9 +4,11 @@ namespace Modules\NeaMeeting\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\User;
+use App\Enums\MeetingStatus;
 use Illuminate\Http\Request;
 use App\Events\MeetingCreated;
 use App\Events\MeetingUpdated;
+use App\Events\MeetingCancelled;
 use App\Services\ResponseService;
 use App\Traits\HandlesExceptions;
 use App\Traits\BulkDeletableTrait;
@@ -56,9 +58,17 @@ class MeetingController extends BaseAdminController
             DB::beginTransaction();
             
             try {
+                $validated=$request->validated();
                 // Create the meeting with validated data
-                $meeting = Meeting::create($request->validated());
-                
+                $meeting = Meeting::create($validated);
+                     // Handle external contact if is_external is true
+
+                if ($validated['is_external'] && isset($validated['external_contacts'])) {
+                    foreach ($validated['external_contacts'] as $contact) {
+                        $meeting->externalContacts()->create($contact);
+                    }
+                }
+                        
                 // Handle media upload if present
                 $this->handleMediaUploads($request, $meeting);
                 
@@ -67,12 +77,13 @@ class MeetingController extends BaseAdminController
                 }
                 
                 // Trigger the meeting created event
-                if ($request->boolean('send_notifications', true)) {
-                    event(new MeetingCreated($meeting, [
-                        'send_email' => $request->boolean('send_email', true),
-                        'organization_ids' => $request->organizations ?? [],
-                    ]));
-                }
+                // if ($request->boolean('send_notifications', true)) {
+                //     event(new MeetingCreated($meeting, [
+                //         'send_email' => $request->boolean('send_email', true),
+                //         'organization_ids' => $request->organizations ?? [],
+                //     ]));
+                // }
+
                 DB::commit();
                 if ($request->has('save_and_add_more')) {
                     return redirect()
@@ -97,34 +108,62 @@ class MeetingController extends BaseAdminController
     {
         $meeting->load(['media' => function($query) {
             $query->where('collection_name', 'meetings');
-        }]);
+        }, 'externalContacts']);
         return $this->renderForm($this->formView, $meeting);
     }
     
 
     public function update(UpdateMeetingRequest $request, Meeting $meeting)
     {
+        // dd($request->all());
         return $this->handleRequest($request, function () use ($request, $meeting) {
             DB::beginTransaction();
-            
             try {
-            // Get validated data
             $validated = $request->validated();
 
-            // Explicitly set end_time to null if empty
             if (empty($validated['end_time'])) {
                 $validated['end_time'] = null;
             }
 
             // Update meeting details
             $meeting->update($validated);
-                // Handle media upload if present
-                $this->handleMediaUploads($request, $meeting);
-                if ($request->hasFile('meetingDocuments')) {
-                    $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
+            if ($validated['is_external'] && isset($validated['external_contacts'])) {
+                $meeting->externalContacts()->delete();
+                foreach ($validated['external_contacts'] as $contact) {
+                    $meeting->externalContacts()->create($contact);
                 }
-                
-                DB::commit();
+             }else{
+                $meeting->externalContacts()->delete();
+            }
+            $this->handleMediaUploads($request, $meeting);
+            if ($request->hasFile('meetingDocuments')) {
+                $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
+            }
+            // trigger the evnts
+            // if ($request->boolean('send_notifications', true)) {
+            //     event(new MeetingUpdated($meeting, [
+            //         'send_email' => $request->boolean('send_email', true),
+            //         'organization_ids' => $request->organizations ?? [],
+            //     ]));
+            // }
+
+            if ($request->boolean('send_notifications', true)) {
+                // dd($validated['status']);
+                if ($validated['status'] === 'Cancelled') {
+                    event(new MeetingCancelled($meeting, [
+                        'send_email' => $request->boolean('send_email', true),
+                        'reason' => $request->input('cancellation_reason', ''), // Optional reason
+                        'organization_ids' => $request->organizations ?? [],
+                    ]));
+                } else {
+                    // event(new \App\Events\MeetingUpdated($meeting, [
+                    //     'send_email' => $request->boolean('send_email', true),
+                    //     'organization_ids' => $request->organizations ?? [],
+                    // ]));
+                }
+            }
+            
+             DB::commit();
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;
@@ -235,6 +274,81 @@ class MeetingController extends BaseAdminController
         }
         
         return response()->json($meetingDates);
+    }
+    public function checkConflict(Request $request)
+    {
+        $request->validate([
+            'meeting_date' => 'required|date',
+            'start_time' => 'required',
+        ]);
+    
+        $meetingDate = $request->meeting_date;
+        $startTime = $request->start_time;
+        $meetingId = $request->meeting_id ?? 0;
+        
+        // Query to find conflicting meetings (including those that overlap)
+        $conflictingMeeting = Meeting::where('meeting_date', $meetingDate)
+            ->where(function($query) use ($startTime) {
+                $query->where('start_time', $startTime)
+                      ->orWhere('end_time', '>', $startTime);
+            })
+            ->when($meetingId > 0, function($query) use ($meetingId) {
+                $query->where('id', '!=', $meetingId);
+            })
+            ->first();
+        
+        return response()->json([
+            'conflict' => !is_null($conflictingMeeting),
+            'meeting' => $conflictingMeeting ? [
+                'title' => $conflictingMeeting->title,
+                'id' => $conflictingMeeting->id,
+                'start_time' => $conflictingMeeting->start_time,
+                'end_time' => $conflictingMeeting->end_time
+            ] : null
+        ]);
+    }
+    public function cancel($id)
+    {
+        // Find the meeting
+        $meeting = Meeting::find($id);
+
+        if (!$meeting) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Meeting not found.'
+            ], 404);
+        }
+
+        // Check if the user has the 'md' role
+        if (!Auth::user()->hasRole('md')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized action.'
+            ], 403);
+        }
+
+        // Check if the meeting is already cancelled
+        if ($meeting->status === 'Cancelled') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Meeting is already cancelled.'
+            ], 400);
+        }
+
+        // Update the meeting status to Cancelled
+        $meeting->status = 'Cancelled';
+        $meeting->save();
+
+        event(new MeetingCancelled($meeting, [
+            'send_email' => $request->boolean('send_email', true),
+            'reason' => $request->input('cancellation_reason', ''), // Optional reason
+            'organization_ids' => $request->organizations ?? [],
+        ]));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Meeting cancelled successfully.'
+        ]);
     }
     
 }

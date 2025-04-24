@@ -29,11 +29,46 @@ class LandingpageController extends Controller
         $pastMeetings = Meeting::where('meeting_date_ad', '<', $today)->orderBy('meeting_date_ad', 'desc')->orderBy('start_time', 'desc')->paginate(10);
         return view('landingpage::pages.landingPage', compact('upcomingMeetings', 'pastMeetings'));
     }
-    public function view($id){
-        $meeting=Meeting::find($id);
-        $meeting->load(['media' => function($query) {
-            $query->where('collection_name', 'meetings');
-        }]);
+    // public function view($id){
+    //     $meeting=Meeting::find($id);
+    //     $meeting->load(['media' => function($query) {
+    //         $query->where('collection_name', 'meetings');
+    //     }]);
+    //     return view('landingpage::pages.viewMeetings',['resource'=>$meeting]);
+    // }
+    public function view($id, Request $request)
+    {
+        // dd($id);
+        $meeting = Meeting::with('meetingRoom', 'media')->findOrFail($id);
+
+        if ($request->ajax()) {
+            // dd($request->all());
+            return response()->json([
+                'title' => $meeting->title,
+                'meeting_location' => $meeting->meeting_location,
+                'is_virtual' => $meeting->is_virtual,
+                'meeting_date' => $meeting->meeting_date,
+                'meeting_date_ad' => $meeting->meeting_date_ad,
+                'start_time' => \Carbon\Carbon::parse($meeting->start_time)->format('h:i A'),
+                'end_time' => \Carbon\Carbon::parse($meeting->end_time)->format('h:i A'),
+                'meeting_room' => $meeting->meetingRoom,
+                'meeting_type' => $meeting->meeting_type,
+                'is_external' => $meeting->is_external ? __('field.yes') : __('field.no'),
+                'is_virtual_meeting' => $meeting->is_virtual_meeting ? __('field.yes') : __('field.no'),
+                'virtual_meeting_link' => $meeting->virtual_meeting_link,
+                'status' => $meeting->status ? __('field.active') : __('field.inactive'),
+                'media' => $meeting->media->map(function ($media) {
+                    return [
+                        'name' => $media->name,
+                        'file_name' => $media->file_name,
+                        'url' => $media->getUrl(),
+                        'mime_type' => $media->mime_type,
+                    ];
+                }),
+            ]);
+        }
+
+        // Fallback for non-AJAX requests
         return view('landingpage::pages.viewMeetings',['resource'=>$meeting]);
     }
 }

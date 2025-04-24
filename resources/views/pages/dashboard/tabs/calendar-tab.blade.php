@@ -2,8 +2,6 @@
 <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab">
     <div class="p-4">
         <h5 class="mb-4">{{ __('Calendar View') }}</h5>
-        {{-- <div id="calendar-content" class="calendar-container"></div> --}}
-
         <div class="container-fluid m-1 p-4">
             <!-- Calendar Grid -->
             <div class="card shadow-sm mb-4">
@@ -271,50 +269,19 @@
                 .then(data => {
                     if (data.meetings && data.meetings.length > 0) {
                         let html = `<div class="list-group">`;
-
-                        // data.meetings.forEach(meeting => {
-                        //     const startTime = new Date(meeting.start_time).toLocaleTimeString([], {
-                        //         hour: '2-digit',
-                        //         minute: '2-digit'
-                        //     });
-                        //     const endTime = new Date(meeting.end_time).toLocaleTimeString([], {
-                        //         hour: '2-digit',
-                        //         minute: '2-digit'
-                        //     });
-
-                        //     html += `
-                        //         <a href="/meetings/meetings/${meeting.id}" class="list-group-item list-group-item-action meeting-list-item ${meeting.status}">
-                        //             <div class="d-flex w-100 justify-content-between">
-                        //                 <h6 class="mb-1">${meeting.title}</h6>
-                        //                 <span class="badge bg-${getStatusBadgeColor(meeting.status)}">${meeting.status}</span>
-                        //             </div>
-                        //             <div class="mb-1 meeting-time">
-                        //                 <i class="bx bx-time-five me-1"></i> ${startTime} - ${endTime}
-                        //             </div>
-                        //             <div class="meeting-location">
-                        //                 ${meeting.is_virtual ? 
-                        //                     `<i class="bx bx-video me-1"></i> Virtual Meeting` : 
-                        //                     `<i class="bx bx-map me-1"></i> ${meeting.meeting_location || meeting.meeting_room?.name || 'Location not specified'}`
-                        //                 }
-                        //             </div>
-                        //         </a>
-                        //     `;
-                        // });
                         data.meetings.forEach(meeting => {
                             const startTime = new Date(meeting.start_time).toLocaleTimeString([], {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             });
-                            // Only format endTime if meeting.end_time exists
                             const endTime = meeting.end_time 
                                 ? new Date(meeting.end_time).toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit'
                                 }) 
                                 : '';
-
                             html += `
-                                <a href="/meetings/meetings/${meeting.id}" class="list-group-item list-group-item-action meeting-list-item ${meeting.status}">
+                                <a href="#" class="list-group-item list-group-item-action meeting-list-item ${meeting.status}" data-meeting-id="${meeting.id}">
                                     <div class="d-flex w-100 justify-content-between">
                                         <h6 class="mb-1">${meeting.title}</h6>
                                         <span class="badge bg-${getStatusBadgeColor(meeting.status)}">${meeting.status}</span>
@@ -334,6 +301,18 @@
 
                         html += `</div>`;
                         meetingsContainer.innerHTML = html;
+
+                        // Add click event listeners to meeting items
+                        document.querySelectorAll('.meeting-list-item').forEach(item => {
+                            item.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                const meetingId = this.getAttribute('data-meeting-id');
+                                fetchMeetingDetails(meetingId);
+                                // Show the modal
+                                const meetingModal = new bootstrap.Modal(document.getElementById('meetingModal'));
+                                meetingModal.show();
+                            });
+                        });
                     } else {
                         meetingsContainer.innerHTML = `
                             <div class="no-meetings">
@@ -356,7 +335,100 @@
                     `;
                 });
         }
+        function fetchMeetingDetails(meetingId) {
+            fetch(`/view/${meetingId}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Populate Meeting Information
+                document.getElementById('meeting-title').querySelector('p').textContent = data.title || 'N/A';
+                document.getElementById('meeting-location').querySelector('p').textContent = data.is_virtual ? '{{ __('Virtual') }}' : (data.meeting_location || data.meeting_room?.name || 'N/A');
+                document.getElementById('meeting-date').querySelector('p').textContent = `${data.meeting_date} (${data.meeting_date_ad})` || 'N/A';
+                document.getElementById('start-time').querySelector('p').textContent = data.start_time || 'N/A';
+                document.getElementById('end-time').querySelector('p').textContent = data.end_time || 'N/A';
+                document.getElementById('meeting-room').querySelector('p').textContent = data.meeting_room?.name || 'N/A';
+                document.getElementById('meeting-type').querySelector('p').textContent = data.meeting_type || 'N/A';
+                document.getElementById('is-external').querySelector('p').textContent = data.is_external || 'N/A';
+                document.getElementById('is-virtual-meeting').querySelector('p').textContent = data.is_virtual_meeting || 'N/A';
+                document.getElementById('virtual-meeting-link').querySelector('p').textContent = data.virtual_meeting_link || 'N/A';
 
+                // Handle virtual meeting link
+                const virtualMeetingLinkP = document.getElementById('virtual-meeting-link').querySelector('p');
+                const isValidUrl = url => /^https?:\/\//.test(url); // Simple URL validation
+                if (data.virtual_meeting_link && isValidUrl(data.virtual_meeting_link)) {
+                    virtualMeetingLinkP.innerHTML = `<a href="${data.virtual_meeting_link}" target="_blank" class="text-primary"><i class="bx bx-link me-2 detail-icon"></i>${data.virtual_meeting_link}</a>`;
+                } else {
+                    virtualMeetingLinkP.innerHTML = `<i class="bx bx-link me-2 detail-icon"></i>{{ __('N/A') }}`;
+                }
+
+                // Populate Documents
+                const documentsGrid = document.getElementById('documents-grid');
+                const emptyDocuments = document.getElementById('empty-documents');
+                const viewAllDocuments = document.getElementById('view-all-documents');
+                const documentCount = document.getElementById('document-count');
+                documentsGrid.innerHTML = '';
+
+                if (data.media && data.media.length > 0) {
+                    emptyDocuments.style.display = 'none';
+                    data.media.slice(0, 6).forEach(media => {
+                        let iconClass, iconBg;
+                        if (media.mime_type === 'application/pdf') {
+                            iconClass = 'bxs-file-pdf';
+                            iconBg = 'pdf-icon';
+                        } else if (['text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(media.mime_type)) {
+                            iconClass = 'bxs-file-doc';
+                            iconBg = 'doc-icon';
+                        } else if (media.mime_type.startsWith('image/')) {
+                            iconClass = '';
+                            iconBg = 'img-icon';
+                        } else {
+                            iconClass = 'bxs-file';
+                            iconBg = 'generic-icon';
+                        }
+
+                        const documentHtml = `
+                            <div class="document-item">
+                                <div class="document-preview">
+                                    <div class="file-icon ${iconBg}">
+                                        ${media.mime_type.startsWith('image/') ? `<img src="${media.url}" alt="${media.name || media.file_name}" class="thumbnail">` : `<i class="bx ${iconClass}"></i>`}
+                                    </div>
+                                    <div class="document-info">
+                                        <div class="document-name text-truncate" title="${media.name || media.file_name}">
+                                            ${media.name || media.file_name}
+                                        </div>
+                                        <div class="document-actions">
+                                            <a href="${media.url}" target="_blank" class="action-btn view-btn" title="View">
+                                                <i class="bx bx-show"></i>
+                                            </a>
+                                            <a href="${media.url}" download="${media.file_name}" class="action-btn download-btn" title="Download">
+                                                <i class="bx bx-download"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        documentsGrid.insertAdjacentHTML('beforeend', documentHtml);
+                    });
+
+                    if (data.media.length > 6) {
+                        viewAllDocuments.style.display = 'block';
+                        documentCount.textContent = data.media.length;
+                    } else {
+                        viewAllDocuments.style.display = 'none';
+                    }
+                } else {
+                    emptyDocuments.style.display = 'block';
+                    viewAllDocuments.style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error fetching meeting details:', error));
+        }
         function getStatusBadgeColor(status) {
             switch (status) {
                 case 'Scheduled':

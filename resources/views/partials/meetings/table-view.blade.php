@@ -49,12 +49,24 @@
                     </span>
                 </td>
                 <td class="pe-4 text-end">
-                    <a href="{{ route('admin.landingPage.view', $meeting->id) }}"
-                        class="btn btn-sm btn-outline-primary rounded-pill px-3"
-                        data-bs-toggle="tooltip" title="{{ __('View Details') }}">
+                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3 view-meeting"
+                            data-meeting-id="{{ $meeting->id }}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#meetingModal"
+                            title="{{ __('View Details') }}">
                         <i class="bx bx-show-alt fs-5"></i>
-                    </a>
+                    </button>
+                    @role('md')
+                        @if ($meeting->status !== 'Cancelled') <!-- Prevent showing Cancel button for already cancelled meetings -->
+                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 cancel-meeting"
+                                    data-meeting-id="{{ $meeting->id }}"
+                                    title="{{ __('Cancel Meeting') }}">
+                                <i class="bx bx-x-circle fs-5"></i>
+                            </button>
+                        @endif
+                    @endrole
                 </td>
+                
             </tr>
         @endforeach
     </tbody>

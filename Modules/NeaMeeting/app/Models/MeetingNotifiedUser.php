@@ -16,7 +16,7 @@ class MeetingNotifiedUser extends Model
     
     protected $fillable = [
         'meeting_id',
-        'user_id',
+        'users',
         'notified_at',
         'notification_type',
         'notification_status'
@@ -24,7 +24,7 @@ class MeetingNotifiedUser extends Model
     
     protected $casts = [
         'meeting_id' => 'integer',
-        'user_id' => 'integer',
+        'users' => 'array',
         'notified_at' => 'datetime'
     ];
     public function meeting():BelongsTo

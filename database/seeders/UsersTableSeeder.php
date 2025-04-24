@@ -78,34 +78,123 @@ class UsersTableSeeder extends Seeder
         // Seed Admin Users
         $adminUsers = [
             [
-                'name' => 'Super Admin',
+                'name' => 'distribution',
                 'email' => 'superadmin@dryice.com',
                 'mobile_no' => '9876543210',
                 'role' => 'superadmin',
-            ],
-            [
-                'name' => 'Admin User',
-                'email' => 'admin@nea.com',
-                'mobile_no' => '9876543211',
-                'role' => 'admin',
-            ],
-            [
-                'name' => 'Guest User',
-                'email' => 'guest@admin.com',
-                'mobile_no' => '9876543212',
-                'role' => 'guest',
+                'organization_id'=>3,
             ],
             [
                 'name' => 'user',
+                'email' => 'admin@nea.com',
+                'mobile_no' => '9876543211',
+                'role' => 'admin',
+                'organization_id'=>7,
+            ],
+            [
+                'name' => 'engineering',
+                'email' => 'ramila@nea.org.np',
+                'mobile_no' => '9851219678',
+                'role' => 'admin',
+                'organization_id'=>1,
+            ],
+            [
+                'name' => 'guest',
+                'email' => 'guest@admin.com',
+                'mobile_no' => '9876543212',
+                'role' => 'guest',
+                'organization_id'=>7,
+            ],
+            [
+                'name' => 'administration',
                 'email' => 'user@admin.com',
                 'mobile_no' => '9886543212',
                 'role' => 'user',
+                'organization_id'=>3,
             ],
             [
-                'name' => 'md',
+                'name' => 'itd',
                 'email' => 'md@neamms.com',
                 'mobile_no' => '9856543212',
                 'role' => 'md',
+                'organization_id'=>3,
+            ],
+            [
+                'name' => 'mdUser',
+                'email' => 'neamd@nea.org.np',
+                'mobile_no' => '0014153007',
+                'role' => 'md',
+                'organization_id'=>1,
+            ],
+            [
+                'name' => 'bdd',
+                'email' => 'transmission@nea.org.np',
+                'mobile_no' => '0014153077',
+                'role' => 'user',
+                'organization_id'=>8,
+            ],
+            [
+                'name' => 'finance',
+                'email' => 'pmit@nea.org.np',
+                'mobile_no' => '0014153066',
+                'role' => 'user',
+                'organization_id'=>3,
+            ],
+            [
+                'name' => 'generation',
+                'email' => 'pmd@nea.org.np',
+                'mobile_no' => '0014164099',
+                'role' => 'user',
+                'organization_id'=>11,
+            ],
+            [
+                'name' => 'md',
+                'email' => 'itd@nea.org.np',
+                'mobile_no' => '0014153012',
+                'role' => 'user',
+                'organization_id'=>3,
+            ],
+            [
+                'name' => 'neamd',
+                'email' => 'generation@nea.org.np',
+                'mobile_no' => '0014153016',
+                'role' => 'user',
+                'organization_id'=>7,
+            ],
+            [
+                'name' => 'pmd',
+                'email' => 'finance@nea.org.np',
+                'mobile_no' => '0014153116',
+                'role' => 'user',
+                'organization_id'=>6,
+            ],
+            [
+                'name' => 'pmit',
+                'email' => 'engineering@nea.org.np',
+                'mobile_no' => '0014153027',
+                'role' => 'user',
+                'organization_id'=>10,
+            ],
+            [
+                'name' => 'ramila',
+                'email' => 'dcs@nea.org.np',
+                'mobile_no' => '0014153145',
+                'role' => 'user',
+                'organization_id'=>9,
+            ],
+            [
+                'name' => 'Super Admin',
+                'email' => 'bdd@nea.org.np',
+                'mobile_no' => '0014153206',
+                'role' => 'user',
+                'organization_id'=>4,
+            ],
+            [
+                'name' => 'transmission',
+                'email' => 'administration@nea.org.np',
+                'mobile_no' => '0014153010',
+                'role' => 'user',
+                'organization_id'=>5,
             ],
         ];
 
@@ -116,12 +205,11 @@ class UsersTableSeeder extends Seeder
                 'mobile_no' => $adminUser['mobile_no'],
                 'office_email' => $adminUser['email'],
                 'office_mobile_no' => $adminUser['mobile_no'],
+                'organization_id' => $adminUser['organization_id'],
                 'password' => Hash::make('password'),
                 'status' => true,
                 'password_changed_at' => now(),
-                'locale' => 'np',
-                'designation_id' =>1,
-                'organization_id'=>fake()->numberBetween(1, 9)
+                'locale' => 'np'
             ]);
 
             if (isset($roles[$adminUser['role']])) {

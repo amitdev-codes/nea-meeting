@@ -202,6 +202,8 @@ class DashboardService
                 if ($organizationId) {
                     $countQuery->whereJsonContains('meetings.organizations', (string) $organizationId);
                 }
+
+                // dd($countQuery);
                 
                 return [$status => $countQuery->count()];
             })->toArray();

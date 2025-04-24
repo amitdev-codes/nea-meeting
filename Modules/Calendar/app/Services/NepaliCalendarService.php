@@ -83,11 +83,12 @@ class NepaliCalendarService
             // Query meetings for this English date, only for today or future dates
             $count = DB::table('meetings')
                 ->whereDate('meeting_date_ad', $gregorianDate)
-                ->whereDate('meeting_date_ad', '>=', $today)
+                // ->whereDate('meeting_date_ad', '>=', $today)
                 ->when(!$user->hasAnyRole(['admin', 'superadmin']), function ($query) use ($user) {
                     return $query->whereJsonContains('meetings.organizations', (string) $user->organization_id);
                 })
                 ->count();
+
                 
             $meetingCounts[$day] = $count;
         }

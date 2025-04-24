@@ -107,19 +107,3 @@ if (document.getElementById('meetingsChart')) {
         }
     });
 }
-
-// Calendar AJAX Load
-// document.getElementById('calendar-tab').addEventListener('click', function () {
-//     const calendarContent = document.getElementById('calendar-content');
-//     calendarContent.innerHTML = '<p class="text-center">Loading calendar...</p>';
-
-//     fetch('/calendar/nepali-calendar')
-//         .then(response => response.text())
-//         .then(data => {
-//             calendarContent.innerHTML = data;
-//         })
-//         .catch(error => {
-//             console.error('Error loading calendar:', error);
-//             calendarContent.innerHTML = '<p class="text-center text-danger">Failed to load calendar.</p>';
-//         });
-// });

@@ -32,10 +32,12 @@
         }
 
     </style>
+
     @include('landingpage::layouts/sections/stylesFront')
 </head>
 
 <body class="d-flex flex-column min-vh-100">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @yield('navbar')
 
     <main class="flex-grow-1">

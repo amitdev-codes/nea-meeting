@@ -38,34 +38,9 @@ class MasterDatabaseSeeder extends Seeder
     {
         $this->call([
             GenderSeeder::class,
-            ProvinceSeeder::class,
-            DistrictSeeder::class,
-            LocalLevelSeeder::class,
             FiscalYearSeeder::class,
-            LengthUnitSeeder::class,
-            //
-            ComponentSeeder::class,
-            SubComponentSeeder::class,
-            CropSeeder::class,
-            CropVarietySeeder::class,
-//
-            DesignationsTableSeeder::class,
-            ClusterTypeTableSeeder::class,
-            ExpenditureCategoryTableSeeder::class,
-            ClustersTableSeeder::class,
-
-            SectorSeeder::class,
-            SubSectorSeeder::class,
-            CasteSeeder::class,
-            StarterCategorySeeder::class,
-            LiveStockSeeder::class,
-            LiveStockBreedSeeder::class,
-            SectionTableSeeder::class,
             StatusSeeder::class,
-            AssetsTableSeeder::class,
-            InfrastructureTableSeeder::class,
             OrganizationsTableSeeder::class,
-            //
         ]);
     }
 }

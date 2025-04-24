@@ -31,6 +31,7 @@ return new class extends Migration
             $table->enum('status', MeetingStatus::values())->default(MeetingStatus::Scheduled->value);
             $table->boolean('is_external')->default(false);
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+            $table->text('remarks')->nullable();
             $table->timestamps();
         });
     }

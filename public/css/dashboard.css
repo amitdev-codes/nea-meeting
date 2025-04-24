@@ -5,7 +5,7 @@
 
 .nav-link.active {
     background-color: rgba(0, 0, 0, 0.3) !important;
-    font-weight: bold;
+    font-weight: bold !important;
     color: #fff !important;
 }
 
@@ -19,8 +19,8 @@
 }
 
 .nav-tabs .nav-link.active {
-    background: #fff;
-    color: #007bff;
+    background: rgba(0, 0, 0, 0.4);
+    color: #fff !important;
     border-radius: 0.5rem 0.5rem 0 0;
 }
 
@@ -28,6 +28,10 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
+.card-header.bg-gradient-primary {
+    background: linear-gradient(90deg, #007bff, #0056b3);
+}
+/* Css for charts */
 .chart-placeholder {
     position: relative;
     width: 100%;

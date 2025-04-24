@@ -130,6 +130,7 @@ return [
     'meeting-minutes'=>'बैठकको निर्णयहरू',
     'organizations'=>'कार्यालय',
     'meeting-rooms'=>'बैठक कोठा',
+    'calendar'=>'क्यालेन्डर'
 
 
 

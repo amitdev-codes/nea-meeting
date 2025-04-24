@@ -10,16 +10,18 @@
             @endif
         </button>
     </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link fw-semibold" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab" aria-controls="dashboard" aria-selected="false">
-            <i class="bx bx-bar-chart-alt-2 me-2"></i>
-            {{ __('field.dashboard') }}
-        </button>
-    </li>
+
     <li class="nav-item" role="presentation">
         <button class="nav-link fw-semibold" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar" type="button" role="tab" aria-controls="calendar" aria-selected="false">
             <i class="bx bx-calendar me-2"></i>
             {{ __('field.calendar') }}
+        </button>
+    </li>
+
+    <li class="nav-item" role="presentation">
+        <button class="nav-link fw-semibold" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab" aria-controls="dashboard" aria-selected="false">
+            <i class="bx bx-bar-chart-alt-2 me-2"></i>
+            {{ __('field.dashboard') }}
         </button>
     </li>
 </ul>

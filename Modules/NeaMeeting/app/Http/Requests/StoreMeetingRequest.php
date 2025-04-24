@@ -3,6 +3,7 @@
 namespace Modules\NeaMeeting\Http\Requests;
 
 use Carbon\Carbon;
+use App\Enums\MeetingStatus;
 use App\Helpers\NepaliDateConverter;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -62,6 +63,11 @@ class StoreMeetingRequest extends FormRequest
         if (!$this->has('created_by')) {
             $this->merge(['created_by' => auth()->id()]);
         }
+               // Ensure is_external is boolean
+    //     $this->merge([
+    //     'is_external' => $this->has('is_external') ? true : false,
+    //     'is_virtual' => $this->has('is_virtual') ? true : false,
+    //    ]);
     }
 
     public function rules(): array
@@ -79,13 +85,20 @@ class StoreMeetingRequest extends FormRequest
             'meeting_rooms' => 'nullable|string|max:255',
             'is_virtual' => 'nullable|boolean',
             'is_external' => 'nullable|boolean',
-            'virtual_meeting_link' => 'nullable|string|max:255|required_if:is_virtual,1',
-            'status' => 'string|in:scheduled,completed,cancelled',
+            'virtual_meeting_link' => 'nullable|string|max:255',
+            'status' => 'nullable',
             'created_by' => 'required|exists:users,id',
             'meeting_documents' => 'nullable|array',
             'meeting_documents.*' => 'string', // Temporary filenames for Dropzone
             'organizations' => 'nullable|array', // Add validation for organizations as array
             'organizations.*' => 'integer|exists:organizations,id', 
+            // External contact validation
+            'external_contacts' => 'nullable|array|required_if:is_external,1',
+            'external_contacts.*.name' => 'nullable|string|max:255|required_if:is_external,1',
+            'external_contacts.*.email' => 'nullable|email|max:255|required_if:is_external,1',
+            'external_contacts.*.mobile' => 'nullable|string|max:20',
+            'external_contacts.*.phone' => 'nullable|string|max:20',
+            'external_contacts.*.office_name' => 'nullable|string|max:255|required_if:is_external,1',
         ];
     }
 
@@ -95,6 +108,12 @@ class StoreMeetingRequest extends FormRequest
           
             'created_by.required' => 'The creator ID is required.',
             'organizations.*.exists' => 'One or more selected organizations do not exist.',
+            'external_contacts.required_if' => 'At least one external contact is required for external meetings.',
+            'external_contacts.*.name.required_if' => 'The name is required for each external contact.',
+            'external_contacts.*.email.required_if' => 'The email is required for each external contact.',
+            'external_contacts.*.office_name.required_if' => 'The office name is required for each external contact.',
+
+
         ];
     }
     public function validated($key = null, $default = null)

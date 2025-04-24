@@ -76,6 +76,7 @@ class AppServiceProvider extends ServiceProvider
         $this->cacheMasterData();
         $this->shareMasterData();
         Paginator::defaultView('components.pagination');
+        View::addNamespace('mail', resource_path('views/vendor/mail'));
     }
         /**
      * Cache all master data

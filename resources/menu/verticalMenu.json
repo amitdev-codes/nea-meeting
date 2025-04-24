@@ -41,6 +41,17 @@
             ]
         },
         {
+            "items": [
+                {
+                    "url": "admin.calendar",
+                    "name": "menu.calendar",
+                    "icon": "menu-icon tf-icons bx bx-calendar",
+                    "slug": "admin.calendar",
+                    "permission": "view-calendar"
+                }
+            ]
+        },
+        {
             "header": "Resources Section",
             "items": [
                 {

@@ -3,17 +3,22 @@
 namespace Modules\NeaMeeting\Models;
 
 use Spatie\Image\Enums\Fit;
+use App\Enums\MeetingStatus;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Master\Models\Organization;
 use Modules\NeaMeeting\Models\MeetingRoom;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Modules\NeaMeeting\Models\ExternalContact;
 use Modules\NeaMeeting\Models\MeetingAttendee;
 use Modules\NeaMeeting\Models\MeetingNotifiedUser;
 use Modules\NeaMeeting\Models\MeetingOrganization;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Modules\NeaMeeting\Models\MeetingNotifiedExternalContact;
 
 class Meeting extends Model implements HasMedia
 {
@@ -38,6 +43,7 @@ class Meeting extends Model implements HasMedia
         'status',
         'created_by',
         'organizations',
+        'remarks'
     ];
 
     protected $casts = [
@@ -48,7 +54,8 @@ class Meeting extends Model implements HasMedia
         'is_virtual' => 'boolean', 
         'is_external' => 'boolean', 
         'created_by' => 'integer',
-        'status' => 'string', // Status should be string, not boolean
+        // 'status' => MeetingStatus::class,
+        'status' => 'string',
     ];
 
     public function meetingRoom(): BelongsTo
@@ -96,5 +103,13 @@ class Meeting extends Model implements HasMedia
     public function notifiedUsers()
     {
         return $this->hasMany(MeetingNotifiedUser::class, 'meeting_id');
+    }
+    public function notifiedExternalContacts()
+    {
+        return $this->hasMany(MeetingNotifiedExternalContact::class);
+    }
+    public function externalContacts(): Morphmany
+    {
+        return $this->morphMany(ExternalContact::class, 'contactable');
     }
 }
