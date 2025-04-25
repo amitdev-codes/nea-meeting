@@ -72,6 +72,25 @@
                             "permission": "view-meeting-rooms"
                         }
                     ]
+                },
+                {
+                    "name": "menu.settings",
+                    "icon": "menu-icon tf-icons bx bx-cog",
+                    "slug": ["admin.sms-configurations.*", "admin.email-configurations.*"],
+                    "submenu": [
+                        {
+                            "url": "admin.email-configurations.index",
+                            "name": "menu.email-configurations",
+                            "slug": "admin.email-configurations.*",
+                            "permission": "view-email-configurations"
+                        },
+                        {
+                            "url": "admin.sms-configurations.index",
+                            "name": "menu.sms-configurations",
+                            "slug": "admin.sms-configurations*",
+                            "permission": "view-sms-configurations"
+                        }
+                    ]
                 }
             ]
         },

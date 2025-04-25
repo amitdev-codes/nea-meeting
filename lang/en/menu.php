@@ -131,6 +131,9 @@ return [
 'meeting-minutes'=>'Meeting Minutes',
 'organizations'=>'Offices',
 'meeting-rooms'=>'Meeting Rooms',
-'calendar'=>'Calendar'
+'calendar'=>'Calendar',
+'sms-configurations'=>'SMS Configurations',
+'email-configurations'=>'Email Configurations',
+'settings'=>'Settings',
 
 ];

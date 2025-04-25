@@ -269,12 +269,8 @@
                 <div class="card-header collapsed" id="headingFour" data-toggle="collapse" data-target="#meetingStatus"
                     aria-expanded="false" aria-controls="meetingStatus">
                     <h5 class="mb-0">
-                        <button class="btn btn-link" type="button"
-                         data-bs-toggle="collapse"
-                        data-bs-target="#meetingStatus" aria-expanded="false"
-                        aria-controls="meetingStatus"
-
-                        >
+                        <button class="btn btn-link" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#meetingStatus" aria-expanded="false" aria-controls="meetingStatus">
                             <i class="fas fa-info-circle mr-2"></i> {{ __('Meeting Status') }}
                         </button>
                     </h5>
@@ -364,38 +360,31 @@
 </style>
 
 @push('scripts')
-<script type="module">
-                // Initialize Bootstrap 5 components
-                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            const tooltipList = tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-            
-            // For Bootstrap 5 popovers
-            const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-            const popoverList = popoverTriggerList.map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
-    // Handle virtual meeting toggle
-    $('input[name="is_virtual"]').change(function() {
-        $('.virtual-meeting-link').toggle(this.checked);
-    });
+    <script type="module">
+        // Handle virtual meeting toggle
+        $('input[name="is_virtual"]').change(function() {
+            $('.virtual-meeting-link').toggle(this.checked);
+        });
 
-    // Handle external meeting toggle
-    $('input[name="is_external"]').change(function() {
-        $('.external-contacts-grid').toggle(this.checked);
-    });
+        // Handle external meeting toggle
+        $('input[name="is_external"]').change(function() {
+            $('.external-contacts-grid').toggle(this.checked);
+        });
 
-    // Handle notification options toggle
-    $('#send_notifications').change(function() {
-        $('#notification-options').toggle(this.checked);
-    });
+        // Handle notification options toggle
+        $('#send_notifications').change(function() {
+            $('#notification-options').toggle(this.checked);
+        });
 
-    // Handle status change to show/hide remarks field
-    $('select[name="status"]').change(function() {
-        $('.remarks-field').toggle($(this).val() === '{{ \App\Enums\MeetingStatus::Cancelled->value }}');
-    });
+        // Handle status change to show/hide remarks field
+        $('select[name="status"]').change(function() {
+            $('.remarks-field').toggle($(this).val() === '{{ \App\Enums\MeetingStatus::Cancelled->value }}');
+        });
 
-    // Handle adding new contact row
-    $('.add-contact-row').click(function() {
-        let rowCount = $('.external-contacts-table tbody tr').length;
-        let newRow = `
+        // Handle adding new contact row
+        $('.add-contact-row').click(function() {
+            let rowCount = $('.external-contacts-table tbody tr').length;
+            let newRow = `
             <tr class="contact-row">
                 <td><input type="text" name="external_contacts[${rowCount}][name]" class="form-control" placeholder="{{ __('Enter Name') }}" /></td>
                 <td><input type="email" name="external_contacts[${rowCount}][email]" class="form-control" placeholder="{{ __('Enter Email') }}" /></td>
@@ -408,29 +397,27 @@
                     </button>
                 </td>
             </tr>`;
-        $('.external-contacts-table tbody').append(newRow);
-    });
+            $('.external-contacts-table tbody').append(newRow);
+        });
 
-    // Handle removing contact row
-    $(document).on('click', '.remove-contact-row', function() {
-        if ($('.external-contacts-table tbody tr').length > 1) {
-            $(this).closest('tr').remove();
-            $('.external-contacts-table tbody tr').each(function(index) {
-                $(this).find('input').each(function() {
-                    let name = $(this).attr('name').replace(/external_contacts\[\d+\]/,
-                        `external_contacts[${index}]`);
-                    $(this).attr('name', name);
+        // Handle removing contact row
+        $(document).on('click', '.remove-contact-row', function() {
+            if ($('.external-contacts-table tbody tr').length > 1) {
+                $(this).closest('tr').remove();
+                $('.external-contacts-table tbody tr').each(function(index) {
+                    $(this).find('input').each(function() {
+                        let name = $(this).attr('name').replace(/external_contacts\[\d+\]/,
+                            `external_contacts[${index}]`);
+                        $(this).attr('name', name);
+                    });
                 });
-            });
-        } else {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Warning',
-                text: 'At least one contact row is required.',
-            });
-        }
-    });
-
-
-
-</script>
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning',
+                    text: 'At least one contact row is required.',
+                });
+            }
+        });
+    </script>
+    @endpush

@@ -687,6 +687,38 @@ return [
 
 'is_virtual_meeting'=>'Is Virtual Meeting',
 'is_external'=>'Is External',
+'mail_mailer'=>'Mail Mailer',
+'mail_host'=>'Mail Host',
+'mail_port'=>'Mail Port',
+'mail_username'=>'Mail Username',
+'mail_password'=>'Mail Password',
+'mail_encryption'=>'Mail Encryption',
+'mail_username'=>'Mail Username',
+'mail_password'=>'Mail Password',
+'mail_from_address'=>'Mail From Address',
+'mail_from_name'=>'Mail From Name',
+'is_active'=>'Is Active',
+'all_email-configurations'=>'Email Configurations',
+'Emailconfigurations'=>'Email Configurations',
+'Email Configurations'=>'Email Configurations',
+'Email-configurations'=>'Email Configurations',
+
+'sms_provider'=>'SMS Providers',
+'sms_configurations'=>'SMS Configurations',
+'Smsconfigurations'=>'SMS Configurations',
+'SmsConfigurations'=>'SMS Configurations',
+'api_token'=>'API Token',
+'api_secret'=>'API Secret',
+'base_url'=>'Base URL',
+'sms_username'=>'SMS Username',
+'sms_provider_id'=>'SMS Provider',
+'sender_id'=>'Sender ID',
+'api_key'=>'API Key',
+
+'all_sms-configurations'=>'SMS Configurations',
+'Sms-configurations'=>'SMS Configurations',
+'no_documents'=>'No Documents',
+
 
 
 

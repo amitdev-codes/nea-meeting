@@ -3,6 +3,7 @@
 namespace Modules\NeaMeeting\DataTables;
 
 use Carbon\Carbon;
+use App\Enums\MeetingType;
 use App\Enums\MeetingStatus;
 use Yajra\DataTables\Html\Column;
 use Modules\NeaMeeting\Models\Meeting;
@@ -15,11 +16,51 @@ use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 class MeetingDataTable extends DataTable
 {
     use CommonDataTableFunctions;
-    
-    protected array $searchableColumns = [
 
+    protected array $searchableColumns = [
+        'status',
+        'meeting_type',
+        'title',
+        'meeting_location',
+        'meeting_date',
     ];
-    
+
+    protected array $dropdownColumns = [
+        'status' => [
+            'options' => [], // Populated in constructor
+            'searchBy' => 'value' // Search by enum value
+        ],
+        'meeting_type' => [
+            'options' => [], // Populated in constructor
+            'searchBy' => 'value' // Search by enum value
+        ],
+    ];
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        // Populate meeting_type dropdown
+        $this->dropdownColumns['meeting_type']['options'] = array_reduce(
+            MeetingType::toArray(),
+            function ($carry, $item) {
+                $carry[$item[0]] = $item[1]; // Map value => formatted_name
+                return $carry;
+            },
+            []
+        );
+
+        // Populate status dropdown (assuming MeetingStatus has a similar toArray method)
+        $this->dropdownColumns['status']['options'] = array_reduce(
+            MeetingStatus::toArray(),
+            function ($carry, $item) {
+                $carry[$item[0]] = $item[1]; // Map value => formatted_name
+                return $carry;
+            },
+            []
+        );
+    }
+
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return datatables()
@@ -35,33 +76,42 @@ class MeetingDataTable extends DataTable
                 // Parse meeting date
                 $meetingDate = Carbon::parse($row->meeting_date_ad);
 
-                // Extract time from start_time and end_time
-                $startTime = Carbon::parse($row->start_time)->format('H:i:s'); // Get only time (e.g., '00:00:00')
+                // Extract time from start_time
+                $startTime = Carbon::parse($row->start_time)->format('H:i:s');
                 $endTime = $row->end_time ? Carbon::parse($row->end_time)->format('H:i:s') : null;
 
-                // Combine meeting_date_ad with time to create full DateTime
+                // Combine meeting_date_ad with time
                 $startDateTime = Carbon::parse($row->meeting_date_ad . ' ' . $startTime);
                 $endDateTime = $endTime ? Carbon::parse($row->meeting_date_ad . ' ' . $endTime) : null;
 
                 // Determine the status
-                $calculatedStatus = $row->status; // Default to current status
+                $calculatedStatus = $row->status;
 
-                if ($row->status !== MeetingStatus::Cancelled->value) { // Respect Cancelled status
-                    if ($now->lessThan($startDateTime)) {
-                        $calculatedStatus = MeetingStatus::Scheduled->value;
-                    } elseif ($endDateTime && $now->greaterThanOrEqualTo($startDateTime) && $now->lessThan($endDateTime)) {
-                        $calculatedStatus = MeetingStatus::Ongoing->value;
-                    } elseif ($endDateTime && $now->greaterThanOrEqualTo($endDateTime)) {
+                if ($row->status !== MeetingStatus::Cancelled->value) {
+                    if ($now->toDateString() > $meetingDate->toDateString()) {
                         $calculatedStatus = MeetingStatus::Completed->value;
+                    } elseif ($now->toDateString() === $meetingDate->toDateString()) {
+                        if ($now->lessThan($startDateTime)) {
+                            $calculatedStatus = MeetingStatus::Scheduled->value;
+                        } elseif ($now->greaterThanOrEqualTo($startDateTime)) {
+                            if ($endDateTime && $now->lessThan($endDateTime)) {
+                                $calculatedStatus = MeetingStatus::Ongoing->value;
+                            } elseif (!$endDateTime) {
+                                $calculatedStatus = MeetingStatus::Ongoing->value;
+                            } else {
+                                $calculatedStatus = MeetingStatus::Completed->value;
+                            }
+                        }
+                    } else {
+                        $calculatedStatus = MeetingStatus::Scheduled->value;
                     }
                 }
 
-                // Update the database if the status has changed
+                // Update status if changed
                 if ($row->status !== $calculatedStatus) {
                     $row->update(['status' => $calculatedStatus]);
                 }
 
-                // Return the badge for the calculated status
                 return $this->getMeetingStatusBadge($calculatedStatus);
             })
             ->addColumn('action', $this->addActionColumn(
@@ -71,42 +121,81 @@ class MeetingDataTable extends DataTable
             ))
             ->rawColumns(['checkbox', 'action', 'status']);
     }
+
     public function query(Meeting $model): QueryBuilder
     {
         $query = $model->newQuery();
-        
-        // Check if the user is authenticated and not an admin or superadmin
+        $dropdownFields = [
+            'meeting_type' => 'meeting_type',
+            'status' => 'status'
+        ];
+
+        // Organization-based filtering
         if (auth()->check() && !auth()->user()->hasRole(['admin', 'superadmin'])) {
             $organizationId = auth()->user()->organization_id;
             $query->whereRaw('JSON_CONTAINS(organizations, ?)', [json_encode((string)$organizationId)]);
         }
 
-        
-        // Handle global search
+        // Default filter: Show only Ongoing or Scheduled meetings
+        $isCompletedSearched = false;
+
+        // Check if status filter is applied (dropdown search)
+        if (request()->has('columns')) {
+            foreach (request('columns') as $column) {
+                if (isset($column['data']) && $column['data'] === 'status' && !empty($column['search']['value'])) {
+                    $statusValue = $column['search']['value'];
+                    if ($statusValue == MeetingStatus::Completed->value) {
+                        $isCompletedSearched = true;
+                    }
+                    // Apply status filter from dropdown
+                    $query->where('status', $statusValue);
+                }
+            }
+        }
+
+        // Apply default filter if no Completed status is explicitly searched
+        if (!$isCompletedSearched) {
+            $query->whereIn('status', [
+                MeetingStatus::Ongoing->value,
+                MeetingStatus::Scheduled->value,
+            ]);
+        }
+
+        // Global search
         if (request()->has('search') && request('search')['value']) {
             $search = request('search')['value'];
             $query->where(function ($q) use ($search) {
                 foreach ($this->searchableColumns as $column) {
                     $q->orWhere($column, 'like', "%{$search}%");
                 }
+                // Allow Completed meetings if searched explicitly in global search
+                if (stripos($search, MeetingStatus::Completed->name) !== false) {
+                    $q->orWhere('status', MeetingStatus::Completed->value);
+                }
             });
         }
-        
-        // Handle column-specific search
+
+        // Column-specific search (excluding status, already handled)
         if (request()->has('columns')) {
             foreach (request('columns') as $i => $column) {
-                if (isset($column['search']['value']) && $column['search']['value'] !== '') {
+                if (isset($column['search']['value']) && $column['search']['value'] !== '' && $column['data'] !== 'status') {
                     $value = $column['search']['value'];
-                    if (in_array($column['data'], $this->searchableColumns)) {
-                        $query->where($column['data'], 'like', "%{$value}%");
+                    $columnData = $column['data'];
+                    if (in_array($columnData, $this->searchableColumns)) {
+                        if (array_key_exists($columnData, $dropdownFields)) {
+                            $query->where($dropdownFields[$columnData], $value);
+                        } else {
+                            $query->where($columnData, 'like', "%{$value}%");
+                        }
                     }
                 }
             }
         }
+
         $query->orderBy('meeting_date_ad', 'asc')->orderBy('start_time', 'asc');
         return $query;
     }
-    
+
     public function html(): HtmlBuilder
     {
         return $this->builder()
@@ -135,13 +224,13 @@ class MeetingDataTable extends DataTable
                 }',
             ]);
     }
+
     public function getColumns(): array
     {
         return [
             $this->checkboxColumn(),
             Column::make('title')->title(__('field.title')),
             Column::make('meeting_location')->title(__('field.meeting_location')),
-            // Column::make('meeting_room')->title(__('field.meeting_room')),
             Column::make('meeting_date')->title(__('field.meeting_date')),
             Column::make('start_time')->title(__('field.start_time')),
             Column::make('end_time')->title(__('field.end_time')),
@@ -150,12 +239,12 @@ class MeetingDataTable extends DataTable
             $this->actionColumn('admin.meetings')
         ];
     }
-    
+
     protected function filename(): string
     {
         return 'Meeting_' . date('YmdHis');
     }
-    
+
     protected function getRoutes(): array
     {
         return [

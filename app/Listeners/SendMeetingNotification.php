@@ -10,79 +10,179 @@ use App\Notifications\MeetingNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Modules\NeaMeeting\Models\Notification;
 use App\Notifications\ExternalMeetingNotification;
+use Modules\Settings\Services\DynamicEmailService;
+use Modules\Settings\Services\Sms\SmsServiceInterface;
 
 class SendMeetingNotification implements ShouldQueue
 {
     use InteractsWithQueue;
+    protected $emailService;
+    protected $smsService;
+    
+    /**
+     * Create a new job instance.
+     */
+    public function __construct()
+    {
+        $this->emailService = app(DynamicEmailService::class);
+        $this->smsService = app(SmsServiceInterface::class);
+    }
     
     /**
      * Handle the event.
      */
     public function handle(MeetingCreated $event)
     {
-        // Check if email notifications should be sent
-        if (!($event->options['send_email'] ?? true)) {
+        // Check if notifications should be sent
+        $sendEmail = $event->options['send_email'] ?? true;
+        $sendSms = $event->options['send_sms'] ?? false;
+        
+        if (!$sendEmail && !$sendSms) {
             return;
         }
+        
         // Get organization IDs from the meeting's JSON column
         $organizationIds = $event->options['organization_ids'] ?? json_decode($event->meeting->organizations, true) ?? [];
         $users = !empty($organizationIds) ? User::whereIn('organization_id', $organizationIds)->get() : collect();
         $externalContacts = $event->meeting->externalContacts ?? collect();
+        
         if ($users->isEmpty() && $externalContacts->isEmpty()) {
             return;
         }
 
         // Send notifications to users
-        try{
-            $userIds = [];
+        try {
+            $notifiedUserIds = [];
+            $smsUserIds = [];
+            
             foreach ($users as $user) {
-                try {
-                    $user->notify(new MeetingNotification($event->meeting));
-                    $userIds[] = $user->id;
-                } catch (\Exception $e) {
-                    \Log::error('Failed to send meeting notification for user #' . $user->id . ': ' . $e->getMessage());
+                // Send email notification if enabled
+                if ($sendEmail) {
+                    try {
+                        $user->notify(new MeetingNotification($event->meeting));
+                        $notifiedUserIds[] = $user->id;
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send meeting email notification for user #' . $user->id . ': ' . $e->getMessage());
+                    }
+                }
+                
+                // Send SMS notification if enabled and user has phone number
+                if ($sendSms && !empty($user->phone)) {
+                    try {
+                        $message = $this->formatSmsMessage($event->meeting, $user);
+                        $result = $this->smsService->send($user->phone, $message);
+                        
+                        if ($result['success']) {
+                            $smsUserIds[] = $user->id;
+                        } else {
+                            Log::error('Failed to send meeting SMS for user #' . $user->id . ': ' . $result['message']);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('SMS service error for user #' . $user->id . ': ' . $e->getMessage());
+                    }
                 }
             }
-            // Store the notified users in a single record
-            if (!empty($userIds)) {
+            
+            // Store the notified users in a single record for email
+            if (!empty($notifiedUserIds)) {
                 $event->meeting->notifiedUsers()->create([
-                    'users' => json_encode($userIds), // Store user IDs as JSON
+                    'users' => json_encode($notifiedUserIds),
                     'notified_at' => now(),
                     'notification_type' => 'email',
                     'notification_status' => 'sent',
                 ]);
             }
-        }catch (\Exception $e) {
-            \Log::error('Failed to save meeting notification record: ' . $e->getMessage());
+            
+            // Store the notified users in a single record for SMS
+            if (!empty($smsUserIds)) {
+                $event->meeting->notifiedUsers()->create([
+                    'users' => json_encode($smsUserIds),
+                    'notified_at' => now(),
+                    'notification_type' => 'sms',
+                    'notification_status' => 'sent',
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to save meeting notification record: ' . $e->getMessage());
         }
-
-            // Send notifications to external contacts
-            try {
-                $externalContactIds = [];
-                foreach ($externalContacts as $contact) {
+        
+        // Send notifications to external contacts
+        try {
+            $notifiedExternalIds = [];
+            $smsExternalIds = [];
+            
+            foreach ($externalContacts as $contact) {
+                // Send email notification if enabled
+                if ($sendEmail) {
                     try {
                         if (!filter_var($contact->email, FILTER_VALIDATE_EMAIL)) {
-                            \Log::warning('Invalid email for external contact #' . $contact->id . ': ' . $contact->email);
+                            Log::warning('Invalid email for external contact #' . $contact->id . ': ' . $contact->email);
                             continue;
                         }
                         $contact->notify(new ExternalMeetingNotification($event->meeting));
-                        $externalContactIds[] = $contact->id;
+                        $notifiedExternalIds[] = $contact->id;
                     } catch (\Exception $e) {
-                        \Log::error('Failed to send meeting notification to external contact #' . $contact->id . ': ' . $e->getMessage());
+                        Log::error('Failed to send meeting notification to external contact #' . $contact->id . ': ' . $e->getMessage());
                     }
                 }
-
-                // Store notified external contacts
-                if (!empty($externalContactIds)) {
-                    $event->meeting->notifiedExternalContacts()->create([
-                        'external_contacts' => json_encode($externalContactIds),
-                        'notified_at' => now(),
-                        'notification_type' => 'email',
-                        'notification_status' => 'sent',
-                    ]);
+                
+                // Send SMS notification if enabled and contact has phone number
+                if ($sendSms && !empty($contact->phone)) {
+                    try {
+                        $message = $this->formatSmsMessage($event->meeting, $contact, true);
+                        $result = $this->smsService->send($contact->phone, $message);
+                        
+                        if ($result['success']) {
+                            $smsExternalIds[] = $contact->id;
+                        } else {
+                            Log::error('Failed to send meeting SMS for external contact #' . $contact->id . ': ' . $result['message']);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('SMS service error for external contact #' . $contact->id . ': ' . $e->getMessage());
+                    }
                 }
-            } catch (\Exception $e) {
-                \Log::error('Failed to save meeting notification record for external contacts: ' . $e->getMessage());
             }
+            
+            // Store notified external contacts for email
+            if (!empty($notifiedExternalIds)) {
+                $event->meeting->notifiedExternalContacts()->create([
+                    'external_contacts' => json_encode($notifiedExternalIds),
+                    'notified_at' => now(),
+                    'notification_type' => 'email',
+                    'notification_status' => 'sent',
+                ]);
+            }
+            
+            // Store notified external contacts for SMS
+            if (!empty($smsExternalIds)) {
+                $event->meeting->notifiedExternalContacts()->create([
+                    'external_contacts' => json_encode($smsExternalIds),
+                    'notified_at' => now(),
+                    'notification_type' => 'sms',
+                    'notification_status' => 'sent',
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to save meeting notification record for external contacts: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Format the SMS message with meeting details
+     *
+     * @param Meeting $meeting
+     * @param User|ExternalContact $recipient
+     * @param bool $isExternal
+     * @return string
+     */
+    protected function formatSmsMessage($meeting, $recipient, $isExternal = false)
+    {
+        $name = $isExternal ? $recipient->name : $recipient->name;
+        $appName = config('app.name');
+        $meetingTitle = $meeting->title;
+        $date = $meeting->scheduled_at->format('M d, Y');
+        $time = $meeting->scheduled_at->format('h:i A');
+        
+        return "Hi {$name}, a new meeting \"{$meetingTitle}\" has been scheduled on {$date} at {$time}. Please check your email for details. - {$appName}";
     }
 }

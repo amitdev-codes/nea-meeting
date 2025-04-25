@@ -455,7 +455,7 @@
         };
     </script>
 @endpush
-@push('styles')
+
     <style>
         /* Enhanced Nepali Calendar Styling */
         .calendar {
@@ -752,4 +752,4 @@
             }
         }
     </style>
-@endpush
+

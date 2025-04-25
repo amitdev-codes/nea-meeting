@@ -3,12 +3,12 @@ namespace App\Enums;
 
 enum MeetingType: string
 {
-    case REGULAR = 'Regular';
-    case BOARD = 'Board';
-    case EMERGENCY = 'Emergency';
-    case STRATEGY = 'Strategy';
-    case DEPARTMENT = 'Department';
-    case PROJECT = 'Project';
+    case REGULAR = 'REGULAR';
+    case BOARD = 'BOARD';
+    case HIGH_PRIORITY = 'HIGH PRIORITY';
+    case OTHER = 'OTHER';
+    // case DEPARTMENT = 'Department';
+    // case PROJECT = 'Project';
 
 
     public static function values(): array

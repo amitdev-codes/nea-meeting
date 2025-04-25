@@ -77,12 +77,13 @@ class MeetingController extends BaseAdminController
                 }
                 
                 // Trigger the meeting created event
-                // if ($request->boolean('send_notifications', true)) {
-                //     event(new MeetingCreated($meeting, [
-                //         'send_email' => $request->boolean('send_email', true),
-                //         'organization_ids' => $request->organizations ?? [],
-                //     ]));
-                // }
+                if ($request->boolean('send_notifications', true)) {
+                    event(new MeetingCreated($meeting, [
+                        'send_email' => $request->boolean('send_email', true),
+                        'send_sms' => $request->boolean('send_sms', true),
+                        'organization_ids' => $request->organizations ?? [],
+                    ]));
+                }
 
                 DB::commit();
                 if ($request->has('save_and_add_more')) {
@@ -143,6 +144,7 @@ class MeetingController extends BaseAdminController
             // if ($request->boolean('send_notifications', true)) {
             //     event(new MeetingUpdated($meeting, [
             //         'send_email' => $request->boolean('send_email', true),
+            //         'send_sms' => $request->boolean('send_sms', true),
             //         'organization_ids' => $request->organizations ?? [],
             //     ]));
             // }
@@ -152,14 +154,16 @@ class MeetingController extends BaseAdminController
                 if ($validated['status'] === 'Cancelled') {
                     event(new MeetingCancelled($meeting, [
                         'send_email' => $request->boolean('send_email', true),
-                        'reason' => $request->input('cancellation_reason', ''), // Optional reason
+                        'send_sms' => $request->boolean('send_sms', true),
+                        'reason' => $request->input('cancellation_reason', ''),
                         'organization_ids' => $request->organizations ?? [],
                     ]));
                 } else {
-                    // event(new \App\Events\MeetingUpdated($meeting, [
-                    //     'send_email' => $request->boolean('send_email', true),
-                    //     'organization_ids' => $request->organizations ?? [],
-                    // ]));
+                    event(new \App\Events\MeetingUpdated($meeting, [
+                        'send_email' => $request->boolean('send_email', true),
+                        'send_sms' => $request->boolean('send_sms', true),
+                        'organization_ids' => $request->organizations ?? [],
+                    ]));
                 }
             }
             

@@ -2,5 +2,6 @@
     "Master": true,
     "Calendar": true,
     "Landingpage": true,
-    "NeaMeeting": true
+    "NeaMeeting": true,
+    "Settings": true
 }

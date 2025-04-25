@@ -127,10 +127,9 @@
     @include('landingpage::partials.footer')
 @endsection
 
-
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <style>
-        /* Modal Specific Styles */
+<link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+@push('styles')
+<style>
         .modal-content {
             border-radius: 15px;
             overflow: hidden;
@@ -378,8 +377,8 @@
                 padding: 0.75rem !important;
             }
         }
-    </style>
-
+</style>
+@endpush
 
 @push('scripts')
     <script type="module">

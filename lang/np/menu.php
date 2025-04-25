@@ -130,7 +130,11 @@ return [
     'meeting-minutes'=>'बैठकको निर्णयहरू',
     'organizations'=>'कार्यालय',
     'meeting-rooms'=>'बैठक कोठा',
-    'calendar'=>'क्यालेन्डर'
+    'calendar'=>'क्यालेन्डर',
+    'sms-configurations' => 'एसएमएस कन्फिगरेसनहरू',
+    'email-configurations' => 'इमेल कन्फिगरेसनहरू',
+    'settings'=>'सेटिङहरू',
+
 
 
 

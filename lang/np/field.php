@@ -606,5 +606,36 @@ return [
     'is_external' => 'बाह्य बैठक हो',
     'yes' => 'हो',
     'no' => 'होइन',
+    'mail_mailer' => 'मेल मेलर',
+    'mail_host' => 'मेल होस्ट',
+    'mail_port' => 'मेल पोर्ट',
+    'mail_username' => 'मेल प्रयोगकर्ता नाम',
+    'mail_password' => 'मेल पासवर्ड',
+    'mail_encryption' => 'मेल इन्क्रिप्सन',
+    'mail_from_address' => 'मेल पठाउने ठेगाना',
+    'mail_from_name' => 'मेल पठाउने नाम',
+    'is_active' => 'सक्रिय छ',
+    'all_email-configurations' => 'सबै इमेल कन्फिगरेसनहरू',
+    'Emailconfigurations' => 'इमेल कन्फिगरेसनहरू',
+    'EmailConfigurations' => 'इमेल कन्फिगरेसन',
+    'Email-configurations' => 'इमेल कन्फिगरेसन',
+    'sms_provider' => 'एसएमएस प्रदायक',
+    'sms_configurations' => 'एसएमएस कन्फिगरेसनहरू',
+    'Smsconfigurations' => 'एसएमएस कन्फिगरेसनहरू',
+    'SmsConfigurations' => 'एसएमएस कन्फिगरेसनहरू',
+    'api_token' => 'एपीआई टोकन',
+    'api_secret' => 'एपीआई गोप्य-संकेत',
+    'base_url' => 'बेस यूआरएल',
+    'sms_username' => 'एसएमएस प्रयोगकर्ता नाम',
+    'sms_provider_id' => 'एसएमएस प्रदायक',
+    'sender_id' => 'प्रेषक आईडी',
+    'api_key' => 'एपीआई Key',
+    'all_sms-configurations' => 'सबै एसएमएस कन्फिगरेसनहरू',
+    'Sms-configurations' => 'एसएमएस कन्फिगरेसनहरू',
+
+
+
+
+
      
 ];

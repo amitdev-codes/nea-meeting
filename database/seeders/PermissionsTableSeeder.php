@@ -38,6 +38,8 @@ class PermissionsTableSeeder extends Seeder
             'view-meeting-attendees','create-meeting-attendees','edit-meeting-attendees','delete-meeting-attendees',
             'view-meeting-minutes','create-meeting-minutes','edit-meeting-minutes','delete-meeting-minutes',
             'view-meetings','create-meetings','edit-meetings','delete-meetings',
+            'view-sms-configurations','create-sms-configurations','edit-sms-configurations','delete-sms-configurations',
+            'view-email-configurations','create-email-configurations','edit-email-configurations','delete-email-configurations',
 
       
         ];

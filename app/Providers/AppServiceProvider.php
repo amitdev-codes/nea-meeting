@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Carbon\Carbon;
 use App\Models\Resource;
+use App\Enums\MeetingType;
 use App\Models\SiteSetting;
 use App\Traits\HasStatusScope;
 use Modules\Forms\Models\Form;
@@ -40,6 +41,7 @@ use Modules\Lmbis\Models\LmbisActivity;
 use Modules\Master\Models\Organization;
 use Modules\Master\Models\SubComponent;
 use Modules\Indicators\Models\Indicator;
+use Modules\Settings\Models\SmsProvider;
 use Modules\Master\Models\Infrastructure;
 use Modules\Master\Models\LiveStockBreed;
 use Modules\Master\Models\StarterCategory;
@@ -132,6 +134,10 @@ class AppServiceProvider extends ServiceProvider
             return MeetingRoom::get(['id', 'name']);
         });
 
+        Cache::remember('smsProviders', 3600, function () {
+            return SmsProvider::get(['id', 'name']);
+        });
+
 
 
     }
@@ -154,6 +160,7 @@ class AppServiceProvider extends ServiceProvider
             'meeting_rooms' => Cache::get('meeting_rooms'),
             'organizations' => Cache::get('organizations'),
             'designations' => Cache::get('designations'),
+            'smsProviders' => Cache::get('smsProviders'),
         ]);
     }
 }

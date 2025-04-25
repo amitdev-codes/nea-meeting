@@ -18,6 +18,7 @@ use Modules\Forms\Database\Seeders\FormsDatabaseSeeder;
 use Modules\Lmbis\Database\Seeders\LmbisDatabaseSeeder;
 use Modules\Groups\Database\Seeders\GroupsDatabaseSeeder;
 use Modules\Master\Database\Seeders\MasterDatabaseSeeder;
+use Modules\Settings\Database\Seeders\SettingsDatabaseSeeder;
 use Modules\Grievances\Database\Seeders\GrievancesDatabaseSeeder;
 use Modules\Indicators\Database\Seeders\IndicatorsDatabaseSeeder;
 use Modules\NeaMeeting\Database\Seeders\NeaMeetingDatabaseSeeder;
@@ -44,7 +45,8 @@ class DatabaseSeeder extends Seeder
             UsersTableSeeder::class,
             SiteSettingSeeder::class,
             ResourceSeeder::class,
-            NeaMeetingDatabaseSeeder::class
+            NeaMeetingDatabaseSeeder::class,
+            SettingsDatabaseSeeder::class
 
         ]);
 

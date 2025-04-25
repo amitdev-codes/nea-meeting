@@ -45,13 +45,8 @@
                             <x-resource.detail-item label="{{ __('field.meeting_type') }}" 
                                 :value="$resource->meeting_type ?? ''" 
                                 class="col-md-6" />
-                            <x-resource.detail-item label="{{ __('field.created_at') }}" 
-                                :value="$resource->created_at" 
-                                type="datetime" 
-                                class="col-md-6" />
-                            <x-resource.detail-item label="{{ __('field.updated_at') }}" 
-                                :value="$resource->updated_at" 
-                                type="datetime" 
+                            <x-resource.detail-item label="{{ __('field.virtual_meeting_link') }}" 
+                                :value="$resource->virtual_meeting_link ?? ''" 
                                 class="col-md-6" />
                         </div>
                     </div>

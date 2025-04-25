@@ -157,6 +157,10 @@ class ComposerStaticInit34a66aff6d6ace15390a51061e4fbb0b
         'M' => 
         array (
             'Monolog\\' => 8,
+            'Modules\\Settings\\Tests\\' => 23,
+            'Modules\\Settings\\Database\\Seeders\\' => 34,
+            'Modules\\Settings\\Database\\Factories\\' => 36,
+            'Modules\\Settings\\' => 17,
             'Modules\\NeaMeeting\\Tests\\' => 25,
             'Modules\\NeaMeeting\\Database\\Seeders\\' => 36,
             'Modules\\NeaMeeting\\Database\\Factories\\' => 38,
@@ -544,6 +548,22 @@ class ComposerStaticInit34a66aff6d6ace15390a51061e4fbb0b
         array (
             0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
         ),
+        'Modules\\Settings\\Tests\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/Modules/Settings/tests',
+        ),
+        'Modules\\Settings\\Database\\Seeders\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/Modules/Settings/database/seeders',
+        ),
+        'Modules\\Settings\\Database\\Factories\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/Modules/Settings/database/factories',
+        ),
+        'Modules\\Settings\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/Modules/Settings/app',
+        ),
         'Modules\\NeaMeeting\\Tests\\' => 
         array (
             0 => __DIR__ . '/../..' . '/Modules/NeaMeeting/tests',
@@ -833,6 +853,7 @@ class ComposerStaticInit34a66aff6d6ace15390a51061e4fbb0b
         'App\\Enums\\MeetingStatus' => __DIR__ . '/../..' . '/app/Enums/MeetingStatus.php',
         'App\\Enums\\MeetingType' => __DIR__ . '/../..' . '/app/Enums/MeetingType.php',
         'App\\Enums\\Status' => __DIR__ . '/../..' . '/app/Enums/Status.php',
+        'App\\Events\\MeetingCancelled' => __DIR__ . '/../..' . '/app/Events/MeetingCancelled.php',
         'App\\Events\\MeetingCreated' => __DIR__ . '/../..' . '/app/Events/MeetingCreated.php',
         'App\\Events\\MeetingUpdated' => __DIR__ . '/../..' . '/app/Events/MeetingUpdated.php',
         'App\\Helpers\\MenuHelper' => __DIR__ . '/../..' . '/app/Helpers/MenuHelper.php',
@@ -897,13 +918,14 @@ class ComposerStaticInit34a66aff6d6ace15390a51061e4fbb0b
         'App\\Http\\Requests\\UpdateUserRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UpdateUserRequest.php',
         'App\\Http\\Requests\\updateContactFormRequest' => __DIR__ . '/../..' . '/app/Http/Requests/updateContactFormRequest.php',
         'App\\Imports\\DynamicImport' => __DIR__ . '/../..' . '/app/Imports/DynamicImport.php',
+        'App\\Listeners\\SendMeetingCancelledNotification' => __DIR__ . '/../..' . '/app/Listeners/SendMeetingCancelledNotification.php',
         'App\\Listeners\\SendMeetingNotification' => __DIR__ . '/../..' . '/app/Listeners/SendMeetingNotification.php',
         'App\\Listeners\\SendMeetingUpdateNotification' => __DIR__ . '/../..' . '/app/Listeners/SendMeetingUpdateNotification.php',
         'App\\Listeners\\UpdateLastLoginTimestamp' => __DIR__ . '/../..' . '/app/Listeners/UpdateLastLoginTimestamp.php',
         'App\\Listeners\\UpdateLastLogoutTimestamp' => __DIR__ . '/../..' . '/app/Listeners/UpdateLastLogoutTimestamp.php',
         'App\\Livewire\\Sliders\\SliderStatus' => __DIR__ . '/../..' . '/app/Livewire/Sliders/SliderStatus.php',
         'App\\Mail\\ContactMail' => __DIR__ . '/../..' . '/app/Mail/ContactMail.php',
-        'App\\Mail\\PlayerRegistrationManagementMail' => __DIR__ . '/../..' . '/app/Mail/PlayerRegistrationManagementMail.php',
+        'App\\Mail\\MeetingCancelledMail' => __DIR__ . '/../..' . '/app/Mail/MeetingCancelledMail.php',
         'App\\Mail\\PlayersRegistrationMail' => __DIR__ . '/../..' . '/app/Mail/PlayersRegistrationMail.php',
         'App\\Models\\Address' => __DIR__ . '/../..' . '/app/Models/Address.php',
         'App\\Models\\ApplicationSetting' => __DIR__ . '/../..' . '/app/Models/ApplicationSetting.php',
@@ -930,6 +952,7 @@ class ComposerStaticInit34a66aff6d6ace15390a51061e4fbb0b
         'App\\Notifications\\MeetingNotification' => __DIR__ . '/../..' . '/app/Notifications/MeetingNotification.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Providers\\EventServiceProvider' => __DIR__ . '/../..' . '/app/Providers/EventServiceProvider.php',
+        'App\\Providers\\NotificationServiceProvider' => __DIR__ . '/../..' . '/app/Providers/NotificationServiceProvider.php',
         'App\\Services\\InstagramService' => __DIR__ . '/../..' . '/app/Services/InstagramService.php',
         'App\\Services\\PdfExportService' => __DIR__ . '/../..' . '/app/Services/PdfExportService.php',
         'App\\Services\\ResponseService' => __DIR__ . '/../..' . '/app/Services/ResponseService.php',
@@ -4891,6 +4914,29 @@ class ComposerStaticInit34a66aff6d6ace15390a51061e4fbb0b
         'Modules\\NeaMeeting\\Providers\\EventServiceProvider' => __DIR__ . '/../..' . '/Modules/NeaMeeting/app/Providers/EventServiceProvider.php',
         'Modules\\NeaMeeting\\Providers\\NeaMeetingServiceProvider' => __DIR__ . '/../..' . '/Modules/NeaMeeting/app/Providers/NeaMeetingServiceProvider.php',
         'Modules\\NeaMeeting\\Providers\\RouteServiceProvider' => __DIR__ . '/../..' . '/Modules/NeaMeeting/app/Providers/RouteServiceProvider.php',
+        'Modules\\Settings\\DataTables\\EmailConfigurationDataTable' => __DIR__ . '/../..' . '/Modules/Settings/app/DataTables/EmailConfigurationDataTable.php',
+        'Modules\\Settings\\DataTables\\SmsConfigurationDataTable' => __DIR__ . '/../..' . '/Modules/Settings/app/DataTables/SmsConfigurationDataTable.php',
+        'Modules\\Settings\\Database\\Seeders\\EmailConfigurationTableSeeder' => __DIR__ . '/../..' . '/Modules/Settings/database/seeders/EmailConfigurationTableSeeder.php',
+        'Modules\\Settings\\Database\\Seeders\\SettingsDatabaseSeeder' => __DIR__ . '/../..' . '/Modules/Settings/database/seeders/SettingsDatabaseSeeder.php',
+        'Modules\\Settings\\Database\\Seeders\\SmsConfigurationTableSeeder' => __DIR__ . '/../..' . '/Modules/Settings/database/seeders/SmsConfigurationTableSeeder.php',
+        'Modules\\Settings\\Http\\Controllers\\EmailConfigurationController' => __DIR__ . '/../..' . '/Modules/Settings/app/Http/Controllers/EmailConfigurationController.php',
+        'Modules\\Settings\\Http\\Controllers\\SettingsController' => __DIR__ . '/../..' . '/Modules/Settings/app/Http/Controllers/SettingsController.php',
+        'Modules\\Settings\\Http\\Controllers\\SmsConfigurationController' => __DIR__ . '/../..' . '/Modules/Settings/app/Http/Controllers/SmsConfigurationController.php',
+        'Modules\\Settings\\Http\\Requests\\StoreEmailConfigurationRequest' => __DIR__ . '/../..' . '/Modules/Settings/app/Http/Requests/StoreEmailConfigurationRequest.php',
+        'Modules\\Settings\\Http\\Requests\\StoreSmsConfigurationRequest' => __DIR__ . '/../..' . '/Modules/Settings/app/Http/Requests/StoreSmsConfigurationRequest.php',
+        'Modules\\Settings\\Http\\Requests\\UpdateEmailConfigurationRequest' => __DIR__ . '/../..' . '/Modules/Settings/app/Http/Requests/UpdateEmailConfigurationRequest.php',
+        'Modules\\Settings\\Http\\Requests\\UpdateSmsConfigurationRequest' => __DIR__ . '/../..' . '/Modules/Settings/app/Http/Requests/UpdateSmsConfigurationRequest.php',
+        'Modules\\Settings\\Models\\EmailConfiguration' => __DIR__ . '/../..' . '/Modules/Settings/app/Models/EmailConfiguration.php',
+        'Modules\\Settings\\Models\\SmsConfiguration' => __DIR__ . '/../..' . '/Modules/Settings/app/Models/SmsConfiguration.php',
+        'Modules\\Settings\\Models\\SmsProvider' => __DIR__ . '/../..' . '/Modules/Settings/app/Models/SmsProvider.php',
+        'Modules\\Settings\\Providers\\EventServiceProvider' => __DIR__ . '/../..' . '/Modules/Settings/app/Providers/EventServiceProvider.php',
+        'Modules\\Settings\\Providers\\RouteServiceProvider' => __DIR__ . '/../..' . '/Modules/Settings/app/Providers/RouteServiceProvider.php',
+        'Modules\\Settings\\Providers\\SettingsServiceProvider' => __DIR__ . '/../..' . '/Modules/Settings/app/Providers/SettingsServiceProvider.php',
+        'Modules\\Settings\\Services\\DynamicEmailService' => __DIR__ . '/../..' . '/Modules/Settings/app/Services/DynamicEmailService.php',
+        'Modules\\Settings\\Services\\Sms\\GenericSmsService' => __DIR__ . '/../..' . '/Modules/Settings/app/Services/Sms/GenericSmsService.php',
+        'Modules\\Settings\\Services\\Sms\\SmsServiceFactory' => __DIR__ . '/../..' . '/Modules/Settings/app/Services/Sms/SmsServiceFactory.php',
+        'Modules\\Settings\\Services\\Sms\\SmsServiceInterface' => __DIR__ . '/../..' . '/Modules/Settings/app/Services/Sms/SmsServiceInterface.php',
+        'Modules\\Settings\\Services\\Sms\\SparrowSmsService' => __DIR__ . '/../..' . '/Modules/Settings/app/Services/Sms/SparrowSmsService.php',
         'Monolog\\Attribute\\AsMonologProcessor' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/Attribute/AsMonologProcessor.php',
         'Monolog\\Attribute\\WithMonologChannel' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/Attribute/WithMonologChannel.php',
         'Monolog\\DateTimeImmutable' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/DateTimeImmutable.php',
