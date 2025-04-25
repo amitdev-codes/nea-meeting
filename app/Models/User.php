@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use App\Models\Address;
-use Illuminate\Support\Facades\Cache;
 use Spatie\Activitylog\LogOptions;
 use Modules\Master\Models\Category;
+use Illuminate\Support\Facades\Auth;
 use Modules\Master\Models\Component;
+use Illuminate\Support\Facades\Cache;
 use Modules\Master\Models\Designation;
 use Spatie\Permission\Traits\HasRoles;
 use Modules\Master\Models\Organization;
@@ -151,4 +152,24 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Category::class, 'category_id', 'id');
     }
+
+    // protected static function boot()
+    // {
+    //     parent::boot();
+
+    //     static::addGlobalScope('hideSuperadmin', function ($query) {
+    //         // Check if the current user is NOT a superadmin
+    //         if (!Auth::check() || !Auth::user()->hasRole('superadmin')) {
+    //             $query->whereDoesntHave('roles', function ($q) {
+    //                 $q->where('name', 'superadmin');
+    //             });
+    //         }
+    //     });
+    // }
+
+    // // If using Spatie Laravel Permission for roles
+    // public function hasRole($role)
+    // {
+    //     return $this->roles()->where('name', $role)->exists();
+    // }
 }

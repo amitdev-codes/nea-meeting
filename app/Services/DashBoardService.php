@@ -138,73 +138,152 @@ class DashboardService
         
         return $query->count();
     }
-
-    private function getMeetingsPerNepaliMonth(Carbon $today): array
+    private function getMeetingsPerNepaliMonth(Carbon $today, ?int $organizationId = null, string $role = 'user'): array
     {
         $nepaliMonthsData = [];
         $currentNepaliDate = NepaliDateConverter::toNepaliDate($today);
         $currentNepaliYear = $currentNepaliDate['year'];
         $currentNepaliMonth = $currentNepaliDate['month'];
-        
-        for ($i = 5; $i >= 0; $i--) {
-            $monthOffset = $currentNepaliMonth - $i;
-            $year = $currentNepaliYear;
-            
-            if ($monthOffset <= 0) {
-                $monthOffset += 12;
-                $year--;
-            }
-            
+
+        // Determine the fiscal year start and end
+        // Nepali fiscal year starts from Shrawan (month 4) and ends at Ashadh (month 3) next year
+        $fiscalYearStart = $currentNepaliMonth >= 4 ? $currentNepaliYear : $currentNepaliYear - 1;
+        $fiscalYearEnd = $fiscalYearStart + 1;
+
+        // Iterate through all 12 months of the fiscal year, starting from Shrawan
+        for ($monthOffset = 4; $monthOffset <= 15; $monthOffset++) {
+            $nepaliMonth = $monthOffset > 12 ? $monthOffset - 12 : $monthOffset;
+            $year = $monthOffset > 12 ? $fiscalYearEnd : $fiscalYearStart;
+
             $calendarRecord = DB::table('nepali_calendar')
                 ->where('bs_year', $year)
-                ->where('month', $monthOffset)
+                ->where('month', $nepaliMonth)
                 ->first();
-            
+
             if (!$calendarRecord) {
-                $nepaliMonthsData[] = [
-                    'label' => NepaliDateConverter::$nepaliMonths[$monthOffset],
-                    'count' => 0,
-                ];
-                continue;
+                continue; // Skip if no calendar record exists
             }
-            
+
             $daysInMonth = $calendarRecord->days;
-            $startGregorian = NepaliDateConverter::toGregorianDate($year, $monthOffset, 1)['gregorian_date'];
-            $endGregorian = NepaliDateConverter::toGregorianDate($year, $monthOffset, $daysInMonth)['gregorian_date'];
-            
+            $startGregorian = NepaliDateConverter::toGregorianDate($year, $nepaliMonth, 1)['gregorian_date'];
+            $endGregorian = NepaliDateConverter::toGregorianDate($year, $nepaliMonth, $daysInMonth)['gregorian_date'];
+
             $endNepali = NepaliDateConverter::toNepaliDate(Carbon::parse($endGregorian));
-            if ($endNepali['month'] != $monthOffset) {
+            if ($endNepali['month'] != $nepaliMonth) {
                 $endGregorian = Carbon::parse($endGregorian)->subDay()->toDateString();
             }
-            
-            $count = Meeting::whereBetween('meeting_date_ad', [$startGregorian, $endGregorian])->count();
-            $nepaliMonthsData[] = [
-                'label' => NepaliDateConverter::$nepaliMonths[$monthOffset],
-                'count' => $count,
-            ];
+
+            $query = Meeting::whereBetween('meeting_date_ad', [$startGregorian, $endGregorian]);
+
+            // Apply organization filter for non-admin roles
+            if ($organizationId && !in_array($role, ['superadmin', 'centraladmin'])) {
+                $query->whereJsonContains('meetings.organizations', (string) $organizationId);
+            }
+
+            $count = $query->count();
+
+            // Only include months with meetings
+            if ($count > 0) {
+                $nepaliMonthsData[] = [
+                    'label' => NepaliDateConverter::$nepaliMonths[$nepaliMonth],
+                    'count' => $count,
+                ];
+            }
         }
-        
+
         return $nepaliMonthsData;
     }
 
-    private function getMeetingStatusDistribution(?int $organizationId = null): array
+    // private function getMeetingsPerNepaliMonth(Carbon $today): array
+    // {
+    //     $nepaliMonthsData = [];
+    //     $currentNepaliDate = NepaliDateConverter::toNepaliDate($today);
+    //     $currentNepaliYear = $currentNepaliDate['year'];
+    //     $currentNepaliMonth = $currentNepaliDate['month'];
+        
+    //     for ($i = 5; $i >= 0; $i--) {
+    //         $monthOffset = $currentNepaliMonth - $i;
+    //         $year = $currentNepaliYear;
+            
+    //         if ($monthOffset <= 0) {
+    //             $monthOffset += 12;
+    //             $year--;
+    //         }
+            
+    //         $calendarRecord = DB::table('nepali_calendar')
+    //             ->where('bs_year', $year)
+    //             ->where('month', $monthOffset)
+    //             ->first();
+            
+    //         if (!$calendarRecord) {
+    //             $nepaliMonthsData[] = [
+    //                 'label' => NepaliDateConverter::$nepaliMonths[$monthOffset],
+    //                 'count' => 0,
+    //             ];
+    //             continue;
+    //         }
+            
+    //         $daysInMonth = $calendarRecord->days;
+    //         $startGregorian = NepaliDateConverter::toGregorianDate($year, $monthOffset, 1)['gregorian_date'];
+    //         $endGregorian = NepaliDateConverter::toGregorianDate($year, $monthOffset, $daysInMonth)['gregorian_date'];
+
+              
+
+            
+    //         $endNepali = NepaliDateConverter::toNepaliDate(Carbon::parse($endGregorian));
+    //         if ($endNepali['month'] != $monthOffset) {
+    //             $endGregorian = Carbon::parse($endGregorian)->subDay()->toDateString();
+    //         }
+            
+    //         $count = Meeting::whereBetween('meeting_date_ad', [$startGregorian, $endGregorian])->count();
+    //         $nepaliMonthsData[] = [
+    //             'label' => NepaliDateConverter::$nepaliMonths[$monthOffset],
+    //             'count' => $count,
+    //         ];
+    //     }
+        
+    //     return $nepaliMonthsData;
+    // }
+
+    // private function getMeetingStatusDistribution(?int $organizationId = null): array
+    // {
+    //     $query = Meeting::select('status')->groupBy('status');
+        
+    //     if ($organizationId) {
+    //         $query->whereJsonContains('meetings.organizations', (string) $organizationId);
+    //     }
+        
+    //     return $query->pluck('status')
+    //         ->mapWithKeys(function ($status) use ($organizationId) {
+    //             $countQuery = Meeting::where('status', $status);
+                
+    //             if ($organizationId) {
+    //                 $countQuery->whereJsonContains('meetings.organizations', (string) $organizationId);
+    //             }
+
+    //             // dd($countQuery);
+                
+    //             return [$status => $countQuery->count()];
+    //         })->toArray();
+    // }
+    private function getMeetingStatusDistribution(?int $organizationId = null, string $role = 'user'): array
     {
         $query = Meeting::select('status')->groupBy('status');
-        
-        if ($organizationId) {
+
+        // Apply organization filter for non-admin roles
+        if ($organizationId && !in_array($role, ['superadmin', 'centraladmin'])) {
             $query->whereJsonContains('meetings.organizations', (string) $organizationId);
         }
-        
+
         return $query->pluck('status')
-            ->mapWithKeys(function ($status) use ($organizationId) {
+            ->mapWithKeys(function ($status) use ($organizationId, $role) {
                 $countQuery = Meeting::where('status', $status);
-                
-                if ($organizationId) {
+
+                // Apply organization filter for non-admin roles
+                if ($organizationId && !in_array($role, ['superadmin', 'centraladmin'])) {
                     $countQuery->whereJsonContains('meetings.organizations', (string) $organizationId);
                 }
 
-                // dd($countQuery);
-                
                 return [$status => $countQuery->count()];
             })->toArray();
     }

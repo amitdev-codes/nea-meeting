@@ -38,6 +38,7 @@ class MeetingSeeder extends Seeder
         }
         
         $meetings = [];
+        $fiscalYearId=8;
         
         // Create past meetings
         for ($i = 1; $i <= 10; $i++) {
@@ -72,6 +73,7 @@ class MeetingSeeder extends Seeder
                 'created_by' => $userIds[array_rand($userIds)],
                 'created_at' => (clone $startTime)->subDays(rand(3, 10)),
                 'updated_at' => (clone $startTime)->subDays(rand(1, 3)),
+                'fiscal_year_id' => $fiscalYearId
             ];
         }
         
@@ -108,6 +110,7 @@ class MeetingSeeder extends Seeder
                 'created_by' => $userIds[array_rand($userIds)],
                 'created_at' => (clone $startTime)->subDays(rand(3, 10)),
                 'updated_at' => (clone $startTime)->subDays(rand(1, 3)),
+                'fiscal_year_id' => $fiscalYearId
             ];
         }
         
@@ -144,6 +147,7 @@ class MeetingSeeder extends Seeder
                 'created_by' => $userIds[array_rand($userIds)],
                 'created_at' => (clone $startTime)->subDays(rand(3, 10)),
                 'updated_at' => (clone $startTime)->subDays(rand(1, 3)),
+                'fiscal_year_id' => $fiscalYearId
             ];
         }
         

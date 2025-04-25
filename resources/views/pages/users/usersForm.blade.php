@@ -18,6 +18,10 @@
                 <div class="mb-3 col-md-3">
                     <x-forms.input-phone name="mobile_no" label="{{ __('Mobile No') }}" :value="old('mobile_no', $model->mobile_no ?? '')" required />
                 </div>
+                <!-- Mobile No -->
+                <div class="mb-3 col-md-3">
+                    <x-forms.input-phone name="phone" label="{{ __('Phone No') }}" :value="old('phone', $model->phone ?? '')"  />
+                </div>
 
                 <!-- Role -->
                 <div class="mb-3 col-md-3">
@@ -31,7 +35,7 @@
 
 
                 <!-- Organization -->
-                <div class="mb-3 col-md-6">
+                <div class="mb-3 col-md-3">
                     <x-forms.input-select2 name="organization_id" label="{{ __('Organization') }}" :options="$organizations
                         ->map(function ($organization) {
                             return [$organization->id, $organization->name . ' (' . $organization->name_np . ')'];
@@ -41,7 +45,7 @@
                 </div>
 
                 <!-- Password (Moved to Last) -->
-                <div class="mb-3 col-md-6">
+                <div class="mb-3 col-md-3">
                     <x-forms.input-password name="password" label="{{ __('Password') }}" required />
                 </div>
             </div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Mail\TestMailable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ImageController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\Auth\PasswordController;
+use Modules\Settings\Services\DynamicEmailService;
 use App\Http\Controllers\CumulativeProgressController;
 
 Route::middleware(['locale'])->group(function () {
@@ -29,6 +31,17 @@ Route::middleware(['locale'])->group(function () {
             Route::get('/account/change-password', [PasswordController::class, 'edit'])->name('password.edit');
             Route::get('/account/change-language', [DashBoardController::class, 'locale'])->name('locale');
         });
+    });
+
+    Route::get('/test-email', function () {
+        try {
+            $emailService = new DynamicEmailService();
+
+            $emailService->send('amitdev67@gmail.com', new TestMailable());
+            return 'Email sent successfully!';
+        } catch (\Exception $e) {
+            return 'Error: ' . $e->getMessage();
+        }
     });
 
 

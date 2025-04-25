@@ -35,7 +35,7 @@ class DynamicEmailService
     protected function setMailConfig()
     {
         $config = [
-            'driver'     => $this->emailConfig->mail_mailer,
+            'transport'     => $this->emailConfig->mail_mailer,
             'host'       => $this->emailConfig->mail_host,
             'port'       => $this->emailConfig->mail_port,
             'username'   => $this->emailConfig->mail_username,

@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role as SpatieRole;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Role extends SpatieRole
 {
@@ -18,6 +19,12 @@ class Role extends SpatieRole
         static::creating(function ($role) {
             if (empty($role->guard_name)) {
                 $role->guard_name = config('auth.defaults.guard');
+            }
+        });
+        static::addGlobalScope('hideSuperadminRole', function ($query) {
+            // Check if the current user is NOT a superadmin
+            if (!Auth::user() || !Auth::user()->hasRole('superadmin')) {
+                $query->where('name', '!=', 'superadmin');
             }
         });
     }

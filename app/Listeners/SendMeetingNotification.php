@@ -13,9 +13,9 @@ use App\Notifications\ExternalMeetingNotification;
 use Modules\Settings\Services\DynamicEmailService;
 use Modules\Settings\Services\Sms\SmsServiceInterface;
 
-class SendMeetingNotification implements ShouldQueue
+class SendMeetingNotification 
 {
-    use InteractsWithQueue;
+
     protected $emailService;
     protected $smsService;
     
@@ -66,11 +66,11 @@ class SendMeetingNotification implements ShouldQueue
                     }
                 }
                 
-                // Send SMS notification if enabled and user has phone number
-                if ($sendSms && !empty($user->phone)) {
+                // Send SMS notification if enabled and user has mobile_no number
+                if ($sendSms && !empty($user->mobile_no)) {
                     try {
                         $message = $this->formatSmsMessage($event->meeting, $user);
-                        $result = $this->smsService->send($user->phone, $message);
+                        $result = $this->smsService->send($user->mobile_no, $message);
                         
                         if ($result['success']) {
                             $smsUserIds[] = $user->id;
@@ -126,11 +126,11 @@ class SendMeetingNotification implements ShouldQueue
                     }
                 }
                 
-                // Send SMS notification if enabled and contact has phone number
-                if ($sendSms && !empty($contact->phone)) {
+                // Send SMS notification if enabled and contact has mobile_no number
+                if ($sendSms && !empty($contact->mobile_no)) {
                     try {
                         $message = $this->formatSmsMessage($event->meeting, $contact, true);
-                        $result = $this->smsService->send($contact->phone, $message);
+                        $result = $this->smsService->send($contact->mobile_no, $message);
                         
                         if ($result['success']) {
                             $smsExternalIds[] = $contact->id;
@@ -180,8 +180,8 @@ class SendMeetingNotification implements ShouldQueue
         $name = $isExternal ? $recipient->name : $recipient->name;
         $appName = config('app.name');
         $meetingTitle = $meeting->title;
-        $date = $meeting->scheduled_at->format('M d, Y');
-        $time = $meeting->scheduled_at->format('h:i A');
+        $date = $meeting->scheduled_at;
+        $time = $meeting->scheduled_at;
         
         return "Hi {$name}, a new meeting \"{$meetingTitle}\" has been scheduled on {$date} at {$time}. Please check your email for details. - {$appName}";
     }

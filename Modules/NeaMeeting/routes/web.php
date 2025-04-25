@@ -15,6 +15,6 @@ Route::group(['prefix' => 'meetings', 'middleware' => ['locale']], function () {
     Route::resource('meeting-rooms', MeetingRoomController::class)->names('admin.meeting-rooms');
     Route::resource('meeting-attendees', MeetingAttendeeController::class)->names('admin.meeting-attendees');
     Route::resource('meeting-minutes', MeetingMinuteController::class)->names('admin.meeting-minutes');
-    Route::post('checkConflict', [MeetingController::class,'checkConflict'])->name('meetings.check-conflict');
+    Route::post('checkConflict', [MeetingController::class,'checkConflict'])->name('meetings.check-conflicts');
     Route::post('/cancel/{id}', [MeetingController::class, 'cancel'])->name('meetings.cancel');
 });

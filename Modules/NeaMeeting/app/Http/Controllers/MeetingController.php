@@ -59,10 +59,7 @@ class MeetingController extends BaseAdminController
             
             try {
                 $validated=$request->validated();
-                // Create the meeting with validated data
                 $meeting = Meeting::create($validated);
-                     // Handle external contact if is_external is true
-
                 if ($validated['is_external'] && isset($validated['external_contacts'])) {
                     foreach ($validated['external_contacts'] as $contact) {
                         $meeting->externalContacts()->create($contact);
@@ -78,12 +75,14 @@ class MeetingController extends BaseAdminController
                 
                 // Trigger the meeting created event
                 if ($request->boolean('send_notifications', true)) {
+                    // dd('test');
                     event(new MeetingCreated($meeting, [
                         'send_email' => $request->boolean('send_email', true),
                         'send_sms' => $request->boolean('send_sms', true),
                         'organization_ids' => $request->organizations ?? [],
                     ]));
                 }
+                
 
                 DB::commit();
                 if ($request->has('save_and_add_more')) {
@@ -97,6 +96,8 @@ class MeetingController extends BaseAdminController
             }
         }, 'admin.meetings.index', 'Meeting created successfully.', 'Failed to create the Meeting.');
     }
+
+
     public function show(Meeting $meeting)
     {
         $meeting->load(['media' => function($query) {
@@ -141,14 +142,6 @@ class MeetingController extends BaseAdminController
                 $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
             }
             // trigger the evnts
-            // if ($request->boolean('send_notifications', true)) {
-            //     event(new MeetingUpdated($meeting, [
-            //         'send_email' => $request->boolean('send_email', true),
-            //         'send_sms' => $request->boolean('send_sms', true),
-            //         'organization_ids' => $request->organizations ?? [],
-            //     ]));
-            // }
-
             if ($request->boolean('send_notifications', true)) {
                 // dd($validated['status']);
                 if ($validated['status'] === 'Cancelled') {
@@ -159,7 +152,8 @@ class MeetingController extends BaseAdminController
                         'organization_ids' => $request->organizations ?? [],
                     ]));
                 } else {
-                    event(new \App\Events\MeetingUpdated($meeting, [
+                    // dd('test');
+                    event(new MeetingUpdated($meeting, [
                         'send_email' => $request->boolean('send_email', true),
                         'send_sms' => $request->boolean('send_sms', true),
                         'organization_ids' => $request->organizations ?? [],
@@ -281,26 +275,24 @@ class MeetingController extends BaseAdminController
     }
     public function checkConflict(Request $request)
     {
-        $request->validate([
-            'meeting_date' => 'required|date',
-            'start_time' => 'required',
-        ]);
+        $request->validate(['meeting_date' => 'required|date','start_time' => 'required']);
     
         $meetingDate = $request->meeting_date;
         $startTime = $request->start_time;
-        $meetingId = $request->meeting_id ?? 0;
-        
-        // Query to find conflicting meetings (including those that overlap)
-        $conflictingMeeting = Meeting::where('meeting_date', $meetingDate)
-            ->where(function($query) use ($startTime) {
-                $query->where('start_time', $startTime)
-                      ->orWhere('end_time', '>', $startTime);
-            })
-            ->when($meetingId > 0, function($query) use ($meetingId) {
-                $query->where('id', '!=', $meetingId);
-            })
-            ->first();
-        
+    
+        // Convert Nepali date to AD date
+       $date=explode('-',$meetingDate);
+       $year=$date[0];
+       $month=$date[1];
+       $day=$date[2];
+       $converter = new NepaliDateConverter();
+       $adDate = $converter->toGregorianDate($year, $month, $day);
+       $meetingDateAd = $adDate['gregorian_date'];
+
+       $startTime = Carbon::createFromFormat('h:i A', $startTime)->format('H:i:s');
+       $startDateTime = Carbon::createFromFormat('Y-m-d H:i:s', "$meetingDateAd $startTime");
+       $conflictingMeeting = Meeting::where('start_time', $startDateTime)->first();
+    
         return response()->json([
             'conflict' => !is_null($conflictingMeeting),
             'meeting' => $conflictingMeeting ? [

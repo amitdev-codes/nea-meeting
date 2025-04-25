@@ -2,30 +2,23 @@
 
 namespace App\Mail;
 
-use App\Models\Contact;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
 
-class ContactMail extends Mailable
+class TestMailable extends Mailable
 {
     use Queueable, SerializesModels;
 
-    // public $contact;
     /**
      * Create a new message instance.
      */
-    public function __construct(Contact $contact)
+    public function __construct()
     {
-        $this->contact = $contact;
-    }
-
-    public function build()
-    {
-        return $this->subject('New Contact Message')
-                    ->view('emails.contact-email');
+        //
     }
 
     /**
@@ -34,19 +27,24 @@ class ContactMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Contact Mail',
+            subject: 'Test Mailable',
         );
+    }
+
+    public function build()
+    {
+        return $this->subject('Test Email')->view('emails.test'); 
     }
 
     /**
      * Get the message content definition.
      */
-    public function content(): Content
-    {
-        return new Content(
-            view: 'emails.contact-email',
-        );
-    }
+    // public function content(): Content
+    // {
+    //     return new Content(
+    //         view: 'view.name',
+    //     );
+    // }
 
     /**
      * Get the attachments for the message.

@@ -2,6 +2,8 @@
 
 namespace Modules\Settings\Http\Controllers;
 
+use Exception;
+use App\Models\Contact;
 use App\Mail\ContactMail;
 use Illuminate\Http\Request;
 use App\Services\ResponseService;
@@ -86,36 +88,41 @@ class EmailConfigurationController extends BaseAdminController
   
     public function activate(EmailConfiguration $emailConfiguration)
     {
-        EmailConfiguration::where('id', '!=', $emailConfiguration->id)->update(['is_active' => false]);
-        $emailConfiguration->update(['is_active' => true]);
+        // EmailConfiguration::where('id', '!=', $emailConfiguration->id)->update(['is_active' => false]);
+        // $emailConfiguration->update(['is_active' => true]);
 
-        return redirect()->route('admin.email-configurations.index')
-            ->with('success', 'Email configuration activated successfully');
+        // return redirect()->route('admin.email-configurations.index')
+        //     ->with('success', 'Email configuration activated successfully');
     }
-
 
     public function test()
     {
-        try {
-            // Define default email and message for testing
-            $defaultEmail = env('TEST_EMAIL_ADDRESS', 'amitdev67@gmail.com');
-            $defaultSubject = 'Test Email from Application';
-            $defaultMessage = 'This is a test email sent to verify email configuration.';
-    
+
+            $to = 'amitdev67@gmail.com';
+            $contact = new Contact();
+            $contact->message = 'This is a test email sent to verify email configuration.';
+            $contact->name = 'amit';
+            $contact->email = 'amitdev67@gmail.com';
+            $contact->subject = 'testing';
+            $contact->save();
+
+            // dd('test');
+
+            
             try {
-                $this->emailService->send('amitdev67@gmail.com','ContactMail');
+                Mail::to($to)->send(new ContactMail($contact));
+                
                 $emailStatus = 'Email sent successfully';
-            } catch (\Exception $e) {
-                $emailStatus = 'Email error: ' . $e->getMessage();
+                return redirect()->route('admin.email-configurations.index')
+                    ->with('success', $emailStatus);
+                    
+            } catch (Exception $e) {
+                dd($e);
+                Log::error('Email sending error: ' . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                
             }
-        } catch (\Exception $e) {
-            // Log the error with additional context
-            Log::error('Failed to send test email: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-            ]);
-    
-            return redirect()->route('admin.email-configurations.index')
-                ->with('error', 'Failed to send test email: ' . $e->getMessage());
-        }
+
     }
 }

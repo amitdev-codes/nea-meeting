@@ -57,6 +57,9 @@ class Meeting extends Model implements HasMedia
         // 'status' => MeetingStatus::class,
         'status' => 'string',
     ];
+    protected $attributes = [
+        'fiscal_year_id' => 8,
+    ];
 
     public function meetingRoom(): BelongsTo
     {

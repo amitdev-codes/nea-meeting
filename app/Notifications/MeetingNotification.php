@@ -10,9 +10,9 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class MeetingNotification extends Notification implements ShouldQueue
+class MeetingNotification extends Notification
 {
-    use Queueable;
+  
 
     protected $meeting;
 

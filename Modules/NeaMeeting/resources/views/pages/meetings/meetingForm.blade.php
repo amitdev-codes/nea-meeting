@@ -37,7 +37,7 @@
 
 
                         <div class="mb-3 col-md-3">
-                            <x-forms.input-time name="start_time" id="startTime" :label="__('field.start_time')" :value="old(
+                            <x-forms.input-time name="start_time" id="start_time" :label="__('field.start_time')" :value="old(
                                 'start_time',
                                 isset($model) && $model->start_time
                                     ? \Carbon\Carbon::parse($model->start_time)->format('H:i')
@@ -419,5 +419,38 @@
                 });
             }
         });
+
+        function checkTimeConflicts() {
+            const startTime = $('#start_time').val();
+            const meetingDate = $('#nepaliDate').val(); 
+            // Check for conflicts
+            $.ajax({
+                url: '/meetings/checkConflict', // Your route for checking conflicts
+                method: 'POST',
+                data: {
+                    meeting_date: meetingDate,
+                    start_time: startTime,
+                    _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for Laravel
+                },
+                success: function(response) {
+                    console.log(response);
+                    if (response.conflict) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Time Conflict Detected',
+                            text: `The selected time conflicts with an existing meeting: ${response.meeting.title} (ID: ${response.meeting.id}) from ${response.meeting.start_time} to ${response.meeting.end_time}.`,
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    // Handle error if needed
+                    console.error(xhr);
+                }
+            });
+        }
+        // Event listener for start time change
+        $('#start_time').on('change', function() {
+            checkTimeConflicts();
+        });
     </script>
-    @endpush
+@endpush

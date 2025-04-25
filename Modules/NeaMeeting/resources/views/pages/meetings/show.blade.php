@@ -10,17 +10,20 @@
         <div class="row g-4">
             {{-- Main Information Card --}}
             <div class="col-xl-8 col-lg-7">
-                <x-resource.detail-card title="{{ __('field.meeting_information') }}" icon="bx-group" 
-                    class="card h-100 shadow-sm border-0">
-                    <x-slot name="actions">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="bx bx-group me-2" style="font-size: 1.5rem;"></i>
+                            <h5 class="mb-0">{{ __('field.meeting_information') }}</h5>
+                        </div>
                         @can('edit meetings')
                             <a href="{{ route('admin.meetings.edit', $resource) }}" 
-                               class="btn btn-primary btn-sm waves-effect waves-light" 
+                               class="btn btn-light btn-sm waves-effect waves-light" 
                                aria-label="Edit meeting">
                                 <i class="bx bx-edit me-1"></i> Edit
                             </a>
                         @endcan
-                    </x-slot>
+                    </div>
 
                     <div class="card-body">
                         <div class="row gy-3">
@@ -30,34 +33,68 @@
                             <x-resource.detail-item label="{{ __('field.meeting_location') }}" 
                                 :value="$resource->meeting_location" 
                                 class="col-12" />
-                            <x-resource.detail-item label="{{ __('field.meeting_date') }}" 
-                                :value="$resource->meeting_date . ' (' . $resource->meeting_date_ad . ')' ?? 'N/A'" 
-                                class="col-md-6" />
-                            <x-resource.detail-item label="{{ __('field.start_time') }}" 
-                                :value="$resource->start_time ?? ''" 
-                                class="col-md-3" />
-                            <x-resource.detail-item label="{{ __('field.end_time') }}" 
-                                :value="$resource->end_time ?? ''" 
-                                class="col-md-3" />
+                            
+                            <div class="col-md-12">
+                                <x-resource.detail-item label="{{ __('field.meeting_date') }}" 
+                                    :value="$resource->meeting_date . ' (' . $resource->meeting_date_ad . ')' ?? 'N/A'" />
+                            </div>
+                            <div class="col-md-12">
+                                <x-resource.detail-item label="{{ __('field.start_time') }}" 
+                                    :value="$resource->start_time ?? ''" />
+                            </div>
+                            <div class="col-md-12">
+                                <x-resource.detail-item label="{{ __('field.end_time') }}" 
+                                    :value="$resource->end_time ?? ''" />
+                            </div>
+                            
                             <x-resource.detail-item label="{{ __('field.meeting_room_id') }}" 
                                 :value="$resource->meetingRoom->name ?? 'N/A'" 
                                 class="col-md-6" />
                             <x-resource.detail-item label="{{ __('field.meeting_type') }}" 
                                 :value="$resource->meeting_type ?? ''" 
                                 class="col-md-6" />
-                            <x-resource.detail-item label="{{ __('field.virtual_meeting_link') }}" 
-                                :value="$resource->virtual_meeting_link ?? ''" 
-                                class="col-md-6" />
+                            
+                            {{-- Enhanced Virtual Meeting Link --}}
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">{{ __('field.virtual_meeting_link') }}</label>
+                                    @if($resource->virtual_meeting_link)
+                                        <div class="d-flex align-items-center mt-1">
+                                            <a href="{{ $resource->virtual_meeting_link }}" 
+                                               target="_blank" 
+                                               class="btn btn-outline-primary btn-sm d-inline-flex align-items-center me-2">
+                                                <i class="bx bx-link-external me-1"></i>
+                                                Join Virtual Meeting
+                                            </a>
+                                            <button class="btn btn-icon btn-sm btn-outline-secondary copy-link" 
+                                                    data-link="{{ $resource->virtual_meeting_link }}"
+                                                    title="Copy link">
+                                                <i class="bx bx-copy"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted d-block mt-1">
+                                            {{ Str::limit($resource->virtual_meeting_link, 50) }}
+                                        </small>
+                                    @else
+                                        <p class="text-muted mb-0">No virtual meeting link provided</p>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </x-resource.detail-card>
+                </div>
             </div>
 
             {{-- Documents Sidebar --}}
             <div class="col-xl-4 col-lg-5">
-                <x-resource.detail-card title="Meeting Documents" 
-                    icon="bx-file" 
-                    class="card h-100 shadow-sm border-0">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-gradient-info text-white">
+                        <div class="d-flex align-items-center">
+                            <i class="bx bx-file me-2" style="font-size: 1.5rem;"></i>
+                            <h5 class="mb-0">Meeting Documents</h5>
+                        </div>
+                    </div>
+
                     <div class="card-body">
                         @if ($resource->media->isNotEmpty())
                             <div class="row g-3">
@@ -126,14 +163,22 @@
                             </div>
                         @endif
                     </div>
-                </x-resource.detail-card>
+                </div>
             </div>
         </div>
     </div>
-
+    @endsection
     <style>
         .container-p-4 {
             padding: 1rem;
+        }
+
+        .card-header.bg-gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-header.bg-gradient-info {
+            background: linear-gradient(135deg, #17ead9 0%, #6078ea 100%);
         }
 
         .document-preview {
@@ -234,4 +279,25 @@
             }
         }
     </style>
-@endsection
+
+    @push('scripts')
+        <script type="module">
+                // Copy link functionality
+                document.querySelectorAll('.copy-link').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const link = this.getAttribute('data-link');
+                        navigator.clipboard.writeText(link).then(() => {
+                            const originalTitle = this.getAttribute('title');
+                            this.setAttribute('title', 'Copied!');
+                            const tooltip = bootstrap.Tooltip.getInstance(this) || new bootstrap.Tooltip(this);
+                            tooltip.show();
+                            
+                            setTimeout(() => {
+                                this.setAttribute('title', originalTitle);
+                                tooltip.hide();
+                            }, 2000);
+                        });
+                    });
+                });
+        </script>
+    @endpush

@@ -23,9 +23,10 @@ class SmsServiceFactory
             ->latest()
             ->first();
         
-        if (!$activeConfig) {
-            throw new \Exception('No active SMS configuration found');
-        }
+            if (!$activeConfig) {
+                \Log::warning('No active SMS configuration found, returning null');
+                return null; // Return null to skip SMS service initialization
+            }
         
         return match ($activeConfig->provider->code) {
             'sparrow' => new SparrowSmsService(),

@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('meetings', function (Blueprint $table) {
             $table->id();
             $table->string('title', 200);
+            $table->foreignId('fiscal_year_id')->nullable()->constrained('mst_fiscal_years')->nullOnDelete();
             $table->text('description')->nullable();
             // $table->enum('meeting_type', MeetingType::values())->default(MeetingType::REGULAR->value);
             $table->enum('meeting_type', MeetingType::values())->nullable();

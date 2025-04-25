@@ -38,7 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
             CheckPasswordExpiry::class,
         ]);
         $middleware->api(prepend: [
-            EnsureTokenIsValid::class,
+            // EnsureTokenIsValid::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
