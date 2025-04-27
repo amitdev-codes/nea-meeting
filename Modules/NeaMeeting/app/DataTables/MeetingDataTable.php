@@ -136,30 +136,54 @@ class MeetingDataTable extends DataTable
             $query->whereRaw('JSON_CONTAINS(organizations, ?)', [json_encode((string)$organizationId)]);
         }
 
-        // Default filter: Show only Ongoing or Scheduled meetings
-        $isCompletedSearched = false;
+        // // Default filter: Show only Ongoing or Scheduled meetings
+        // $isCompletedSearched = false;
+        
 
-        // Check if status filter is applied (dropdown search)
-        if (request()->has('columns')) {
-            foreach (request('columns') as $column) {
-                if (isset($column['data']) && $column['data'] === 'status' && !empty($column['search']['value'])) {
-                    $statusValue = $column['search']['value'];
-                    if ($statusValue == MeetingStatus::Completed->value) {
-                        $isCompletedSearched = true;
+        // // Check if status filter is applied (dropdown search)
+        // if (request()->has('columns')) {
+        //     foreach (request('columns') as $column) {
+        //         if (isset($column['data']) && $column['data'] === 'status' && !empty($column['search']['value'])) {
+        //             $statusValue = $column['search']['value'];
+        //             if ($statusValue == MeetingStatus::Completed->value) {
+        //                 $isCompletedSearched = true;
+        //             }
+        //             // Apply status filter from dropdown
+        //             $query->where('status', $statusValue);
+        //         }
+        //     }
+        // }
+
+        // // Apply default filter if no Completed status is explicitly searched
+        // if (!$isCompletedSearched) {
+        //     $query->whereIn('status', [
+        //         MeetingStatus::Ongoing->value,
+        //         MeetingStatus::Scheduled->value,
+        //     ]);
+        // }
+
+        // Default filter: Show only Ongoing or Scheduled meetings
+            $isStatusFiltered = false;
+
+            // Check if status filter is applied (dropdown search)
+            if (request()->has('columns')) {
+                foreach (request('columns') as $column) {
+                    if (isset($column['data']) && $column['data'] === 'status' && !empty($column['search']['value'])) {
+                        $statusValue = $column['search']['value'];
+                        $isStatusFiltered = true;
+                        // Apply status filter from dropdown
+                        $query->where('status', $statusValue);
                     }
-                    // Apply status filter from dropdown
-                    $query->where('status', $statusValue);
                 }
             }
-        }
 
-        // Apply default filter if no Completed status is explicitly searched
-        if (!$isCompletedSearched) {
-            $query->whereIn('status', [
-                MeetingStatus::Ongoing->value,
-                MeetingStatus::Scheduled->value,
-            ]);
-        }
+            // Apply default filter if no status is explicitly searched
+            if (!$isStatusFiltered) {
+                $query->whereIn('status', [
+                    MeetingStatus::Ongoing->value,
+                    MeetingStatus::Scheduled->value,
+                ]);
+            }
 
         // Global search
         if (request()->has('search') && request('search')['value']) {
