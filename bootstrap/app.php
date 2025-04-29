@@ -4,9 +4,11 @@ use App\Http\Middleware\Locale;
 use App\Console\Commands\UnlockUser;
 use Illuminate\Foundation\Application;
 use App\Console\Commands\DatabaseSetUp;
+use Illuminate\Console\Scheduling\Schedule;
 use App\Http\Middleware\CheckPasswordExpiry;
 use App\Http\Middleware\SecretCodeMiddleware;
 use App\Http\Middleware\CheckDynamicPermission;
+use App\Console\Commands\MeetingReminderCommand;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use App\Http\Middleware\CheckResourcePermissions;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -23,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withCommands([
         DatabaseSetUp::class,
         UnlockUser::class,
+        MeetingReminderCommand::class
     ])
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
@@ -43,4 +46,11 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        // Add our meeting reminder command to run every 10 minutes
+        $schedule->command('meetings:send-reminders')
+                ->everyTenMinutes()
+                ->appendOutputTo(storage_path('logs/meeting-reminders.log'));
+    })
+    ->create();

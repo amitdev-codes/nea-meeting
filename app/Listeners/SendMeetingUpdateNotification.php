@@ -8,6 +8,8 @@ use App\Events\MeetingUpdated;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Notifications\MeetingNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Modules\Settings\Models\SmsConfiguration;
+use Modules\Settings\Models\EmailConfiguration;
 use App\Notifications\ExternalMeetingNotification;
 use Modules\Settings\Services\DynamicEmailService;
 use Modules\Settings\Services\Sms\SmsServiceInterface;
@@ -34,6 +36,17 @@ class SendMeetingUpdateNotification
             return;
         }
 
+                // Check if notifications services are active
+                $emailActive = EmailConfiguration::where('is_active', true)->exists();
+                $smsActive = SmsConfiguration::where('is_active', true)->exists();
+
+                if (!$emailActive && !$smsActive) {
+                    $this->error('Both email and SMS services are inactive. Cannot send any notifications.');
+                    return 1;
+                }
+        
+                // dd($e
+
         // Get organization IDs from the meeting's JSON column or options
         $organizationIds = $event->options['organization_ids'] ?? json_decode($event->meeting->organizations, true) ?? [];
         $users = !empty($organizationIds) ? User::whereIn('organization_id', $organizationIds)->get() : collect();
@@ -59,7 +72,7 @@ class SendMeetingUpdateNotification
                         Log::error('Failed to send meeting email notification for user #' . $user->id . ': ' . $e->getMessage());
                     }
                 }
-                if ($sendSms && !empty($user->mobile_no)) {
+                if ($smsActive && !empty($user->mobile_no)) {
                     try {
                         $message = $this->formatSmsMessage($event->meeting, $user);
                         $result = $this->smsService->send($user->mobile_no, $message);
