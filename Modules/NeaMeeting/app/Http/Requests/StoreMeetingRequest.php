@@ -58,16 +58,20 @@ class StoreMeetingRequest extends FormRequest
                 if (is_string($organizations) && !empty($organizations)) {
                     $this->merge(['organizations' => explode(',', $organizations)]);
                 }
+            }else {
+                $organizations = [];
             }
+            // Ensure "Managing Directors Secretariat" (ID: 1) is always included
+            if (!in_array(1, $organizations)) {
+                $organizations[] = "1"; 
+            }
+
+            $this->merge(['organizations' => $organizations]);
+        
 
         if (!$this->has('created_by')) {
             $this->merge(['created_by' => auth()->id()]);
         }
-               // Ensure is_external is boolean
-    //     $this->merge([
-    //     'is_external' => $this->has('is_external') ? true : false,
-    //     'is_virtual' => $this->has('is_virtual') ? true : false,
-    //    ]);
     }
 
     public function rules(): array

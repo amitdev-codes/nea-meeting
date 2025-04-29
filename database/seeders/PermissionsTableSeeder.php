@@ -40,6 +40,7 @@ class PermissionsTableSeeder extends Seeder
             'view-meetings','create-meetings','edit-meetings','delete-meetings',
             'view-sms-configurations','create-sms-configurations','edit-sms-configurations','delete-sms-configurations',
             'view-email-configurations','create-email-configurations','edit-email-configurations','delete-email-configurations',
+            'view-google-calendar-settings','create-google-calendar-settings','edit-google-calendar-settings','delete-google-calendar-settings',
 
       
         ];

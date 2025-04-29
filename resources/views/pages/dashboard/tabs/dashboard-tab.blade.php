@@ -2,6 +2,7 @@
     <!-- Total Counts Section -->
     <div class="container-xxl py-4">
         @include('partials.dashboard.summary-cards', [
+            'yesterdaysMeetings' => $yesterdaysMeetings,
             'todaysMeetings' => $todaysMeetings,
             'comingMeetings' => $comingMeetings,
             'thisMonthMeetings' => $thisMonthMeetings,

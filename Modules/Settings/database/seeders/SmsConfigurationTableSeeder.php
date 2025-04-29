@@ -17,7 +17,7 @@ class SmsConfigurationTableSeeder extends Seeder
             'api_token' => 'v2_yKAzuqfPzE9BXfwGu1T3SA366eM.N8hb',
             'sender_id' => 'NEA',
             'base_url' => 'https://smsportal.nea.org.np/api/sms?',
-            'is_active' => true,
+            'is_active' => false,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

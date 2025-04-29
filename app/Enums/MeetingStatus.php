@@ -9,6 +9,15 @@ enum MeetingStatus: string
     case Cancelled = 'Cancelled';
 
 
+    public function getBadgeClass(): string
+    {
+        return match ($this) {
+            self::Cancelled => 'bg-danger',
+            self::Ongoing => 'bg-success',
+            self::Scheduled => 'bg-primary',
+            self::Completed => 'bg-secondary',
+        };
+    }
     public static function values(): array
     {
         return array_column(self::cases(), 'value');

@@ -3,5 +3,6 @@
     "Calendar": true,
     "Landingpage": true,
     "NeaMeeting": true,
-    "Settings": true
+    "Settings": true,
+    "GoogleCalendar": true
 }

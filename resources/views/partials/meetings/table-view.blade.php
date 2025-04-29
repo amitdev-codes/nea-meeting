@@ -44,7 +44,7 @@
                     </span>
                 </td>
                 <td class="d-none d-xl-table-cell">
-                    <span class="badge {{ $meeting->status === 'Ongoing' ? 'bg-success' : ($meeting->status === 'Scheduled' ? 'bg-warning' : 'bg-secondary') }} text-white rounded-pill px-2 py-1">
+                    <span class="badge {{ \App\Enums\MeetingStatus::from($meeting->status)->getBadgeClass() }} text-white rounded-pill px-2 py-1">
                         {{ $meeting->status }}
                     </span>
                 </td>

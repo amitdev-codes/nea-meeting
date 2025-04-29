@@ -16,6 +16,7 @@ class DashboardService
     {
         $data = [
             'todaysMeetings' => 0,
+            'yesterdaysMeetings' => 0,
             'upcomingMeetings' => 0,
             'thisMonthMeetings' => 0,
             'totalMeetings' => 0,
@@ -39,6 +40,7 @@ class DashboardService
     {
         // Basic metrics
         $data['todaysMeetings'] = $this->getTodaysMeetingsCount(null, $today);
+        $data['yesterdaysMeetings'] = $this->getYesterdaysMeetingsCount(null, $today);
         $data['upcomingMeetings'] = $this->getUpcomingMeetingsCount(null, $today);
         $data['thisMonthMeetings'] = $this->getThisMonthMeetingsCount(null, $today);
         $data['totalMeetings'] = $this->getTotalMeetingsCount();
@@ -97,6 +99,17 @@ class DashboardService
     private function getTodaysMeetingsCount(?int $organizationId, Carbon $today): int
     {
         $query = Meeting::whereDate('meeting_date_ad', $today);
+        
+        if ($organizationId) {
+            $query->whereJsonContains('meetings.organizations', (string) $organizationId);
+        }
+        
+        return $query->count();
+    }
+    private function getYesterdaysMeetingsCount(?int $organizationId, Carbon $today): int
+    {
+        $yesterday = $today->copy()->subDay();
+        $query = Meeting::whereDate('meeting_date_ad', $yesterday);
         
         if ($organizationId) {
             $query->whereJsonContains('meetings.organizations', (string) $organizationId);

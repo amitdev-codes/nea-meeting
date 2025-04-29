@@ -40,6 +40,23 @@ class SendMeetingNotification
         if (!$sendEmail && !$sendSms) {
             return;
         }
+
+                // Check if required services are active and available
+        if ($sendEmail && (!$this->emailService || !method_exists($this->emailService, 'isActive') || !$this->emailService->isActive())) {
+            Log::warning('Email service is not active or unavailable. Skipping email notifications.');
+            if (!$sendSms) {
+                return true; // No SMS notifications requested, so return early
+            }
+            $sendEmail = false; // Disable email notifications but continue for SMS if applicable
+        }
+
+        if ($sendSms && (!$this->smsService || !method_exists($this->smsService, 'isActive') || !$this->smsService->isActive())) {
+            Log::warning('SMS service is not active or unavailable. Skipping SMS notifications.');
+            if (!$sendEmail) {
+                return true; // No email notifications requested, so return early
+            }
+            $sendSms = false; // Disable SMS notifications but continue for email if applicable
+        }
         
         // Get organization IDs from the meeting's JSON column
         $organizationIds = $event->options['organization_ids'] ?? json_decode($event->meeting->organizations, true) ?? [];
@@ -65,6 +82,8 @@ class SendMeetingNotification
                         Log::error('Failed to send meeting email notification for user #' . $user->id . ': ' . $e->getMessage());
                     }
                 }
+
+                // dd($this->smsService);
                 
                 // Send SMS notification if enabled and user has mobile_no number
                 if ($sendSms && !empty($user->mobile_no)) {

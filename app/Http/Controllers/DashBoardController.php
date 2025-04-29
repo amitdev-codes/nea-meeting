@@ -46,7 +46,7 @@ class DashBoardController extends Controller
         }
         return back()->with('notification', ['icon' => 'success', 'title' => __('menu.locale'), 'message' => __('notification.locale_success')]);
     }
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = Auth::user();
         $today = Carbon::now();
@@ -54,6 +54,7 @@ class DashBoardController extends Controller
         $dashboardData = $this->dashboardService->getDashboardData($user, $today);
         $dashboardData = array_merge([
             'todaysMeetings' => 0,
+            'yesterdaysMeetings' => 0,
             'upcomingMeetings' => null,
             'thisMonthMeetings' => 0,
             'totalMeetings' => 0,
@@ -78,11 +79,7 @@ class DashBoardController extends Controller
                 'currentNepaliDay' => $calendarData['currentNepaliDay'],
                 'dashboardData' => $dashboardData]);
         }
-        // dd($dashboardData);
         return view('pages.dashboard.admin', ['calendarData' => $calendarData,'dashboardData' => $dashboardData]);
     }
-
-
-
-        
+       
 }

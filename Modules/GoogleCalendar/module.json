@@ -1,0 +1,11 @@
+{
+    "name": "GoogleCalendar",
+    "alias": "googlecalendar",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\GoogleCalendar\\Providers\\GoogleCalendarServiceProvider"
+    ],
+    "files": []
+}

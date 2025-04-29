@@ -20,7 +20,7 @@
                 </div>
                 <!-- Mobile No -->
                 <div class="mb-3 col-md-3">
-                    <x-forms.input-phone name="phone" label="{{ __('Phone No') }}" :value="old('phone', $model->phone ?? '')"  />
+                    <x-forms.input-telephone name="phone" label="{{ __('Phone No') }}" :value="old('phone', $model->phone ?? '')"  />
                 </div>
 
                 <!-- Role -->

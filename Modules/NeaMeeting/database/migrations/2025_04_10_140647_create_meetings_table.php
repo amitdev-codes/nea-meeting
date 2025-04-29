@@ -33,6 +33,8 @@ return new class extends Migration
             $table->boolean('is_external')->default(false);
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->text('remarks')->nullable();
+            $table->string('google_calendar_event_id')->nullable();
+            $table->string('google_calendar_link')->nullable();
             $table->timestamps();
         });
     }

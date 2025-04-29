@@ -10,7 +10,7 @@
         <x-forms.input name="mail_port" type="number" :label="__('field.mail_port')" :value="old('mail_port', $model->mail_port ?? '')" />
     </div>
     <div class="mb-3 col-md-3">
-        <x-forms.input-select2 name="mail_encryption" :options="[['tls', 'TLS'], ['ssl', 'SSL']]" :value="old('mail_encryption', isset($model) ? $model->mail_encryption ?? '' : '')"
+        <x-forms.input-select2 name="mail_encryption" :options="[['TLSV2', 'TLS'], ['ssl', 'SSL']]" :value="old('mail_encryption', isset($model) ? $model->mail_encryption ?? '' : '')"
             placeholder="{{ __('Select Mail Encryption') }}" required />
     </div>
     <div class="mb-3 col-md-3">

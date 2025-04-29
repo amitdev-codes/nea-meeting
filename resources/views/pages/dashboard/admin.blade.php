@@ -18,53 +18,75 @@
         <!-- Total Counts Section -->
         <div class="container-xxl py-4">
             <div class="row g-4 mb-4">
-                <!-- Today's Meetings -->
-                <div class="col-md-3">
-                    <div class="card bg-primary text-white shadow-sm">
-                        <div class="card-body d-flex align-items-center">
-                            <i class="bx bx-calendar-event bx-md me-3"></i>
-                            <div>
-                                <h5 class="card-title text-white mb-1">आजका बैठकहरू</h5>
-                                <h2 class="mb-0 text-white">{{ NepaliDateConverter::toNepaliDigits($dashboardData['todaysMeetings']) }}</h2>
+                <!-- Yesterday's Meetings -->
+                <div class="col-md">
+                    <a href="{{ route('admin.meetings.index', ['filter' => 'yesterday']) }}" class="text-decoration-none">
+                        <div class="card shadow-sm" style="background: linear-gradient(135deg, #ff6b6b, #ff8e53);">
+                            <div class="card-body d-flex align-items-center text-white">
+                                <i class="bx bx-calendar-minus bx-md me-3"></i>
+                                <div>
+                                    <h5 class="card-title text-white mb-1">हिजोका बैठकहरू</h5>
+                                    <h2 class="mb-0 text-white">{{ NepaliDateConverter::toNepaliDigits($dashboardData['yesterdaysMeetings']) }}</h2>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
+                </div>
+                <!-- Today's Meetings -->
+                <div class="col-md">
+                    <a href="{{ route('admin.meetings.index', ['filter' => 'today']) }}" class="text-decoration-none">
+                        <div class="card shadow-sm" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                            <div class="card-body d-flex align-items-center text-white">
+                                <i class="bx bx-calendar-event bx-md me-3"></i>
+                                <div>
+                                    <h5 class="card-title text-white mb-1">आजका बैठकहरू</h5>
+                                    <h2 class= "mb-0 text-white">{{ NepaliDateConverter::toNepaliDigits($dashboardData['todaysMeetings']) }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
                 </div>
                 <!-- Upcoming Meetings -->
-                <div class="col-md-3">
-                    <div class="card bg-success text-white shadow-sm">
-                        <div class="card-body d-flex align-items-center">
-                            <i class="bx bx-time-five bx-md me-3"></i>
-                            <div>
-                                <h5 class="card-title text-white mb-1">आगामी बैठकहरू</h5>
-                                <h2 class="mb-0 text-white">{{ NepaliDateConverter::toNepaliDigits($dashboardData['upcomingMeetings']) }}</h2>
+                <div class="col-md">
+                    <a href="{{ route('admin.meetings.index', ['filter' => 'upcoming']) }}" class="text-decoration-none">
+                        <div class="card shadow-sm" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">
+                            <div class="card-body d-flex align-items-center text-white">
+                                <i class="bx bx-time-five bx-md me-3"></i>
+                                <div>
+                                    <h5 class="card-title text-white mb-1">आगामी बैठकहरू</h5>
+                                    <h2 class="mb-0 text-white">{{ NepaliDateConverter::toNepaliDigits($dashboardData['upcomingMeetings']) }}</h2>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <!-- This Month Meetings -->
-                <div class="col-md-3">
-                    <div class="card bg-info text-white shadow-sm">
-                        <div class="card-body d-flex align-items-center">
-                            <i class="bx bx-calendar-month bx-md me-3"></i>
-                            <div>
-                                <h5 class="card-title text-white mb-1">यो महिनाका बैठकहरू</h5>
-                                <h2 class="mb-0 text-white">{{ NepaliDateConverter::toNepaliDigits($dashboardData['thisMonthMeetings']) }}</h2>
+                <div class="col-md">
+                    <a href="{{ route('admin.meetings.index', ['filter' => 'this_month']) }}" class="text-decoration-none">
+                        <div class="card shadow-sm" style="background: linear-gradient(135deg, #1e90ff, #00b7eb);">
+                            <div class="card-body d-flex align-items-center text-white">
+                                <i class="bx bx-calendar-month bx-md me-3"></i>
+                                <div>
+                                    <h5 class="card-title text-white mb-1">यो महिनाका बैठकहरू</h5>
+                                    <h2 class="mb-0 text-white">{{ NepaliDateConverter::toNepaliDigits($dashboardData['thisMonthMeetings']) }}</h2>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <!-- Total Meetings -->
-                <div class="col-md-3">
-                    <div class="card bg-warning text-white shadow-sm">
-                        <div class="card-body d-flex align-items-center">
-                            <i class="bx bx-list-ul bx-md me-3"></i>
-                            <div>
-                                <h5 class="card-title text-white mb-1">कुल बैठकहरू</h5>
-                                <h2 class="mb-0 text-white">{{ NepaliDateConverter::toNepaliDigits($dashboardData['totalMeetings']) }}</h2>
+                <div class="col-md">
+                    <a href="{{ route('admin.meetings.index', ['filter' => 'total']) }}" class="text-decoration-none">
+                        <div class="card shadow-sm" style="background: linear-gradient(135deg, #f1c40f, #f39c12);">
+                            <div class="card-body d-flex align-items-center text-white">
+                                <i class="bx bx-list-ul bx-md me-3"></i>
+                                <div>
+                                    <h5 class="card-title text-white mb-1">कुल बैठकहरू</h5>
+                                    <h2 class="mb-0 text-white">{{ NepaliDateConverter::toNepaliDigits($dashboardData['totalMeetings']) }}</h2>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -127,6 +149,11 @@
                 height: 350px;
             }
         }
+        .card-yesterday { background: linear-gradient(135deg, #ff6b6b, #ff8e53); }
+        .card-today { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .card-upcoming { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .card-this-month { background: linear-gradient(135deg, #1e90ff, #00b7eb); }
+        .card-total { background: linear-gradient(135deg, #f1c40f, #f39c12); }
     </style>
 @endpush
 

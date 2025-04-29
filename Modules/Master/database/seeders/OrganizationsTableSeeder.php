@@ -80,7 +80,7 @@ class OrganizationsTableSeeder extends Seeder
                 'status' => true,
             ],
             [
-                'code' => 'PMD',
+                'code' => 'ITD',
                 'name' => 'Information Technology Department',
                 'name_np' => 'सूचना प्रविधि विभाग',
                 'status' => true,

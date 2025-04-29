@@ -114,11 +114,29 @@ class MeetingDataTable extends DataTable
 
                 return $this->getMeetingStatusBadge($calculatedStatus);
             })
-            ->addColumn('action', $this->addActionColumn(
-                'form',
-                $this->getRoutes(),
-                $this->getPermissions('meetings')
-            ))
+            // ->addColumn('action', $this->addActionColumn(
+            //     'form',
+            //     $this->getRoutes(),
+            //     $this->getPermissions('meetings')
+            // ))
+            ->addColumn('action', function ($row) {
+                // Get the Closure from addActionColumn and evaluate it with the current row
+                $actionClosure = $this->addActionColumn(
+                    'form',
+                    $this->getRoutes(),
+                    $this->getPermissions('meetings')
+                );
+                // Call the Closure to get the HTML string
+                $actionHtml = call_user_func($actionClosure, $row);
+    
+                // Append the notification button if the user has permission
+             
+                    $notifyButton = '<a href="' . route('admin.meetings.notify', ['meeting' => $row->id]) . '" class="btn btn-sm btn-outline-info notify-btn ms-1" title="Send Notification"><i class="bx bx-bell"></i></a>';
+                    $actionHtml = str_replace('</div>', $notifyButton . '</div>', $actionHtml);
+                
+    
+                return $actionHtml;
+            })
             ->rawColumns(['checkbox', 'action', 'status']);
     }
 
@@ -129,6 +147,8 @@ class MeetingDataTable extends DataTable
             'meeting_type' => 'meeting_type',
             'status' => 'status'
         ];
+        $today = Carbon::today();
+        $filter = request()->query('filter', 'total'); // Get the filter parameter, default to 'total'
 
         // Organization-based filtering
         if (auth()->check() && !auth()->user()->hasRole(['admin', 'superadmin'])) {
@@ -136,54 +156,45 @@ class MeetingDataTable extends DataTable
             $query->whereRaw('JSON_CONTAINS(organizations, ?)', [json_encode((string)$organizationId)]);
         }
 
-        // // Default filter: Show only Ongoing or Scheduled meetings
-        // $isCompletedSearched = false;
-        
+        // dd($today->copy()->subDay()->format('Y-m-d'));
 
-        // // Check if status filter is applied (dropdown search)
-        // if (request()->has('columns')) {
-        //     foreach (request('columns') as $column) {
-        //         if (isset($column['data']) && $column['data'] === 'status' && !empty($column['search']['value'])) {
-        //             $statusValue = $column['search']['value'];
-        //             if ($statusValue == MeetingStatus::Completed->value) {
-        //                 $isCompletedSearched = true;
-        //             }
-        //             // Apply status filter from dropdown
-        //             $query->where('status', $statusValue);
-        //         }
-        //     }
-        // }
+        // Time-based filtering based on the filter parameter
+        switch ($filter) {
+            case 'yesterday':
+                $query->whereDate('meeting_date_ad', $today->copy()->subDay()->format('Y-m-d'));
+                break;
+            case 'today':
+                $query->whereDate('meeting_date_ad', $today->format('Y-m-d'));
+                break;
+            case 'upcoming':
+                $query->whereDate('meeting_date_ad', '>', $today->format('Y-m-d'));
+                break;
+            case 'this_month':
+                $query->whereBetween('meeting_date_ad', [
+                    $today->copy()->startOfMonth(),
+                    $today->copy()->endOfMonth(),
+                ]);
+                break;
+            case 'total':
+            default:
+                // No date filter for total meetings
+                break;
+        }
 
-        // // Apply default filter if no Completed status is explicitly searched
-        // if (!$isCompletedSearched) {
-        //     $query->whereIn('status', [
-        //         MeetingStatus::Ongoing->value,
-        //         MeetingStatus::Scheduled->value,
-        //     ]);
-        // }
+        // Default filter: Show only Ongoing or Scheduled meetings (unless filtered otherwise)
+        $isStatusFiltered = false;
 
-        // Default filter: Show only Ongoing or Scheduled meetings
-            $isStatusFiltered = false;
-
-            // Check if status filter is applied (dropdown search)
-            if (request()->has('columns')) {
-                foreach (request('columns') as $column) {
-                    if (isset($column['data']) && $column['data'] === 'status' && !empty($column['search']['value'])) {
-                        $statusValue = $column['search']['value'];
-                        $isStatusFiltered = true;
-                        // Apply status filter from dropdown
-                        $query->where('status', $statusValue);
-                    }
+        // Check if status filter is applied (dropdown search)
+        if (request()->has('columns')) {
+            foreach (request('columns') as $column) {
+                if (isset($column['data']) && $column['data'] === 'status' && !empty($column['search']['value'])) {
+                    $statusValue = $column['search']['value'];
+                    $isStatusFiltered = true;
+                    // Apply status filter from dropdown
+                    $query->where('status', $statusValue);
                 }
             }
-
-            // Apply default filter if no status is explicitly searched
-            if (!$isStatusFiltered) {
-                $query->whereIn('status', [
-                    MeetingStatus::Ongoing->value,
-                    MeetingStatus::Scheduled->value,
-                ]);
-            }
+        }
 
         // Global search
         if (request()->has('search') && request('search')['value']) {
@@ -276,6 +287,7 @@ class MeetingDataTable extends DataTable
             'view' => 'admin.meetings.show',
             'edit' => 'admin.meetings.edit',
             'delete' => 'admin.meetings.destroy',
+            'notify' => 'admin.meetings.notify',
         ];
     }
 }

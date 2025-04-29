@@ -228,6 +228,18 @@
                                 </div>
                             </div>
                         </div>
+                        @if($googleCalendarEnabled)
+                            <div class="form-group row">
+                                <div class="col-md-9 offset-md-3">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="add_to_google_calendar" name="add_to_google_calendar" {{ isset($resource) ? '' : 'checked' }}>
+                                        <label class="custom-control-label" for="add_to_google_calendar">
+                                            {{ isset($resource) ? 'Update Google Calendar event' : 'Add to Google Calendar' }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -448,9 +460,74 @@
                 }
             });
         }
+        function checkTimeValidation() {
+            const startTime = $('#start_time').val();
+            const endTime = $('#endTime').val();
+            const meetingDate = $('#nepaliDate').val();
+
+            // Basic client-side validation
+            if (!startTime || !endTime || !meetingDate) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Input',
+                    text: 'Please fill in all required fields'
+                });
+                return;
+            }
+
+            // Check for conflicts
+            $.ajax({
+                url: '/meetings/checkTimeValidation',
+                method: 'POST',
+                data: {
+                    meeting_date: meetingDate,
+                    start_time: startTime,
+                    end_time: endTime,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Time Selection',
+                            text: response.error
+                        });
+                    } else if (response.conflict) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Time Conflict Detected',
+                            text: `There is already a meeting scheduled at the selected time: ${response.meeting.title}`
+                        });
+                    } else {
+                        // Handle successful case (no conflicts)
+                        // Swal.fire({
+                        //     icon: 'success',
+                        //     title: 'Valid Time',
+                        //     text: 'The selected time is available'
+                        // });
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = 'An error occurred';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMessage = xhr.responseJSON.error;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage
+                    });
+                }
+            });
+        }
         // Event listener for start time change
         $('#start_time').on('change', function() {
             checkTimeConflicts();
+        });
+        $('#endTime').on('change', function() {
+            if ($(this).val()) {
+                checkTimeValidation();
+            }
         });
     </script>
 @endpush
