@@ -177,12 +177,12 @@ class MeetingController extends BaseAdminController
             }
             // trigger the evnts
             if ($request->boolean('send_notifications', true)) {
-                // dd($validated['status']);
+                // dd($validated['status'],'amit');
                 if ($validated['status'] === 'Cancelled') {
                     event(new MeetingCancelled($meeting, [
                         'send_email' => $request->boolean('send_email', true),
                         'send_sms' => $request->boolean('send_sms', true),
-                        'reason' => $request->input('cancellation_reason', ''),
+                        'reason' => $request->input('remarks', ''),
                         'organization_ids' => $request->organizations ?? [],
                     ]));
                 } else {

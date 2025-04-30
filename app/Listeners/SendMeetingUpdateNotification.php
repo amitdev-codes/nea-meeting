@@ -131,7 +131,7 @@ class SendMeetingUpdateNotification
                 }
                 
                 // Send SMS notification if enabled and contact has mobile_no number
-                if ($sendSms && !empty($contact->mobile_no)) {
+                if ($smsActive && !empty($contact->mobile_no)) {
                     try {
                         $message = $this->formatSmsMessage($event->meeting, $contact, true);
                         $result = $this->smsService->send($contact->mobile_no, $message);

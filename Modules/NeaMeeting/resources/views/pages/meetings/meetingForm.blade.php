@@ -151,12 +151,14 @@
                                                                     class="form-control"
                                                                     value="{{ $contact['email'] ?? '' }}"
                                                                     placeholder="{{ __('Enter Email') }}" /></td>
-                                                            <td><input type="text"
+                                                            <td>
+                                                                <input type="number"
                                                                     name="external_contacts[{{ $index }}][mobile]"
                                                                     class="form-control"
                                                                     value="{{ $contact['mobile'] ?? '' }}"
                                                                     placeholder="{{ __('Enter Mobile') }}" /></td>
-                                                            <td><input type="text"
+
+                                                            <td><input type="number"
                                                                     name="external_contacts[{{ $index }}][phone]"
                                                                     class="form-control"
                                                                     value="{{ $contact['phone'] ?? '' }}"
@@ -309,8 +311,6 @@
         @endif
     </div>
 @endsection
-
-
 <style>
     .accordion .card-header {
         background-color: #f8f9fa;

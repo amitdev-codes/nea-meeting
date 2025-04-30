@@ -9,6 +9,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use App\Notifications\MeetingNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Modules\NeaMeeting\Models\Notification;
+use Modules\Settings\Models\SmsConfiguration;
+use Modules\Settings\Models\EmailConfiguration;
 use App\Notifications\ExternalMeetingNotification;
 use Modules\Settings\Services\DynamicEmailService;
 use Modules\Settings\Services\Sms\SmsServiceInterface;
@@ -41,22 +43,14 @@ class SendMeetingNotification
             return;
         }
 
-                // Check if required services are active and available
-        if ($sendEmail && (!$this->emailService || !method_exists($this->emailService, 'isActive') || !$this->emailService->isActive())) {
-            Log::warning('Email service is not active or unavailable. Skipping email notifications.');
-            if (!$sendSms) {
-                return true; // No SMS notifications requested, so return early
-            }
-            $sendEmail = false; // Disable email notifications but continue for SMS if applicable
+        $emailActive = EmailConfiguration::where('is_active', true)->exists();
+        $smsActive = SmsConfiguration::where('is_active', true)->exists();
+
+        if (!$emailActive && !$smsActive) {
+            $this->error('Both email and SMS services are inactive. Cannot send any notifications.');
+            return 1;
         }
 
-        if ($sendSms && (!$this->smsService || !method_exists($this->smsService, 'isActive') || !$this->smsService->isActive())) {
-            Log::warning('SMS service is not active or unavailable. Skipping SMS notifications.');
-            if (!$sendEmail) {
-                return true; // No email notifications requested, so return early
-            }
-            $sendSms = false; // Disable SMS notifications but continue for email if applicable
-        }
         
         // Get organization IDs from the meeting's JSON column
         $organizationIds = $event->options['organization_ids'] ?? json_decode($event->meeting->organizations, true) ?? [];
@@ -86,7 +80,7 @@ class SendMeetingNotification
                 // dd($this->smsService);
                 
                 // Send SMS notification if enabled and user has mobile_no number
-                if ($sendSms && !empty($user->mobile_no)) {
+                if ($smsActive && !empty($user->mobile_no)) {
                     try {
                         $message = $this->formatSmsMessage($event->meeting, $user);
                         $result = $this->smsService->send($user->mobile_no, $message);
@@ -146,7 +140,7 @@ class SendMeetingNotification
                 }
                 
                 // Send SMS notification if enabled and contact has mobile_no number
-                if ($sendSms && !empty($contact->mobile_no)) {
+                if ($smsActive && !empty($contact->mobile_no)) {
                     try {
                         $message = $this->formatSmsMessage($event->meeting, $contact, true);
                         $result = $this->smsService->send($contact->mobile_no, $message);

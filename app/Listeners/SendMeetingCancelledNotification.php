@@ -8,15 +8,18 @@ use App\Events\MeetingCancelled;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Notifications\MeetingNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Modules\Settings\Models\SmsConfiguration;
+use Modules\Settings\Models\EmailConfiguration;
 use App\Notifications\ExternalMeetingNotification;
 use Modules\Settings\Services\DynamicEmailService;
 use App\Notifications\MeetingCancelledNotification;
+use App\Notifications\MeetingCancellationNotification;
 use Modules\Settings\Services\Sms\SmsServiceInterface;
 use App\Notifications\ExternalMeetingCancelledNotification;
+use App\Notifications\ExternalMeetingCancellationNotification;
 
-class SendMeetingCancelledNotification implements ShouldQueue
+class SendMeetingCancelledNotification
 {
-    use InteractsWithQueue;
 
     protected $emailService;
     protected $smsService;
@@ -35,6 +38,7 @@ class SendMeetingCancelledNotification implements ShouldQueue
      */
     public function handle(MeetingCancelled $event)
     {
+        // dd($event);
         // Check if notifications should be sent
         $sendEmail = $event->options['send_email'] ?? true;
         $sendSms = $event->options['send_sms'] ?? false;
@@ -43,29 +47,22 @@ class SendMeetingCancelledNotification implements ShouldQueue
             return;
         }
 
-        // Check if required services are active and available
-        if ($sendEmail && (!$this->emailService || !method_exists($this->emailService, 'isActive') || !$this->emailService->isActive())) {
-            Log::warning('Email service is not active or unavailable. Skipping email notifications.');
-            if (!$sendSms) {
-                return true; // No SMS notifications requested, so return early
-            }
-            $sendEmail = false; // Disable email notifications but continue for SMS if applicable
-        }
 
-        if ($sendSms && (!$this->smsService || !method_exists($this->smsService, 'isActive') || !$this->smsService->isActive())) {
-            Log::warning('SMS service is not active or unavailable. Skipping SMS notifications.');
-            if (!$sendEmail) {
-                return true; // No email notifications requested, so return early
-            }
-            $sendSms = false; // Disable SMS notifications but continue for email if applicable
+        $emailActive = EmailConfiguration::where('is_active', true)->exists();
+        $smsActive = SmsConfiguration::where('is_active', true)->exists();
+
+        if (!$emailActive && !$smsActive) {
+            $this->error('Both email and SMS services are inactive. Cannot send any notifications.');
+            return 1;
         }
+        
 
         // Get organization IDs from the event options or meeting's JSON column
         $organizationIds = $event->options['organization_ids'] ?? json_decode($event->meeting->organizations, true) ?? [];
-        $users = !empty($organizationIds) ? User::whereIn('organization_id', $organizationIds)
-            ->orWhereIn('id', $event->meeting->attendees->pluck('id'))
-            ->get() : collect();
+        $users = !empty($organizationIds) ? User::whereIn('organization_id', $organizationIds)->get() : collect();
         $externalContacts = $event->meeting->externalContacts ?? collect();
+
+        // dd($users);
 
         if ($users->isEmpty() && $externalContacts->isEmpty()) {
             return;
@@ -77,10 +74,11 @@ class SendMeetingCancelledNotification implements ShouldQueue
             $smsUserIds = [];
 
             foreach ($users as $user) {
+                // dd($user);
                 // Send email notification if enabled
-                if ($sendEmail) {
+                if ($emailActive) {
                     try {
-                        $user->notify(new MeetingNotification($event->meeting, $event->options['reason'] ?? ''));
+                        $user->notify(new MeetingCancellationNotification($event->meeting, $event->options['reason'] ?? ''));
                         $notifiedUserIds[] = $user->id;
                     } catch (\Exception $e) {
                         Log::error('Failed to send meeting cancellation email notification for user #' . $user->id . ': ' . $e->getMessage());
@@ -88,7 +86,7 @@ class SendMeetingCancelledNotification implements ShouldQueue
                 }
 
                 // Send SMS notification if enabled and user has mobile_no
-                if ($sendSms && !empty($user->mobile_no)) {
+                if ($smsActive && !empty($user->mobile_no)) {
                     try {
                         $message = $this->formatSmsMessage($event->meeting, $user, $event->options['reason'] ?? '');
                         $result = $this->smsService->send($user->mobile_no, $message);
@@ -134,13 +132,13 @@ class SendMeetingCancelledNotification implements ShouldQueue
 
             foreach ($externalContacts as $contact) {
                 // Send email notification if enabled
-                if ($sendEmail) {
+                if ($emailActive) {
                     try {
                         if (!filter_var($contact->email, FILTER_VALIDATE_EMAIL)) {
                             Log::warning('Invalid email for external contact #' . $contact->id . ': ' . $contact->email);
                             continue;
                         }
-                        $contact->notify(new ExternalMeetingNotification($event->meeting, $event->options['reason'] ?? ''));
+                        $contact->notify(new ExternalMeetingCancellationNotification($event->meeting, $event->options['reason'] ?? ''));
                         $notifiedExternalIds[] = $contact->id;
                     } catch (\Exception $e) {
                         Log::error('Failed to send meeting cancellation notification to external contact #' . $contact->id . ': ' . $e->getMessage());
@@ -148,7 +146,7 @@ class SendMeetingCancelledNotification implements ShouldQueue
                 }
 
                 // Send SMS notification if enabled and contact has mobile_no
-                if ($sendSms && !empty($contact->mobile_no)) {
+                if ($smsActive && !empty($contact->mobile_no)) {
                     try {
                         $message = $this->formatSmsMessage($event->meeting, $contact, $event->options['reason'] ?? '', true);
                         $result = $this->smsService->send($contact->mobile_no, $message);
