@@ -1,13 +1,13 @@
 @component('mail::message')
-# NEA Meeting Cancellation Notice
+# NEA Meeting Reminder
 
 <div style="text-align: center; margin-bottom: 25px;">
-    <img src="{{ asset('assets/img/nea-logo.png') }}" alt="NEA Logo" style="max-width: 80px;">
+    <img src="{{ asset('assets/img/nea-logo.png') }}" alt="NEA Logo" style="max-width: 100px;">
 </div>
 
-Dear **{{ $user->username }}**,
+Dear Sir/Madam,
 
-We regret to inform you that the following meeting has been **cancelled**:
+This is a reminder for the following upcoming meeting:
 
 @component('mail::panel')
 ## {{ $meeting->title }}
@@ -18,11 +18,11 @@ We regret to inform you that the following meeting has been **cancelled**:
 
 @if($meeting->is_virtual)
 **Meeting Type:** Virtual<br>
-**Link:** {{ $meeting->virtual_meeting_link ?? 'N/A' }}
+**Link:** [{{ $meeting->virtual_meeting_link }}]({{ $meeting->virtual_meeting_link }})
 @else
-**Location:** {{ $meeting->meeting_location ?? 'N/A' }}
+**Location:** {{ $meeting->meeting_location ?? 'To be announced' }}
 @if($meeting->meeting_room_id)
-<br>**Room:** {{ $meeting->meetingRoom->name ?? 'N/A' }}
+<br>**Room:** {{ $meeting->meetingRoom->name ?? 'No room specified' }}
 @endif
 @endif
 @endcomponent
@@ -32,16 +32,9 @@ We regret to inform you that the following meeting has been **cancelled**:
 {{ $meeting->description }}
 @endif
 
-### Reason for Cancellation:
-@if($meeting->remarks)
-{{ $meeting->remarks }}
-@else
-No specific reason provided.
-@endif
+Please ensure your attendance or contact the meeting organizer if you are unable to attend.
 
-If you have any questions or need further assistance, please contact the meeting organizer.
-
-Thank you for your understanding,<br>
+Thank you,<br>
 NEA Meeting Management System
 
 <div style="text-align: center; margin-top: 25px; color: #888; font-size: 12px;">

@@ -6,9 +6,9 @@
     <img src="{{ asset('assets/img/nea-logo.png') }}" alt="NEA Logo" style="max-width: 80px;">
 </div>
 
-Dear **{{ $user->username }}**,
+Dear Sir/Madam,,
 
-You are invited to attend the following meeting:
+You are cordially invited to attend the following meeting:
 
 @component('mail::panel')
 ## {{ $meeting->title }}
@@ -33,11 +33,6 @@ You are invited to attend the following meeting:
 {{ $meeting->description }}
 @endif
 
-Please confirm your attendance by clicking the button below:
-
-@component('mail::button', ['url' => $url, 'color' => 'success'])
-View Meeting Details
-@endcomponent
 
 If you have any questions, please contact the meeting organizer.
 

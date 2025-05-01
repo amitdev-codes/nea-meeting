@@ -67,6 +67,19 @@ class StoreMeetingRequest extends FormRequest
             }
 
             $this->merge(['organizations' => $organizations]);
+                    // Prepend +977 to mobile and phone numbers
+                    if ($this->has('external_contacts')) {
+                        $externalContacts = $this->input('external_contacts');
+                        foreach ($externalContacts as $index => $contact) {
+                            if (!empty($contact['mobile']) && !str_starts_with($contact['mobile'], '+977')) {
+                                $externalContacts[$index]['mobile'] = '+977' . $contact['mobile'];
+                            }
+                            if (!empty($contact['phone']) && !str_starts_with($contact['phone'], '+977')) {
+                                $externalContacts[$index]['phone'] = '+977' . $contact['phone'];
+                            }
+                        }
+                        $this->merge(['external_contacts' => $externalContacts]);
+                    }
         
 
         if (!$this->has('created_by')) {
@@ -100,8 +113,8 @@ class StoreMeetingRequest extends FormRequest
             'external_contacts' => 'nullable|array|required_if:is_external,1',
             'external_contacts.*.name' => 'nullable|string|max:255|required_if:is_external,1',
             'external_contacts.*.email' => 'nullable|email|max:255|required_if:is_external,1',
-            'external_contacts.*.mobile' => 'nullable|string|max:20',
-            'external_contacts.*.phone' => 'nullable|string|max:20',
+            'external_contacts.*.mobile' => 'nullable|regex:/^\+977\d{10}$/', // Validate +977 followed by 10 digits
+            'external_contacts.*.phone' => 'nullable|regex:/^\+977\d{7,8}$/', // Validate +977 followed by 7–8 digits
             'external_contacts.*.office_name' => 'nullable|string|max:255|required_if:is_external,1',
         ];
     }
@@ -109,15 +122,14 @@ class StoreMeetingRequest extends FormRequest
     public function messages(): array
     {
         return [
-          
             'created_by.required' => 'The creator ID is required.',
             'organizations.*.exists' => 'One or more selected organizations do not exist.',
             'external_contacts.required_if' => 'At least one external contact is required for external meetings.',
             'external_contacts.*.name.required_if' => 'The name is required for each external contact.',
             'external_contacts.*.email.required_if' => 'The email is required for each external contact.',
             'external_contacts.*.office_name.required_if' => 'The office name is required for each external contact.',
-
-
+            'external_contacts.*.mobile.regex' => 'The mobile number must start with +977 followed by exactly 10 digits.',
+            'external_contacts.*.phone.regex' => 'The phone number must start with +977 followed by 7 to 8 digits.',
         ];
     }
     public function validated($key = null, $default = null)

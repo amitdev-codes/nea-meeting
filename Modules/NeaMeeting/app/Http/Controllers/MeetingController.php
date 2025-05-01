@@ -5,6 +5,7 @@ namespace Modules\NeaMeeting\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Enums\MeetingStatus;
+use App\Events\MeetingEvent;
 use Illuminate\Http\Request;
 use App\Events\MeetingCreated;
 use App\Events\MeetingUpdated;
@@ -98,7 +99,7 @@ class MeetingController extends BaseAdminController
                 // Trigger the meeting created event
                 if ($request->boolean('send_notifications', true)) {
                     // dd('test');
-                    event(new MeetingCreated($meeting, [
+                    event(new MeetingEvent($meeting,'scheduled',  [
                         'send_email' => $request->boolean('send_email', true),
                         'send_sms' => $request->boolean('send_sms', true),
                         'organization_ids' => $request->organizations ?? [],
@@ -177,22 +178,13 @@ class MeetingController extends BaseAdminController
             }
             // trigger the evnts
             if ($request->boolean('send_notifications', true)) {
-                // dd($validated['status'],'amit');
-                if ($validated['status'] === 'Cancelled') {
-                    event(new MeetingCancelled($meeting, [
-                        'send_email' => $request->boolean('send_email', true),
-                        'send_sms' => $request->boolean('send_sms', true),
-                        'reason' => $request->input('remarks', ''),
-                        'organization_ids' => $request->organizations ?? [],
-                    ]));
-                } else {
-                    // dd('test');
-                    event(new MeetingUpdated($meeting, [
-                        'send_email' => $request->boolean('send_email', true),
-                        'send_sms' => $request->boolean('send_sms', true),
-                        'organization_ids' => $request->organizations ?? [],
-                    ]));
-                }
+                $notificationType = $validated['status'] === 'Cancelled' ? 'cancellation' : 'rescheduled';
+                event(new MeetingEvent($meeting, $notificationType, [
+                    'send_email' => $request->boolean('send_email', true),
+                    'send_sms' => $request->boolean('send_sms', true),
+                    'reason' => $request->input('remarks', ''),
+                    'organization_ids' => $request->organizations ?? [],
+                ]));
             }
             
              DB::commit();
@@ -431,9 +423,10 @@ class MeetingController extends BaseAdminController
             }
         }
     
-        event(new MeetingCancelled($meeting, [
+        event(new MeetingEvent($meeting, 'cancellation', [
             'send_email' => $request->boolean('send_email', true),
-            'reason' => $request->input('cancellation_reason', ''), // Optional reason
+            'send_sms' => $request->boolean('send_sms', true),
+            'reason' => $request->input('cancellation_reason', ''),
             'organization_ids' => $request->input('organizations', []),
         ]));
     

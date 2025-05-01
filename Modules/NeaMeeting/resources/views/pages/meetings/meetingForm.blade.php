@@ -119,6 +119,8 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="table-responsive">
+                                            <!-- External Contacts Table -->
+                                            <!-- External Contacts Table -->
                                             <table class="table table-bordered external-contacts-table">
                                                 <thead class="thead-light">
                                                     <tr>
@@ -152,17 +154,29 @@
                                                                     value="{{ $contact['email'] ?? '' }}"
                                                                     placeholder="{{ __('Enter Email') }}" /></td>
                                                             <td>
-                                                                <input type="number"
-                                                                    name="external_contacts[{{ $index }}][mobile]"
-                                                                    class="form-control"
-                                                                    value="{{ $contact['mobile'] ?? '' }}"
-                                                                    placeholder="{{ __('Enter Mobile') }}" /></td>
-
-                                                            <td><input type="number"
-                                                                    name="external_contacts[{{ $index }}][phone]"
-                                                                    class="form-control"
-                                                                    value="{{ $contact['phone'] ?? '' }}"
-                                                                    placeholder="{{ __('Enter Phone') }}" /></td>
+                                                                <div class="input-group">
+                                                                    <span class="input-group-text">+977</span>
+                                                                    <input type="number"
+                                                                        name="external_contacts[{{ $index }}][mobile]"
+                                                                        class="form-control"
+                                                                        value="{{ isset($contact['mobile']) ? ltrim($contact['mobile'], '+977') : '' }}"
+                                                                        placeholder="{{ __('Enter Mobile') }}"
+                                                                        minlength="10" maxlength="10" pattern="\d{10}"
+                                                                        oninput="this.value = this.value.slice(0, 10)" />
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="input-group">
+                                                                    <span class="input-group-text">+977</span>
+                                                                    <input type="number"
+                                                                        name="external_contacts[{{ $index }}][phone]"
+                                                                        class="form-control"
+                                                                        value="{{ isset($contact['phone']) ? ltrim($contact['phone'], '+977') : '' }}"
+                                                                        placeholder="{{ __('Enter Phone') }}"
+                                                                        minlength="7" maxlength="8" pattern="\d{7,8}"
+                                                                        oninput="this.value = this.value.slice(0, 8)" />
+                                                                </div>
+                                                            </td>
                                                             <td><input type="text"
                                                                     name="external_contacts[{{ $index }}][office_name]"
                                                                     class="form-control"
@@ -183,12 +197,28 @@
                                                             <td><input type="email" name="external_contacts[0][email]"
                                                                     class="form-control"
                                                                     placeholder="{{ __('Enter Email') }}" /></td>
-                                                            <td><input type="text" name="external_contacts[0][mobile]"
-                                                                    class="form-control"
-                                                                    placeholder="{{ __('Enter Mobile') }}" /></td>
-                                                            <td><input type="text" name="external_contacts[0][phone]"
-                                                                    class="form-control"
-                                                                    placeholder="{{ __('Enter Phone') }}" /></td>
+                                                            <td>
+                                                                <div class="input-group">
+                                                                    <span class="input-group-text">+977</span>
+                                                                    <input type="number"
+                                                                        name="external_contacts[0][mobile]"
+                                                                        class="form-control"
+                                                                        placeholder="{{ __('Enter Mobile') }}"
+                                                                        minlength="10" maxlength="10" pattern="\d{10}"
+                                                                        oninput="this.value = this.value.slice(0, 10)" />
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="input-group">
+                                                                    <span class="input-group-text">+977</span>
+                                                                    <input type="number"
+                                                                        name="external_contacts[0][phone]"
+                                                                        class="form-control"
+                                                                        placeholder="{{ __('Enter Phone') }}"
+                                                                        minlength="7" maxlength="8" pattern="\d{7,8}"
+                                                                        oninput="this.value = this.value.slice(0, 8)" />
+                                                                </div>
+                                                            </td>
                                                             <td><input type="text"
                                                                     name="external_contacts[0][office_name]"
                                                                     class="form-control"
@@ -230,11 +260,12 @@
                                 </div>
                             </div>
                         </div>
-                        @if($googleCalendarEnabled)
+                        @if ($googleCalendarEnabled)
                             <div class="form-group row">
                                 <div class="col-md-9 offset-md-3">
                                     <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" id="add_to_google_calendar" name="add_to_google_calendar" {{ isset($resource) ? '' : 'checked' }}>
+                                        <input type="checkbox" class="custom-control-input" id="add_to_google_calendar"
+                                            name="add_to_google_calendar" {{ isset($resource) ? '' : 'checked' }}>
                                         <label class="custom-control-label" for="add_to_google_calendar">
                                             {{ isset($resource) ? 'Update Google Calendar event' : 'Add to Google Calendar' }}
                                         </label>
@@ -369,6 +400,21 @@
         transform: translateY(-1px);
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
+
+    .is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+        .input-group-text {
+            background-color: #f8f9fa;
+            border-right: none;
+        }
+        .input-group .form-control {
+            border-left: none;
+        }
+        .invalid-feedback {
+            font-size: 0.875rem;
+            color: #dc3545;
+        }
 </style>
 
 @push('scripts')
@@ -400,8 +446,24 @@
             <tr class="contact-row">
                 <td><input type="text" name="external_contacts[${rowCount}][name]" class="form-control" placeholder="{{ __('Enter Name') }}" /></td>
                 <td><input type="email" name="external_contacts[${rowCount}][email]" class="form-control" placeholder="{{ __('Enter Email') }}" /></td>
-                <td><input type="text" name="external_contacts[${rowCount}][mobile]" class="form-control" placeholder="{{ __('Enter Mobile') }}" /></td>
-                <td><input type="text" name="external_contacts[${rowCount}][phone]" class="form-control" placeholder="{{ __('Enter Phone') }}" /></td>
+                <td>
+                    <div class="input-group">
+                        <span class="input-group-text">+977</span>
+                        <input type="number" name="external_contacts[${rowCount}][mobile]" class="form-control" 
+                            placeholder="{{ __('Enter Mobile') }}" 
+                            minlength="10" maxlength="10" pattern="\d{10}" 
+                            oninput="this.value = this.value.slice(0, 10)" />
+                    </div>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <span class="input-group-text">+977</span>
+                        <input type="number" name="external_contacts[${rowCount}][phone]" class="form-control" 
+                            placeholder="{{ __('Enter Phone') }}" 
+                            minlength="7" maxlength="8" pattern="\d{7,8}" 
+                            oninput="this.value = this.value.slice(0, 8)" />
+                    </div>
+                </td>
                 <td><input type="text" name="external_contacts[${rowCount}][office_name]" class="form-control" placeholder="{{ __('Enter Office Name') }}" /></td>
                 <td>
                     <button type="button" class="btn btn-danger btn-sm remove-contact-row">
@@ -411,6 +473,33 @@
             </tr>`;
             $('.external-contacts-table tbody').append(newRow);
         });
+        // Client-side validation for mobile and phone numbers
+        $(document).on('input', 'input[name*="external_contacts"][name$="[mobile]"]', function() {
+            let value = $(this).val();
+            if (value && (value.length !== 10 || !/^\d{10}$/.test(value))) {
+                $(this).addClass('is-invalid');
+                $(this).next('.invalid-feedback').remove();
+                $(this).after('<div class="invalid-feedback">Mobile number must be exactly 10 digits.</div>');
+            } else {
+                $(this).removeClass('is-invalid');
+                $(this).next('.invalid-feedback').remove();
+            }
+        });
+
+        $(document).on('input', 'input[name*="external_contacts"][name$="[phone]"]', function() {
+            let value = $(this).val();
+            if (value && (value.length < 7 || value.length > 8 || !/^\d{7,8}$/.test(value))) {
+                $(this).addClass('is-invalid');
+                $(this).next('.invalid-feedback').remove();
+                $(this).after('<div class="invalid-feedback">Phone number must be 7 to 8 digits.</div>');
+            } else {
+                $(this).removeClass('is-invalid');
+                $(this).next('.invalid-feedback').remove();
+            }
+        });
+
+
+
 
         // Handle removing contact row
         $(document).on('click', '.remove-contact-row', function() {
@@ -432,9 +521,10 @@
             }
         });
 
+
         function checkTimeConflicts() {
             const startTime = $('#start_time').val();
-            const meetingDate = $('#nepaliDate').val(); 
+            const meetingDate = $('#nepaliDate').val();
             // Check for conflicts
             $.ajax({
                 url: '/meetings/checkConflict', // Your route for checking conflicts
@@ -460,6 +550,7 @@
                 }
             });
         }
+
         function checkTimeValidation() {
             const startTime = $('#start_time').val();
             const endTime = $('#endTime').val();

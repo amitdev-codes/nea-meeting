@@ -1,5 +1,5 @@
 @component('mail::message')
-# NEA Meeting Cancellation Notification
+# NEA Meeting Rescheduled Notification
 
 <div style="text-align: center; margin-bottom: 25px;">
     <img src="{{ asset('assets/img/nea-logo.png') }}" alt="NEA Logo" style="max-width: 100px;">
@@ -7,17 +7,18 @@
 
 Dear Sir/Madam,
 
-We regret to inform you that the following meeting has been **cancelled**:
+We wish to inform you that the following meeting has been **rescheduled**:
 
 @component('mail::panel')
 ## {{ $meeting->title }}
 
-**Original Date:** {{ $meetingDate }}<br>
-**Original Time:** {{ $startTime }} - {{ $endTime }}<br>
+**New Date:** {{ $meetingDate }}<br>
+**New Time:** {{ $startTime }} - {{ $endTime }}<br>
 **Type:** {{ $meeting->meeting_type }}<br>
 
 @if($meeting->is_virtual)
-**Meeting Type:** Virtual
+**Meeting Type:** Virtual<br>
+**Link:** [{{ $meeting->virtual_meeting_link }}]({{ $meeting->virtual_meeting_link }})
 @else
 **Location:** {{ $meeting->meeting_location ?? 'To be announced' }}
 @if($meeting->meeting_room_id)
@@ -31,7 +32,7 @@ We regret to inform you that the following meeting has been **cancelled**:
 {{ $meeting->description }}
 @endif
 
-If you have any questions or require further details, please contact the meeting organizer.
+Please update your calendar accordingly. If you have any questions, please contact the meeting organizer.
 
 Thank you,<br>
 NEA Meeting Management System

@@ -13,22 +13,22 @@
             placeholder="{{ __('label.enter_field', ['field' => __('field.' . $attributes['name'])]) }}"
             id="{{ $attributes['name'] }}" name="{{ $attributes['name'] }}"
             value="{{ old($attributes['name'], $attributes['value']) }}"
-            pattern="[1-9][0-9]{6}" maxlength="7"
+            pattern="[1-9][0-9]{6,8}" maxlength="9"
             oninput="formatTelephone(this)"
             @if ($attributes['required']) required @endif>
     </div>
-    <small class="text-muted">Enter 7-digit telephone number (e.g., 1234 567)</small>
+    <small class="text-muted">Enter 7 to 9-digit telephone number (e.g., 1234567)</small>
     <span class="error invalid-feedback">{{ $errors->first($attributes['name']) }}</span>
 </div>
-
-<script>
+@push('scripts')
+<script type="module">
     function formatTelephone(input) {
         // Remove non-numeric characters
         let value = input.value.replace(/[^0-9]/g, '');
 
-        // Limit to 7 digits
-        if (value.length > 7) {
-            value = value.slice(0, 7);
+        // Limit to 9 digits
+        if (value.length > 9) {
+            value = value.slice(0, 9);
         }
 
         // Ensure first digit is 1-9
@@ -36,11 +36,21 @@
             value = '';
         }
 
-        // Format as YXXX XXX
-        if (value.length > 4) {
-            value = value.slice(0, 4) + ' ' + value.slice(4);
-        }
-
+        // Set input value to clean numeric value
         input.value = value;
+
+        // Store clean value in a hidden input or data attribute for submission
+        input.setAttribute('data-clean-value', value);
     }
+    const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function () {
+                const telInput = document.querySelector('input[name="{{ $attributes['name'] }}"]');
+                if (telInput && telInput.getAttribute('data-clean-value')) {
+                    telInput.value = telInput.getAttribute('data-clean-value');
+                }
+            });
+    }
+
 </script>
+@endpush
