@@ -1,1 +1,0 @@
-import{D as o}from"./dependentDropdown-BtuqQTBX.js";function c(e,n={}){new o("#component_id",'select[name="sub_component_id"]',e.subcomponents,{placeholder:"Select SubComponent"}),new o("#sector_id",'select[name="sub_sector_id"]',e.subSectors,{placeholder:"Select SubSector",initialValue:n.sub_sector_id})}export{c as i};

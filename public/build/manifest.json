@@ -778,93 +778,14 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "js/app-BNuoH0rw.js",
+    "file": "js/app-Bc1T0Hye.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "_jquery-D39sRDH4.js",
       "_bootstrap.esm-G9-_ouNT.js",
-      "__commonjsHelpers-CqkleIqs.js",
-      "resources/js/utils/locationDropdowns.js",
-      "resources/js/utils/fansepDropdowns.js",
-      "resources/js/utils/wardDropdowns.js",
-      "resources/js/utils/formDropdowns.js",
-      "resources/js/utils/formEntriesDropdowns.js",
-      "resources/js/utils/groupByFormDropdown.js",
-      "resources/js/utils/dependentDropdown.js"
-    ]
-  },
-  "resources/js/utils/dependentDropdown.js": {
-    "file": "js/dependentDropdown-BtuqQTBX.js",
-    "name": "dependentDropdown",
-    "src": "resources/js/utils/dependentDropdown.js",
-    "isEntry": true
-  },
-  "resources/js/utils/dependentDropdownWithMultiple.js": {
-    "file": "js/dependentDropdownWithMultiple-l0sNRNKZ.js",
-    "name": "dependentDropdownWithMultiple",
-    "src": "resources/js/utils/dependentDropdownWithMultiple.js",
-    "isEntry": true
-  },
-  "resources/js/utils/editable-grid-common.js": {
-    "file": "js/editable-grid-common-l0sNRNKZ.js",
-    "name": "editable-grid-common",
-    "src": "resources/js/utils/editable-grid-common.js",
-    "isEntry": true
-  },
-  "resources/js/utils/fansepDropdowns.js": {
-    "file": "js/fansepDropdowns-CpcPLc8D.js",
-    "name": "fansepDropdowns",
-    "src": "resources/js/utils/fansepDropdowns.js",
-    "isEntry": true,
-    "imports": [
-      "resources/js/utils/dependentDropdown.js"
-    ]
-  },
-  "resources/js/utils/formDropdowns.js": {
-    "file": "js/formDropdowns-D5Awz2is.js",
-    "name": "formDropdowns",
-    "src": "resources/js/utils/formDropdowns.js",
-    "isEntry": true,
-    "imports": [
-      "resources/js/utils/dependentDropdown.js"
-    ]
-  },
-  "resources/js/utils/formEntriesDropdowns.js": {
-    "file": "js/formEntriesDropdowns-7viNQLee.js",
-    "name": "formEntriesDropdowns",
-    "src": "resources/js/utils/formEntriesDropdowns.js",
-    "isEntry": true,
-    "imports": [
-      "resources/js/utils/dependentDropdown.js"
-    ]
-  },
-  "resources/js/utils/groupByFormDropdown.js": {
-    "file": "js/groupByFormDropdown-Bi5AOQX3.js",
-    "name": "groupByFormDropdown",
-    "src": "resources/js/utils/groupByFormDropdown.js",
-    "isEntry": true,
-    "imports": [
-      "resources/js/utils/dependentDropdown.js"
-    ]
-  },
-  "resources/js/utils/locationDropdowns.js": {
-    "file": "js/locationDropdowns-MVjEisyU.js",
-    "name": "locationDropdowns",
-    "src": "resources/js/utils/locationDropdowns.js",
-    "isEntry": true,
-    "imports": [
-      "resources/js/utils/dependentDropdown.js"
-    ]
-  },
-  "resources/js/utils/wardDropdowns.js": {
-    "file": "js/wardDropdowns-F48lMFHK.js",
-    "name": "wardDropdowns",
-    "src": "resources/js/utils/wardDropdowns.js",
-    "isEntry": true,
-    "imports": [
-      "resources/js/utils/dependentDropdown.js"
+      "__commonjsHelpers-CqkleIqs.js"
     ]
   }
 }
