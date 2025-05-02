@@ -50,8 +50,8 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function (Schedule $schedule) {
-        $schedule->command('meetings:send-reminders')
-                ->everyTenMinutes()
-                ->appendOutputTo(storage_path('logs/meeting-reminders.log'));
+        // $schedule->command('meetings:send-reminders')->everyTenMinutes()->appendOutputTo(storage_path('logs/meeting-reminders.log'));
+        $schedule->command('meetings:send-reminders')->hourly()->appendOutputTo(storage_path('logs/meeting-reminders.log'));
+        $schedule->command('storage:fix-permissions')->daily()->appendOutputTo(storage_path('logs/storage-permissions.log'));
     })
     ->create();
