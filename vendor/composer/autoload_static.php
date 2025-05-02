@@ -903,6 +903,7 @@ class ComposerStaticInit34a66aff6d6ace15390a51061e4fbb0b
 
     public static $classMap = array (
         'App\\Console\\Commands\\DatabaseSetUp' => __DIR__ . '/../..' . '/app/Console/Commands/DatabaseSetUp.php',
+        'App\\Console\\Commands\\FixStoragePermissions' => __DIR__ . '/../..' . '/app/Console/Commands/FixStoragePermissions.php',
         'App\\Console\\Commands\\MakeAll' => __DIR__ . '/../..' . '/app/Console/Commands/MakeAll.php',
         'App\\Console\\Commands\\MeetingReminderCommand' => __DIR__ . '/../..' . '/app/Console/Commands/MeetingReminderCommand.php',
         'App\\Console\\Commands\\UnlockUser' => __DIR__ . '/../..' . '/app/Console/Commands/UnlockUser.php',
@@ -950,7 +951,6 @@ class ComposerStaticInit34a66aff6d6ace15390a51061e4fbb0b
         'App\\Http\\Controllers\\LanguageController' => __DIR__ . '/../..' . '/app/Http/Controllers/LanguageController.php',
         'App\\Http\\Controllers\\PhotoController' => __DIR__ . '/../..' . '/app/Http/Controllers/PhotoController.php',
         'App\\Http\\Controllers\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/ProfileController.php',
-        'App\\Http\\Controllers\\SSBeneficiariesFormController' => __DIR__ . '/../..' . '/app/Http/Controllers/SSBeneficiariesFormController.php',
         'App\\Http\\Controllers\\SiteSettingController' => __DIR__ . '/../..' . '/app/Http/Controllers/SiteSettingController.php',
         'App\\Http\\Controllers\\SliderController' => __DIR__ . '/../..' . '/app/Http/Controllers/SliderController.php',
         'App\\Http\\Middleware\\CheckDynamicPermission' => __DIR__ . '/../..' . '/app/Http/Middleware/CheckDynamicPermission.php',
@@ -33262,7 +33262,6 @@ class ComposerStaticInit34a66aff6d6ace15390a51061e4fbb0b
         'Modules\\Landingpage\\Http\\Controllers\\FaqController' => __DIR__ . '/../..' . '/Modules/Landingpage/app/Http/Controllers/FaqController.php',
         'Modules\\Landingpage\\Http\\Controllers\\LandingPageMenuController' => __DIR__ . '/../..' . '/Modules/Landingpage/app/Http/Controllers/LandingPageMenuController.php',
         'Modules\\Landingpage\\Http\\Controllers\\LandingpageController' => __DIR__ . '/../..' . '/Modules/Landingpage/app/Http/Controllers/LandingpageController.php',
-        'Modules\\Landingpage\\Http\\Controllers\\SuccessStoriesController' => __DIR__ . '/../..' . '/Modules/Landingpage/app/Http/Controllers/SuccessStoriesController.php',
         'Modules\\Landingpage\\Http\\Requests\\StoreFaqRequest' => __DIR__ . '/../..' . '/Modules/Landingpage/app/Http/Requests/StoreFaqRequest.php',
         'Modules\\Landingpage\\Http\\Requests\\StoreLandingPageMenuRequest' => __DIR__ . '/../..' . '/Modules/Landingpage/app/Http/Requests/StoreLandingPageMenuRequest.php',
         'Modules\\Landingpage\\Http\\Requests\\UpdateFaqRequest' => __DIR__ . '/../..' . '/Modules/Landingpage/app/Http/Requests/UpdateFaqRequest.php',

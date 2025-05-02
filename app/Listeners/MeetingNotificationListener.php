@@ -6,9 +6,10 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Events\MeetingEvent;
 use Illuminate\Support\Facades\Log;
-use App\Notifications\MeetingStatusNotification;
+use App\Helpers\NepaliDateConverter;
 use Modules\Settings\Models\SmsConfiguration;
 use Modules\Settings\Models\EmailConfiguration;
+use App\Notifications\MeetingStatusNotification;
 use Modules\Settings\Services\DynamicEmailService;
 use Modules\Settings\Services\Sms\SmsServiceInterface;
 
@@ -164,9 +165,27 @@ class MeetingNotificationListener
     
         // Safely parse meeting date and start time with fallback
         try {
-            $meetingDate = Carbon::parse($meeting->meeting_date_ad)->format('M d, Y');
-            $startTime = Carbon::parse($meeting->start_time)->format('h:i A');
-            $formattedDateTime = "{$meetingDate} at {$startTime}";
+            $meetingDate = Carbon::parse($meeting->meeting_date_ad);
+            $startTime = Carbon::parse($meeting->start_time);
+    
+            // Convert to Nepali date using the helper function
+            $nepaliDate = NepaliDateConverter::toNepaliDate($meetingDate); // Adjust based on your class/namespace
+
+            // Convert day and year to Nepali digits
+            $nepaliDay = NepaliDateConverter::toNepaliDigits($nepaliDate['day']);
+            $nepaliYear = NepaliDateConverter::toNepaliDigits($nepaliDate['year']);
+            $nepaliFormattedDate = "{$nepaliDate['month_name']} {$nepaliDay} {$nepaliYear}";
+
+            // Format time to 12-hour format and convert to Nepali digits
+            $hour = $startTime->format('g'); // Hour without leading zero (e.g., "2")
+            $nepaliHour = NepaliDateConverter::toNepaliDigits($hour);
+            $period = $startTime->format('A') === 'AM' ? 'बिहान' : 'बेलुका'; // AM = बिहान, PM = बेलुका
+            $formattedTime = "{$nepaliHour} बजे"; // e.g., "२ बजे"
+
+            // Combine Nepali date and time
+            $formattedDateTime = "{$nepaliFormattedDate}, {$formattedTime}";
+        
+            // Combine Nepali date and time;
         } catch (\Exception $e) {
             Log::warning("Invalid date or time for meeting #{$meeting->id}: {$e->getMessage()}");
             $formattedDateTime = 'at a scheduled date and time'; // Fallback message

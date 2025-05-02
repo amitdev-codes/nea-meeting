@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'App\\Console\\Commands\\DatabaseSetUp' => $baseDir . '/app/Console/Commands/DatabaseSetUp.php',
+    'App\\Console\\Commands\\FixStoragePermissions' => $baseDir . '/app/Console/Commands/FixStoragePermissions.php',
     'App\\Console\\Commands\\MakeAll' => $baseDir . '/app/Console/Commands/MakeAll.php',
     'App\\Console\\Commands\\MeetingReminderCommand' => $baseDir . '/app/Console/Commands/MeetingReminderCommand.php',
     'App\\Console\\Commands\\UnlockUser' => $baseDir . '/app/Console/Commands/UnlockUser.php',
@@ -54,7 +55,6 @@ return array(
     'App\\Http\\Controllers\\LanguageController' => $baseDir . '/app/Http/Controllers/LanguageController.php',
     'App\\Http\\Controllers\\PhotoController' => $baseDir . '/app/Http/Controllers/PhotoController.php',
     'App\\Http\\Controllers\\ProfileController' => $baseDir . '/app/Http/Controllers/ProfileController.php',
-    'App\\Http\\Controllers\\SSBeneficiariesFormController' => $baseDir . '/app/Http/Controllers/SSBeneficiariesFormController.php',
     'App\\Http\\Controllers\\SiteSettingController' => $baseDir . '/app/Http/Controllers/SiteSettingController.php',
     'App\\Http\\Controllers\\SliderController' => $baseDir . '/app/Http/Controllers/SliderController.php',
     'App\\Http\\Middleware\\CheckDynamicPermission' => $baseDir . '/app/Http/Middleware/CheckDynamicPermission.php',
@@ -32366,7 +32366,6 @@ return array(
     'Modules\\Landingpage\\Http\\Controllers\\FaqController' => $baseDir . '/Modules/Landingpage/app/Http/Controllers/FaqController.php',
     'Modules\\Landingpage\\Http\\Controllers\\LandingPageMenuController' => $baseDir . '/Modules/Landingpage/app/Http/Controllers/LandingPageMenuController.php',
     'Modules\\Landingpage\\Http\\Controllers\\LandingpageController' => $baseDir . '/Modules/Landingpage/app/Http/Controllers/LandingpageController.php',
-    'Modules\\Landingpage\\Http\\Controllers\\SuccessStoriesController' => $baseDir . '/Modules/Landingpage/app/Http/Controllers/SuccessStoriesController.php',
     'Modules\\Landingpage\\Http\\Requests\\StoreFaqRequest' => $baseDir . '/Modules/Landingpage/app/Http/Requests/StoreFaqRequest.php',
     'Modules\\Landingpage\\Http\\Requests\\StoreLandingPageMenuRequest' => $baseDir . '/Modules/Landingpage/app/Http/Requests/StoreLandingPageMenuRequest.php',
     'Modules\\Landingpage\\Http\\Requests\\UpdateFaqRequest' => $baseDir . '/Modules/Landingpage/app/Http/Requests/UpdateFaqRequest.php',
