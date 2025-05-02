@@ -67,6 +67,8 @@ class DashBoardController extends Controller
             'userMeetingsPerDayData' => [],
         ], $dashboardData);
 
+        // dd($calendarData);
+
         if ($user->hasRole(['md','user','guest'])) {
             return view('pages.dashboard.user', [
                 'calendarData' => $calendarData['calendarData'],

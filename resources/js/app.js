@@ -24,13 +24,3 @@ window.toastr.options = {
 
 window.Chart = Chart;
 
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.notify-btn').forEach(button => {
-        button.addEventListener('click', function (e) {
-            e.preventDefault();
-            if (confirm('Are you sure you want to send notifications for this meeting?')) {
-                window.location.href = this.href;
-            }
-        });
-    });
-});

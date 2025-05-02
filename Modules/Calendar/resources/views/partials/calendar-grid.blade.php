@@ -4,7 +4,14 @@
     <div class="calendar">
         <div class="calendar-header">
             <div class="row g-0">
-                @foreach ([['nepali' => 'आइत', 'english' => 'Sun'], ['nepali' => 'सोम', 'english' => 'Mon'], ['nepali' => 'मंगल', 'english' => 'Tue'], ['nepali' => 'बुध', 'english' => 'Wed'], ['nepali' => 'बिही', 'english' => 'Thu'], ['nepali' => 'शुक्र', 'english' => 'Fri'], ['nepali' => 'शनि', 'english' => 'Sat']] as $index => $day)
+                @foreach ([
+                    ['nepali' => 'आइत', 'english' => 'Sun'],
+                    ['nepali' => 'सोम', 'english' => 'Mon'],
+                    ['nepali' => 'मंगल', 'english' => 'Tue'],
+                    ['nepali' => 'बुध', 'english' => 'Wed'],
+                    ['nepali' => 'बिही', 'english' => 'Thu'],
+                    ['nepali' => 'शुक्र', 'english' => 'Fri'],
+                    ['nepali' => 'शनि', 'english' => 'Sat']] as $index => $day)
                     <div class="col weekday {{ $index == 0 ? 'sunday' : '' }} {{ $index == 6 ? 'saturday' : '' }}">
                         <div class="nepali-weekday">{{ $day['nepali'] }}</div>
                         <div class="english-weekday">{{ $day['english'] }}</div>
@@ -23,8 +30,8 @@
                     $currentDay = $today->day;
                     $currentMonth = $today->month;
                     $currentYear = $today->year;
-
                     $isCurrentMonth = $startDate->month == $currentMonth && $startDate->year == $currentYear;
+
 
                     $totalDaysDisplayed = $daysInMonth + $startDay;
                     $totalWeeks = ceil($totalDaysDisplayed / 7);
@@ -49,12 +56,12 @@
                             } elseif ($currentPosition <= $totalDaysDisplayed) {
                                 $day = $currentPosition - $startDay;
                                 $nepaliDay = NepaliDateConverter::toNepaliDigits($day);
-                                $isToday =
-                                    $isCurrentMonth &&
-                                    $startDate
+                         
+                                $isToday = $startDate
                                         ->copy()
                                         ->addDays($day - 1)
                                         ->isToday();
+                                        // @dd($isToday);
                                 $englishDate = isset($calendarData['english_dates'][$day])
                                     ? $calendarData['english_dates'][$day]
                                     : '';

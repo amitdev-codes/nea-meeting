@@ -29,13 +29,6 @@ class LandingpageController extends Controller
         $pastMeetings = Meeting::where('meeting_date_ad', '<', $today)->orderBy('meeting_date_ad', 'desc')->orderBy('start_time', 'desc')->paginate(10);
         return view('landingpage::pages.landingPage', compact('upcomingMeetings', 'pastMeetings'));
     }
-    // public function view($id){
-    //     $meeting=Meeting::find($id);
-    //     $meeting->load(['media' => function($query) {
-    //         $query->where('collection_name', 'meetings');
-    //     }]);
-    //     return view('landingpage::pages.viewMeetings',['resource'=>$meeting]);
-    // }
     public function view($id, Request $request)
     {
         // dd($id);

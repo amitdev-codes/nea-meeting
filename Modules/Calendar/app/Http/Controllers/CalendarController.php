@@ -28,10 +28,8 @@ class CalendarController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        // Get year and month from request if provided
         $year = $request->input('year');
         $month = $request->input('month');
-        // Get all calendar data from the service
         $calendarData = $this->calendarService->getCompleteCalendarData($user, $year, $month);
         return view('calendar::pages.calendar.nepali-calendar', $calendarData);
     }

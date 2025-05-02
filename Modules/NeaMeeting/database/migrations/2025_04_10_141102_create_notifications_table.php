@@ -12,12 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notifications', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('meeting_id')->constrained()->cascadeOnDelete();
-            $table->string('notification_type', 50);
-            $table->text('message');
-            $table->boolean('is_read')->default(false);
+            $table->uuid('id')->primary(); // Matches the UUID format in the error
+            $table->string('type'); // Required by Laravel's notification system
+            $table->morphs('notifiable'); // Creates notifiable_id and notifiable_type
+            $table->text('data'); // Stores notification data as JSON
+            $table->timestamp('read_at')->nullable(); // Tracks if notification is read
+            $table->foreignId('meeting_id')->constrained()->cascadeOnDelete(); // Your custom field
+            $table->string('notification_type', 50); // Your custom field
+            $table->text('message'); // Your custom field
             $table->timestamps();
         });
     }

@@ -9,13 +9,14 @@
                     <div class="d-flex justify-content-between align-items-center flex-wrap">
                         <!-- Left: Today's Full Date -->
                         <h4 class="mb-0 fs-5" id="currentMonthYear">{{ $todaysDate['full_date_time'] }}</h4>
-    
+
                         <!-- Center: Dropdowns -->
                         <div class="d-flex justify-content-center align-items-center flex-wrap gap-3 flex-grow-1 mx-3">
                             <div class="dropdown-container">
                                 <select class="form-select shadow-sm" id="year" name="year">
                                     @foreach ($years as $year)
-                                        <option value="{{ $year }}" {{ $year == $currentBsYear ? 'selected' : '' }}>
+                                        <option value="{{ $year }}"
+                                            {{ $year == $currentBsYear ? 'selected' : '' }}>
                                             {{ NepaliDateConverter::toNepaliDigits($year) }}</option>
                                     @endforeach
                                 </select>
@@ -23,7 +24,8 @@
                             <div class="dropdown-container">
                                 <select class="form-select shadow-sm" id="month" name="month">
                                     @foreach ($months as $index => $month)
-                                        <option value="{{ $month }}" {{ $month == $currentBsMonth ? 'selected' : '' }}>
+                                        <option value="{{ $month }}"
+                                            {{ $month == $currentBsMonth ? 'selected' : '' }}>
                                             {{ NepaliDateConverter::$nepaliMonths[$month] }}</option>
                                     @endforeach
                                 </select>
@@ -31,13 +33,14 @@
                             <div class="dropdown-container">
                                 <select class="form-select shadow-sm" id="day" name="day">
                                     @for ($i = 1; $i <= $days; $i++)
-                                        <option value="{{ $i }}" {{ $i == $currentNepaliDay ? 'selected' : '' }}>
+                                        <option value="{{ $i }}"
+                                            {{ $i == $currentNepaliDay ? 'selected' : '' }}>
                                             {{ NepaliDateConverter::toNepaliDigits($i) }}</option>
                                     @endfor
                                 </select>
                             </div>
                         </div>
-    
+
                         <!-- Right: Nepali Month/Year | AD Month/Year -->
                         <div class="d-flex align-items-center">
                             <span id="monthYearRange" class="fw-semibold" style="color: #dc3545;">
@@ -54,7 +57,7 @@
                     </div>
                 </div>
             </div>
-    
+
             <!-- Meeting Schedule Section -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center flex-wrap">
@@ -75,75 +78,88 @@
         </div>
     </div>
 </div>
+
+
 @push('scripts')
     <script type="module">
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('year').addEventListener('change', function() {
-                const selectedYear = this.value;
-                const currentMonth = document.getElementById('month').value;
-                fetchMonths(selectedYear, currentMonth).then(() => updateCalendar());
+        const NepaliDateConverter = {
+            nepaliMonths: @json(\App\Helpers\NepaliDateConverter::$nepaliMonths),
+            toNepaliDigits: function(number) {
+                const digits = @json(\App\Helpers\NepaliDateConverter::$nepaliDigits);
+                return String(number).split('').map(d => digits[d] || d).join('');
+            }
+        };
+        document.getElementById('year').addEventListener('change', function() {
+            const selectedYear = this.value;
+            const currentMonth = document.getElementById('month').value;
+            fetchMonths(selectedYear, currentMonth).then(() => updateCalendar());
+        });
+
+        document.getElementById('month').addEventListener('change', function() {
+            const year = document.getElementById('year').value;
+            const selectedMonth = this.value;
+            fetchDays(year, selectedMonth).then(() => updateCalendar());
+        });
+
+        document.getElementById('day').addEventListener('change', function() {
+            updateCalendar();
+            const year = document.getElementById('year').value;
+            const month = document.getElementById('month').value;
+            const day = this.value;
+            loadMeetings(year, month, day);
+        });
+
+        const todayCells = document.querySelectorAll('.calendar-day.today');
+        // console.log(todayCells.length);
+
+        // alert('hello');
+        if (todayCells.length > 0) {
+            todayCells[0].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
             });
 
-            document.getElementById('month').addEventListener('change', function() {
-                const year = document.getElementById('year').value;
-                const selectedMonth = this.value;
-                fetchDays(year, selectedMonth).then(() => updateCalendar());
-            });
+            // Load today's meetings by default
+            const year = document.getElementById('year').value;
+            const month = document.getElementById('month').value;
+            const day = document.getElementById('day').value;
 
-            document.getElementById('day').addEventListener('change', function() {
-                updateCalendar();
-                const year = document.getElementById('year').value;
-                const month = document.getElementById('month').value;
-                const day = this.value;
-                loadMeetings(year, month, day);
-            });
+            console.log(year, month, day);
 
-            const todayCells = document.querySelectorAll('.calendar-day.today');
-            if (todayCells.length > 0) {
-                todayCells[0].scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
+            loadMeetings(year, month, day);
+        }
+
+        // Set up event delegation for calendar day clicks
+        document.addEventListener('click', function(e) {
+            const calendarDay = e.target.closest('.calendar-day:not(.other-month)');
+            // alert('test');
+            if (calendarDay) {
+                // Remove selected class from all cells
+                document.querySelectorAll('.calendar-day.selected').forEach(el => {
+                    el.classList.remove('selected');
                 });
 
-                // Load today's meetings by default
-                const year = document.getElementById('year').value;
-                const month = document.getElementById('month').value;
-                const day = document.getElementById('day').value;
-                loadMeetings(year, month, day);
-            }
+                // Add selected class to clicked cell
+                calendarDay.classList.add('selected');
 
-            // Set up event delegation for calendar day clicks
-            document.addEventListener('click', function(e) {
-                const calendarDay = e.target.closest('.calendar-day:not(.other-month)');
-                // alert('test');
-                if (calendarDay) {
-                    // Remove selected class from all cells
-                    document.querySelectorAll('.calendar-day.selected').forEach(el => {
-                        el.classList.remove('selected');
-                    });
+                // Get the Nepali date from the clicked cell
+                const nepaliDate = calendarDay.getAttribute('data-nepali-date');
+                if (nepaliDate) {
+                    const [year, month, day] = nepaliDate.split('-');
 
-                    // Add selected class to clicked cell
-                    calendarDay.classList.add('selected');
+                    // Update day dropdown selection
+                    document.getElementById('day').value = parseInt(day);
 
-                    // Get the Nepali date from the clicked cell
-                    const nepaliDate = calendarDay.getAttribute('data-nepali-date');
-                    console.log("nepaliDate", nepaliDate);
-                    if (nepaliDate) {
-                        const [year, month, day] = nepaliDate.split('-');
+                    // Load meetings for the selected date
+                    // console.log(year, month, day);
+                    loadMeetings(year, month, day);
 
-                        // Update day dropdown selection
-                        document.getElementById('day').value = parseInt(day);
-
-                        // Load meetings for the selected date
-                        loadMeetings(year, month, day);
-
-                        // Format and display the Nepali date
-                        const formattedDate =
-                            `${NepaliDateConverter.nepaliMonths[month]} ${NepaliDateConverter.toNepaliDigits(day)}, ${NepaliDateConverter.toNepaliDigits(year)}`;
-                        document.getElementById('selectedDate').textContent = formattedDate;
-                    }
+                    // Format and display the Nepali date
+                    const formattedDate =
+                        `${NepaliDateConverter.nepaliMonths[month]} ${NepaliDateConverter.toNepaliDigits(day)}, ${NepaliDateConverter.toNepaliDigits(year)}`;
+                    document.getElementById('selectedDate').textContent = formattedDate;
                 }
-            });
+            }
         });
 
         function fetchMonths(year, preserveMonth = null) {
@@ -265,7 +281,14 @@
                 `${NepaliDateConverter.nepaliMonths[month]} ${NepaliDateConverter.toNepaliDigits(day)}, ${NepaliDateConverter.toNepaliDigits(year)}`;
 
             fetch(`/meetings/get-by-date/${year}/${month}/${day}`)
-                .then(response => response.json())
+            .then(response => {
+                    console.log('Fetch response status:', response.status, response.statusText);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+
                 .then(data => {
                     if (data.meetings && data.meetings.length > 0) {
                         let html = `<div class="list-group">`;
@@ -274,12 +297,12 @@
                                 hour: '2-digit',
                                 minute: '2-digit'
                             });
-                            const endTime = meeting.end_time 
-                                ? new Date(meeting.end_time).toLocaleTimeString([], {
+                            const endTime = meeting.end_time ?
+                                new Date(meeting.end_time).toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit'
-                                }) 
-                                : '';
+                                }) :
+                                '';
                             html += `
                                 <a href="#" class="list-group-item list-group-item-action meeting-list-item ${meeting.status}" data-meeting-id="${meeting.id}">
                                     <div class="d-flex w-100 justify-content-between">
@@ -309,7 +332,8 @@
                                 const meetingId = this.getAttribute('data-meeting-id');
                                 fetchMeetingDetails(meetingId);
                                 // Show the modal
-                                const meetingModal = new bootstrap.Modal(document.getElementById('meetingModal'));
+                                const meetingModal = new bootstrap.Modal(document.getElementById(
+                                    'meetingModal'));
                                 meetingModal.show();
                             });
                         });
@@ -335,63 +359,73 @@
                     `;
                 });
         }
+
         function fetchMeetingDetails(meetingId) {
             fetch(`/view/${meetingId}`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                // Populate Meeting Information
-                document.getElementById('meeting-title').querySelector('p').textContent = data.title || 'N/A';
-                document.getElementById('meeting-location').querySelector('p').textContent = data.is_virtual ? '{{ __('Virtual') }}' : (data.meeting_location || data.meeting_room?.name || 'N/A');
-                document.getElementById('meeting-date').querySelector('p').textContent = `${data.meeting_date} (${data.meeting_date_ad})` || 'N/A';
-                document.getElementById('start-time').querySelector('p').textContent = data.start_time || 'N/A';
-                document.getElementById('end-time').querySelector('p').textContent = data.end_time || 'N/A';
-                document.getElementById('meeting-room').querySelector('p').textContent = data.meeting_room?.name || 'N/A';
-                document.getElementById('meeting-type').querySelector('p').textContent = data.meeting_type || 'N/A';
-                document.getElementById('is-external').querySelector('p').textContent = data.is_external || 'N/A';
-                document.getElementById('is-virtual-meeting').querySelector('p').textContent = data.is_virtual_meeting || 'N/A';
-                document.getElementById('virtual-meeting-link').querySelector('p').textContent = data.virtual_meeting_link || 'N/A';
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    // Populate Meeting Information
+                    document.getElementById('meeting-title').querySelector('p').textContent = data.title || 'N/A';
+                    document.getElementById('meeting-location').querySelector('p').textContent = data.is_virtual ?
+                        '{{ __('Virtual') }}' : (data.meeting_location || data.meeting_room?.name || 'N/A');
+                    document.getElementById('meeting-date').querySelector('p').textContent =
+                        `${data.meeting_date} (${data.meeting_date_ad})` || 'N/A';
+                    document.getElementById('start-time').querySelector('p').textContent = data.start_time || 'N/A';
+                    document.getElementById('end-time').querySelector('p').textContent = data.end_time || 'N/A';
+                    document.getElementById('meeting-room').querySelector('p').textContent = data.meeting_room?.name ||
+                        'N/A';
+                    document.getElementById('meeting-type').querySelector('p').textContent = data.meeting_type || 'N/A';
+                    document.getElementById('is-external').querySelector('p').textContent = data.is_external || 'N/A';
+                    document.getElementById('is-virtual-meeting').querySelector('p').textContent = data
+                        .is_virtual_meeting || 'N/A';
+                    document.getElementById('virtual-meeting-link').querySelector('p').textContent = data
+                        .virtual_meeting_link || 'N/A';
 
-                // Handle virtual meeting link
-                const virtualMeetingLinkP = document.getElementById('virtual-meeting-link').querySelector('p');
-                const isValidUrl = url => /^https?:\/\//.test(url); // Simple URL validation
-                if (data.virtual_meeting_link && isValidUrl(data.virtual_meeting_link)) {
-                    virtualMeetingLinkP.innerHTML = `<a href="${data.virtual_meeting_link}" target="_blank" class="text-primary"><i class="bx bx-link me-2 detail-icon"></i>${data.virtual_meeting_link}</a>`;
-                } else {
-                    virtualMeetingLinkP.innerHTML = `<i class="bx bx-link me-2 detail-icon"></i>{{ __('N/A') }}`;
-                }
+                    // Handle virtual meeting link
+                    const virtualMeetingLinkP = document.getElementById('virtual-meeting-link').querySelector('p');
+                    const isValidUrl = url => /^https?:\/\//.test(url); // Simple URL validation
+                    if (data.virtual_meeting_link && isValidUrl(data.virtual_meeting_link)) {
+                        virtualMeetingLinkP.innerHTML =
+                            `<a href="${data.virtual_meeting_link}" target="_blank" class="text-primary"><i class="bx bx-link me-2 detail-icon"></i>${data.virtual_meeting_link}</a>`;
+                    } else {
+                        virtualMeetingLinkP.innerHTML =
+                            `<i class="bx bx-link me-2 detail-icon"></i>{{ __('N/A') }}`;
+                    }
 
-                // Populate Documents
-                const documentsGrid = document.getElementById('documents-grid');
-                const emptyDocuments = document.getElementById('empty-documents');
-                const viewAllDocuments = document.getElementById('view-all-documents');
-                const documentCount = document.getElementById('document-count');
-                documentsGrid.innerHTML = '';
+                    // Populate Documents
+                    const documentsGrid = document.getElementById('documents-grid');
+                    const emptyDocuments = document.getElementById('empty-documents');
+                    const viewAllDocuments = document.getElementById('view-all-documents');
+                    const documentCount = document.getElementById('document-count');
+                    documentsGrid.innerHTML = '';
 
-                if (data.media && data.media.length > 0) {
-                    emptyDocuments.style.display = 'none';
-                    data.media.slice(0, 6).forEach(media => {
-                        let iconClass, iconBg;
-                        if (media.mime_type === 'application/pdf') {
-                            iconClass = 'bxs-file-pdf';
-                            iconBg = 'pdf-icon';
-                        } else if (['text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(media.mime_type)) {
-                            iconClass = 'bxs-file-doc';
-                            iconBg = 'doc-icon';
-                        } else if (media.mime_type.startsWith('image/')) {
-                            iconClass = '';
-                            iconBg = 'img-icon';
-                        } else {
-                            iconClass = 'bxs-file';
-                            iconBg = 'generic-icon';
-                        }
+                    if (data.media && data.media.length > 0) {
+                        emptyDocuments.style.display = 'none';
+                        data.media.slice(0, 6).forEach(media => {
+                            let iconClass, iconBg;
+                            if (media.mime_type === 'application/pdf') {
+                                iconClass = 'bxs-file-pdf';
+                                iconBg = 'pdf-icon';
+                            } else if (['text/plain', 'application/msword',
+                                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                                ].includes(media.mime_type)) {
+                                iconClass = 'bxs-file-doc';
+                                iconBg = 'doc-icon';
+                            } else if (media.mime_type.startsWith('image/')) {
+                                iconClass = '';
+                                iconBg = 'img-icon';
+                            } else {
+                                iconClass = 'bxs-file';
+                                iconBg = 'generic-icon';
+                            }
 
-                        const documentHtml = `
+                            const documentHtml = `
                             <div class="document-item">
                                 <div class="document-preview">
                                     <div class="file-icon ${iconBg}">
@@ -413,22 +447,23 @@
                                 </div>
                             </div>
                         `;
-                        documentsGrid.insertAdjacentHTML('beforeend', documentHtml);
-                    });
+                            documentsGrid.insertAdjacentHTML('beforeend', documentHtml);
+                        });
 
-                    if (data.media.length > 6) {
-                        viewAllDocuments.style.display = 'block';
-                        documentCount.textContent = data.media.length;
+                        if (data.media.length > 6) {
+                            viewAllDocuments.style.display = 'block';
+                            documentCount.textContent = data.media.length;
+                        } else {
+                            viewAllDocuments.style.display = 'none';
+                        }
                     } else {
+                        emptyDocuments.style.display = 'block';
                         viewAllDocuments.style.display = 'none';
                     }
-                } else {
-                    emptyDocuments.style.display = 'block';
-                    viewAllDocuments.style.display = 'none';
-                }
-            })
-            .catch(error => console.error('Error fetching meeting details:', error));
+                })
+                .catch(error => console.error('Error fetching meeting details:', error));
         }
+
         function getStatusBadgeColor(status) {
             switch (status) {
                 case 'Scheduled':
@@ -446,310 +481,302 @@
             }
         }
 
-        const NepaliDateConverter = {
-            nepaliMonths: @json(\App\Helpers\NepaliDateConverter::$nepaliMonths),
-            toNepaliDigits: function(number) {
-                const digits = @json(\App\Helpers\NepaliDateConverter::$nepaliDigits);
-                return String(number).split('').map(d => digits[d] || d).join('');
-            }
-        };
+
     </script>
 @endpush
 
-    <style>
-        /* Enhanced Nepali Calendar Styling */
-        .calendar {
-            width: 100%;
-            border: none;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            background: #fff;
-        }
+<style>
+    .calendar {
+        width: 100%;
+        border: none;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        background: #fff;
+    }
 
+    .calendar-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem;
+    }
+
+    .calendar-header .weekday {
+        padding: 0.5rem;
+        text-align: center;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .nepali-weekday {
+        font-size: 1rem;
+        margin-bottom: 2px;
+    }
+
+    .english-weekday {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+
+    .weekday.sunday,
+    .weekday.saturday {
+        color: #dc3545;
+    }
+
+    .calendar-day {
+        border: 1px solid #e9ecef;
+        padding: 0.5rem;
+        position: relative;
+        min-height: 70px;
+        transition: all 0.2s ease;
+        background-color: #fff;
+        cursor: pointer;
+    }
+
+    .calendar-day:hover {
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .calendar-day.today {
+        background-color: rgba(255, 99, 71, 0.2);
+        border: none;
+        border-radius: 4px;
+    }
+
+    .calendar-day.selected {
+        background-color: rgba(13, 110, 253, 0.2);
+        border: 2px solid #0d6efd;
+        border-radius: 4px;
+    }
+
+    .calendar-day.today .nepali-date {
+        color: #dc3545;
+    }
+
+    .calendar-day.today::after {
+        content: 'आज';
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        background: #dc3545;
+        color: #fff;
+        padding: 1px 5px;
+        border-radius: 8px;
+        font-size: 0.65rem;
+        font-weight: 600;
+    }
+
+    .calendar-day.has-meetings::before {
+        content: '';
+        position: absolute;
+        bottom: 3px;
+        left: 3px;
+        width: 8px;
+        height: 8px;
+        background-color: #198754;
+        border-radius: 50%;
+    }
+
+    .calendar-day.sunday,
+    .calendar-day.saturday {
+        background-color: rgba(220, 53, 69, 0.03);
+    }
+
+    .calendar-day.other-month {
+        background-color: #f8f9fa;
+        color: #adb5bd;
+    }
+
+    .calendar-day .nepali-date {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 3px;
+    }
+
+    .calendar-day .english-date {
+        font-size: 0.7rem;
+        color: #6c757d;
+        margin-bottom: 3px;
+    }
+
+    .calendar-day.selected {
+        transition: background-color 0.3s ease, border 0.3s ease, color 0.3s ease;
+    }
+
+    .calendar-day .events {
+        margin-top: 3px;
+    }
+
+    .calendar-day .event {
+        background-color: #68ce9e;
+        color: white;
+        border-radius: 3px;
+        padding: 1px 4px;
+        margin-bottom: 2px;
+        font-size: 0.65rem;
+    }
+
+    .calendar-day .ad-date {
+        position: absolute;
+        bottom: 3px;
+        right: 3px;
+        font-size: 0.65rem;
+        color: #6c757d;
+        padding: 1px 4px;
+        border-radius: 2px;
+    }
+
+    .calendar-day.today .ad-date {
+        color: #dc3545;
+        font-weight: 600;
+    }
+
+    .calendar-day[data-nepali-date] {
+        border: 1px solid green;
+        /* Temporary for debugging */
+    }
+
+    /* Meeting List Styles */
+    .meeting-list-item {
+        border-left: 4px solid #0d6efd;
+        background-color: #f8f9fa;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .meeting-list-item:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .meeting-list-item.completed {
+        border-left-color: #198754;
+    }
+
+    .meeting-list-item.cancelled {
+        border-left-color: #dc3545;
+    }
+
+    .meeting-list-item.pending {
+        border-left-color: #fd7e14;
+    }
+
+    .meeting-time {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .meeting-location {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .no-meetings {
+        padding: 30px;
+        text-align: center;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    /* Dropdown Styling */
+    .dropdown-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .form-select {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+        min-width: 80px;
+    }
+
+    .form-label {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    /* Card Enhancements */
+    .card {
+        border: none;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 991.98px) {
         .calendar-header {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-bottom: 1px solid #dee2e6;
-            padding: 1rem;
+            padding: 0.75rem;
         }
 
-        .calendar-header .weekday {
-            padding: 0.5rem;
-            text-align: center;
-            font-weight: 700;
-            color: #2c3e50;
+        .dropdown-container {
+            margin-bottom: 0.5rem;
         }
 
-        .nepali-weekday {
-            font-size: 1rem;
-            margin-bottom: 2px;
+        #monthYearRange {
+            font-size: 0.9rem;
         }
+    }
 
-        .english-weekday {
-            font-size: 0.75rem;
-            color: #6c757d;
-        }
-
-        .weekday.sunday,
-        .weekday.saturday {
-            color: #dc3545;
-        }
-
+    @media (max-width: 767.98px) {
         .calendar-day {
-            border: 1px solid #e9ecef;
-            padding: 0.5rem;
-            position: relative;
-            min-height: 70px;
-            transition: all 0.2s ease;
-            background-color: #fff;
-            cursor: pointer;
-        }
-
-        .calendar-day:hover {
-            background-color: #f8f9fa;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-
-        .calendar-day.today {
-            background-color: rgba(255, 99, 71, 0.2);
-            border: none;
-            border-radius: 4px;
-        }
-
-        .calendar-day.selected {
-            background-color: rgba(13, 110, 253, 0.2);
-            border: 2px solid #0d6efd;
-            border-radius: 4px;
-        }
-
-        .calendar-day.today .nepali-date {
-            color: #dc3545;
-        }
-
-        .calendar-day.today::after {
-            content: 'आज';
-            position: absolute;
-            top: 3px;
-            right: 3px;
-            background: #dc3545;
-            color: #fff;
-            padding: 1px 5px;
-            border-radius: 8px;
-            font-size: 0.65rem;
-            font-weight: 600;
-        }
-
-        .calendar-day.has-meetings::before {
-            content: '';
-            position: absolute;
-            bottom: 3px;
-            left: 3px;
-            width: 8px;
-            height: 8px;
-            background-color: #198754;
-            border-radius: 50%;
-        }
-
-        .calendar-day.sunday,
-        .calendar-day.saturday {
-            background-color: rgba(220, 53, 69, 0.03);
-        }
-
-        .calendar-day.other-month {
-            background-color: #f8f9fa;
-            color: #adb5bd;
+            min-height: 60px;
+            padding: 0.3rem;
         }
 
         .calendar-day .nepali-date {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 3px;
+            font-size: 1rem;
         }
 
-        .calendar-day .english-date {
-            font-size: 0.7rem;
-            color: #6c757d;
-            margin-bottom: 3px;
-        }
-
-        .calendar-day.selected {
-            transition: background-color 0.3s ease, border 0.3s ease, color 0.3s ease;
-        }
-
-        .calendar-day .events {
-            margin-top: 3px;
-        }
-
-        .calendar-day .event {
-            background-color: #68ce9e;
-            color: white;
-            border-radius: 3px;
-            padding: 1px 4px;
-            margin-bottom: 2px;
-            font-size: 0.65rem;
-        }
-
+        .calendar-day .english-date,
+        .calendar-day .event,
         .calendar-day .ad-date {
-            position: absolute;
-            bottom: 3px;
-            right: 3px;
-            font-size: 0.65rem;
-            color: #6c757d;
-            padding: 1px 4px;
-            border-radius: 2px;
-        }
-
-        .calendar-day.today .ad-date {
-            color: #dc3545;
-            font-weight: 600;
-        }
-
-        .calendar-day[data-nepali-date] {
-            border: 1px solid green;
-            /* Temporary for debugging */
-        }
-
-        /* Meeting List Styles */
-        .meeting-list-item {
-            border-left: 4px solid #0d6efd;
-            background-color: #f8f9fa;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .meeting-list-item:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .meeting-list-item.completed {
-            border-left-color: #198754;
-        }
-
-        .meeting-list-item.cancelled {
-            border-left-color: #dc3545;
-        }
-
-        .meeting-list-item.pending {
-            border-left-color: #fd7e14;
-        }
-
-        .meeting-time {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-
-        .meeting-location {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-
-        .no-meetings {
-            padding: 30px;
-            text-align: center;
-            color: #6c757d;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        /* Dropdown Styling */
-        .dropdown-container {
-            display: flex;
-            align-items: center;
+            font-size: 0.6rem;
         }
 
         .form-select {
-            padding: 0.5rem;
-            font-size: 0.9rem;
-            min-width: 80px;
+            font-size: 0.85rem;
+        }
+
+        #monthYearRange {
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .container-fluid {
+            margin: 1rem !important;
+        }
+
+        .calendar-day {
+            min-height: 50px;
+            padding: 0.2rem;
+        }
+
+        .calendar-header .weekday {
+            padding: 0.3rem;
+        }
+
+        .nepali-weekday {
+            font-size: 0.85rem;
+        }
+
+        .english-weekday {
+            font-size: 0.65rem;
         }
 
         .form-label {
-            margin-bottom: 0;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
 
-        /* Card Enhancements */
-        .card {
-            border: none;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
+        #monthYearRange {
+            font-size: 0.75rem;
         }
-
-        .card:hover {
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 991.98px) {
-            .calendar-header {
-                padding: 0.75rem;
-            }
-
-            .dropdown-container {
-                margin-bottom: 0.5rem;
-            }
-
-            #monthYearRange {
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 767.98px) {
-            .calendar-day {
-                min-height: 60px;
-                padding: 0.3rem;
-            }
-
-            .calendar-day .nepali-date {
-                font-size: 1rem;
-            }
-
-            .calendar-day .english-date,
-            .calendar-day .event,
-            .calendar-day .ad-date {
-                font-size: 0.6rem;
-            }
-
-            .form-select {
-                font-size: 0.85rem;
-            }
-
-            #monthYearRange {
-                font-size: 0.85rem;
-            }
-        }
-
-        @media (max-width: 575.98px) {
-            .container-fluid {
-                margin: 1rem !important;
-            }
-
-            .calendar-day {
-                min-height: 50px;
-                padding: 0.2rem;
-            }
-
-            .calendar-header .weekday {
-                padding: 0.3rem;
-            }
-
-            .nepali-weekday {
-                font-size: 0.85rem;
-            }
-
-            .english-weekday {
-                font-size: 0.65rem;
-            }
-
-            .form-label {
-                font-size: 0.8rem;
-            }
-
-            #monthYearRange {
-                font-size: 0.75rem;
-            }
-        }
-    </style>
-
+    }
+</style>

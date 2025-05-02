@@ -164,7 +164,7 @@ class MeetingNotificationListener
     
         // Safely parse meeting date and start time with fallback
         try {
-            $meetingDate = Carbon::parse($meeting->meeting_date)->format('M d, Y');
+            $meetingDate = Carbon::parse($meeting->meeting_date_ad)->format('M d, Y');
             $startTime = Carbon::parse($meeting->start_time)->format('h:i A');
             $formattedDateTime = "{$meetingDate} at {$startTime}";
         } catch (\Exception $e) {

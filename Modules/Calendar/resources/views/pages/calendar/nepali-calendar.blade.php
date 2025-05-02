@@ -78,74 +78,81 @@
 @endsection
 @push('scripts')
     <script type="module">
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('year').addEventListener('change', function() {
-                const selectedYear = this.value;
-                const currentMonth = document.getElementById('month').value;
-                fetchMonths(selectedYear, currentMonth).then(() => updateCalendar());
+        const NepaliDateConverter = {
+            nepaliMonths: @json(\App\Helpers\NepaliDateConverter::$nepaliMonths),
+            toNepaliDigits: function(number) {
+                const digits = @json(\App\Helpers\NepaliDateConverter::$nepaliDigits);
+                return String(number).split('').map(d => digits[d] || d).join('');
+            }
+        };
+
+        document.getElementById('year').addEventListener('change', function() {
+            const selectedYear = this.value;
+            const currentMonth = document.getElementById('month').value;
+            fetchMonths(selectedYear, currentMonth).then(() => updateCalendar());
+        });
+
+        document.getElementById('month').addEventListener('change', function() {
+            const year = document.getElementById('year').value;
+            const selectedMonth = this.value;
+            fetchDays(year, selectedMonth).then(() => updateCalendar());
+        });
+
+        document.getElementById('day').addEventListener('change', function() {
+            updateCalendar();
+            const year = document.getElementById('year').value;
+            const month = document.getElementById('month').value;
+            const day = this.value;
+            loadMeetings(year, month, day);
+        });
+
+        const todayCells = document.querySelectorAll('.calendar-day.today');
+        if (todayCells.length > 0) {
+            todayCells[0].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
             });
 
-            document.getElementById('month').addEventListener('change', function() {
-                const year = document.getElementById('year').value;
-                const selectedMonth = this.value;
-                fetchDays(year, selectedMonth).then(() => updateCalendar());
-            });
+            // Load today's meetings by default
+            const year = document.getElementById('year').value;
+            const month = document.getElementById('month').value;
+            const day = document.getElementById('day').value;
+            loadMeetings(year, month, day);
+        }
 
-            document.getElementById('day').addEventListener('change', function() {
-                updateCalendar();
-                const year = document.getElementById('year').value;
-                const month = document.getElementById('month').value;
-                const day = this.value;
-                loadMeetings(year, month, day);
-            });
-
-            const todayCells = document.querySelectorAll('.calendar-day.today');
-            if (todayCells.length > 0) {
-                todayCells[0].scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
+        // Set up event delegation for calendar day clicks
+        document.addEventListener('click', function(e) {
+            const calendarDay = e.target.closest('.calendar-day:not(.other-month)');
+            // alert('test');
+            if (calendarDay) {
+                // Remove selected class from all cells
+                document.querySelectorAll('.calendar-day.selected').forEach(el => {
+                    el.classList.remove('selected');
                 });
 
-                // Load today's meetings by default
-                const year = document.getElementById('year').value;
-                const month = document.getElementById('month').value;
-                const day = document.getElementById('day').value;
-                loadMeetings(year, month, day);
-            }
+                // Add selected class to clicked cell
+                calendarDay.classList.add('selected');
 
-            // Set up event delegation for calendar day clicks
-            document.addEventListener('click', function(e) {
-                const calendarDay = e.target.closest('.calendar-day:not(.other-month)');
-                // alert('test');
-                if (calendarDay) {
-                    // Remove selected class from all cells
-                    document.querySelectorAll('.calendar-day.selected').forEach(el => {
-                        el.classList.remove('selected');
-                    });
+                // Get the Nepali date from the clicked cell
+                const nepaliDate = calendarDay.getAttribute('data-nepali-date');
+                console.log("nepaliDate", nepaliDate);
+                if (nepaliDate) {
+                    const [year, month, day] = nepaliDate.split('-');
 
-                    // Add selected class to clicked cell
-                    calendarDay.classList.add('selected');
+                    // Update day dropdown selection
+                    document.getElementById('day').value = parseInt(day);
 
-                    // Get the Nepali date from the clicked cell
-                    const nepaliDate = calendarDay.getAttribute('data-nepali-date');
-                    console.log("nepaliDate", nepaliDate);
-                    if (nepaliDate) {
-                        const [year, month, day] = nepaliDate.split('-');
+                    // Load meetings for the selected date
+                    loadMeetings(year, month, day);
 
-                        // Update day dropdown selection
-                        document.getElementById('day').value = parseInt(day);
-
-                        // Load meetings for the selected date
-                        loadMeetings(year, month, day);
-
-                        // Format and display the Nepali date
-                        const formattedDate =
-                            `${NepaliDateConverter.nepaliMonths[month]} ${NepaliDateConverter.toNepaliDigits(day)}, ${NepaliDateConverter.toNepaliDigits(year)}`;
-                        document.getElementById('selectedDate').textContent = formattedDate;
-                    }
+                    // Format and display the Nepali date
+                    const formattedDate =
+                        `${NepaliDateConverter.nepaliMonths[month]} ${NepaliDateConverter.toNepaliDigits(day)}, ${NepaliDateConverter.toNepaliDigits(year)}`;
+                    document.getElementById('selectedDate').textContent = formattedDate;
                 }
-            });
+            }
         });
+     
 
         function fetchMonths(year, preserveMonth = null) {
             return fetch(`/calendar/get-months/${year}`)
@@ -373,16 +380,10 @@
             }
         }
 
-        const NepaliDateConverter = {
-            nepaliMonths: @json(\App\Helpers\NepaliDateConverter::$nepaliMonths),
-            toNepaliDigits: function(number) {
-                const digits = @json(\App\Helpers\NepaliDateConverter::$nepaliDigits);
-                return String(number).split('').map(d => digits[d] || d).join('');
-            }
-        };
+
     </script>
 @endpush
-@push('styles')
+
     <style>
         /* Enhanced Nepali Calendar Styling */
         .calendar {
@@ -679,4 +680,4 @@
             }
         }
     </style>
-@endpush
+
