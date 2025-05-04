@@ -70,6 +70,7 @@
             </div>
         </div>
 
+
         <!-- Section 2: Meeting Attendees -->
         <div class="card mb-3">
             <div class="card-header collapsed" id="headingTwo">
@@ -120,7 +121,6 @@
                                     <div class="card-body">
                                         <div class="table-responsive">
                                             <!-- External Contacts Table -->
-                                            <!-- External Contacts Table -->
                                             <table class="table table-bordered external-contacts-table">
                                                 <thead class="thead-light">
                                                     <tr>
@@ -159,7 +159,7 @@
                                                                     <input type="number"
                                                                         name="external_contacts[{{ $index }}][mobile]"
                                                                         class="form-control"
-                                                                        value="{{ isset($contact['mobile']) ? ltrim($contact['mobile'], '+977') : '' }}"
+                                                                        value="{{ isset($contact['mobile']) ? preg_replace('/^\+977/', '', $contact['mobile']) : '' }}"
                                                                         placeholder="{{ __('Enter Mobile') }}"
                                                                         minlength="10" maxlength="10" pattern="\d{10}"
                                                                         oninput="this.value = this.value.slice(0, 10)" />
@@ -401,20 +401,23 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .is-invalid ~ .invalid-feedback {
-            display: block;
-        }
-        .input-group-text {
-            background-color: #f8f9fa;
-            border-right: none;
-        }
-        .input-group .form-control {
-            border-left: none;
-        }
-        .invalid-feedback {
-            font-size: 0.875rem;
-            color: #dc3545;
-        }
+    .is-invalid~.invalid-feedback {
+        display: block;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+    }
+
+    .input-group .form-control {
+        border-left: none;
+    }
+
+    .invalid-feedback {
+        font-size: 0.875rem;
+        color: #dc3545;
+    }
 </style>
 
 @push('scripts')

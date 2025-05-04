@@ -599,7 +599,7 @@ return [
     'meeting_room'=>'बैठक कोठा',
     'is_external'=>'Is External',
     'meeting_rooms'=>'बैठक कोठाहरू',
-    'calendar'=>'कालेन्डर',
+    'calendar'=>'क्यालेन्डर',
     'active' => 'सक्रिय छ',
     'inactive' => 'सक्रिय छैन',
      'is_virtual_meeting' => 'भर्चुअल बैठक हो',

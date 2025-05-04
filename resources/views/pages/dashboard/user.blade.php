@@ -3,7 +3,7 @@
 
 @php
     $locale = Session::get('locale');
-    App::setLocale('np');
+    App::setLocale($locale);
 @endphp
 
 @section('navbar')
@@ -157,7 +157,7 @@
 @endsection
 
 <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-@push('styles')
+@section('page-style')
     <style>
         .modal-content {
             border-radius: 10px;
@@ -497,7 +497,7 @@
         }
         
     </style>
-@endpush
+@endsection
 
 @push('scripts')
     <script type="module">

@@ -24,7 +24,9 @@
                             <select class="form-select shadow-sm" id="month" name="month">
                                 @foreach ($months as $index => $month)
                                     <option value="{{ $month }}" {{ $month == $currentBsMonth ? 'selected' : '' }}>
-                                        {{ NepaliDateConverter::$nepaliMonths[$month] }}</option>
+                                        {{ NepaliDateConverter::$nepaliMonths[$month] }}
+                                        ({{ NepaliDateConverter::$englishNepaliMonths[$month] }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -38,11 +40,12 @@
                         </div>
                     </div>
 
-                    <!-- Right: Nepali Month/Year | AD Month/Year -->
+                    <!-- Right: Nepali Month/Year | English Nepali Month | AD Month/Year -->
                     <div class="d-flex align-items-center">
                         <span id="monthYearRange" class="fw-semibold" style="color: #dc3545;">
                             {{ NepaliDateConverter::toNepaliDigits($currentBsYear) }}
-                            {{ NepaliDateConverter::$nepaliMonths[$currentBsMonth] }} |
+                            {{ NepaliDateConverter::$nepaliMonths[$currentBsMonth] }}
+                            ({{ NepaliDateConverter::$englishNepaliMonths[$currentBsMonth] }}) |
                             {{ !empty($calendarData['start_date'])? Carbon\Carbon::parse($calendarData['start_date'])->format('M') .'/' .Carbon\Carbon::parse($calendarData['start_date'])->addDays($calendarData['days'] - 1)->format('M Y'): 'Mar/Apr 2025' }}
                         </span>
                     </div>
@@ -73,8 +76,6 @@
             </div>
         </div>
     </div>
-
-    {{-- @dd($meeting); --}}
 @endsection
 @push('scripts')
     <script type="module">
@@ -152,7 +153,7 @@
                 }
             }
         });
-     
+
 
         function fetchMonths(year, preserveMonth = null) {
             return fetch(`/calendar/get-months/${year}`)
@@ -277,47 +278,18 @@
                 .then(data => {
                     if (data.meetings && data.meetings.length > 0) {
                         let html = `<div class="list-group">`;
-
-                        // data.meetings.forEach(meeting => {
-                        //     const startTime = new Date(meeting.start_time).toLocaleTimeString([], {
-                        //         hour: '2-digit',
-                        //         minute: '2-digit'
-                        //     });
-                        //     const endTime = new Date(meeting.end_time).toLocaleTimeString([], {
-                        //         hour: '2-digit',
-                        //         minute: '2-digit'
-                        //     });
-
-                        //     html += `
-                        //         <a href="/meetings/meetings/${meeting.id}" class="list-group-item list-group-item-action meeting-list-item ${meeting.status}">
-                        //             <div class="d-flex w-100 justify-content-between">
-                        //                 <h6 class="mb-1">${meeting.title}</h6>
-                        //                 <span class="badge bg-${getStatusBadgeColor(meeting.status)}">${meeting.status}</span>
-                        //             </div>
-                        //             <div class="mb-1 meeting-time">
-                        //                 <i class="bx bx-time-five me-1"></i> ${startTime} - ${endTime}
-                        //             </div>
-                        //             <div class="meeting-location">
-                        //                 ${meeting.is_virtual ? 
-                        //                     `<i class="bx bx-video me-1"></i> Virtual Meeting` : 
-                        //                     `<i class="bx bx-map me-1"></i> ${meeting.meeting_location || meeting.meeting_room?.name || 'Location not specified'}`
-                        //                 }
-                        //             </div>
-                        //         </a>
-                        //     `;
-                        // });
                         data.meetings.forEach(meeting => {
                             const startTime = new Date(meeting.start_time).toLocaleTimeString([], {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             });
                             // Only format endTime if meeting.end_time exists
-                            const endTime = meeting.end_time 
-                                ? new Date(meeting.end_time).toLocaleTimeString([], {
+                            const endTime = meeting.end_time ?
+                                new Date(meeting.end_time).toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit'
-                                }) 
-                                : '';
+                                }) :
+                                '';
 
                             html += `
                                 <a href="/meetings/meetings/${meeting.id}" class="list-group-item list-group-item-action meeting-list-item ${meeting.status}">
@@ -346,7 +318,7 @@
                                 <i class="bx bx-calendar-x fs-1 mb-2"></i>
                                 <h6>No meetings scheduled for this date</h6>
                                 <p class="mb-0">There are no meetings scheduled for the selected date.</p>
-                                <a href="/meetings/create" class="btn btn-primary btn-sm mt-3">
+                                <a href="/meetings/meetings/create" class="btn btn-primary btn-sm mt-3">
                                     <i class="bx bx-plus me-1"></i> Schedule New Meeting
                                 </a>
                             </div>
@@ -379,11 +351,9 @@
                     return 'secondary';
             }
         }
-
-
     </script>
 @endpush
-
+@section('page-style')
     <style>
         /* Enhanced Nepali Calendar Styling */
         .calendar {
@@ -680,4 +650,4 @@
             }
         }
     </style>
-
+@endsection

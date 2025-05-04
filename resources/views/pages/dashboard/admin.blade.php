@@ -120,7 +120,7 @@
     </div>
 @endsection
 
-@push('styles')
+@section('page-style')
     <style>
         .chart-card {
             height: 400px; /* Fixed height for both cards */
@@ -155,7 +155,7 @@
         .card-this-month { background: linear-gradient(135deg, #1e90ff, #00b7eb); }
         .card-total { background: linear-gradient(135deg, #f1c40f, #f39c12); }
     </style>
-@endpush
+@endsection
 
 @push('scripts')
     <script type="module">

@@ -20,11 +20,43 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Login Button (Right Aligned) -->
+
+            <!-- Language Switcher -->
+            <div class="nav-item dropdown dropdown-language me-3">
+                <a class="nav-link d-flex align-items-center language-toggle" href="#" id="navbarDropdownLanguage" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ __('Select Language') }}">
+                    <img src="https://flagcdn.com/{{ auth()->user()->locale === 'en' ? 'us' : 'np' }}.svg"
+                         class="flag-icon me-1" width="24" height="18"
+                         alt="{{ auth()->user()->locale === 'en' ? 'English' : 'Nepali' }} Flag">
+                    <span class="language-text fw-medium small">
+                        {{ auth()->user()->locale === 'en' ? 'English' : 'नेपाली' }}
+                    </span>
+                    <i class="bx bx-chevron-down ms-1"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdownLanguage">
+                    <!-- English Option -->
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center {{ auth()->user()->locale === 'en' ? 'active-language' : '' }}"
+                           href="{{ route('account.locale', ['locale' => 'en']) }}">
+                            <img src="https://flagcdn.com/us.svg" width="24" height="18" alt="English Flag" class="flag-icon me-2">
+                            <span class="small">English</span>
+                        </a>
+                    </li>
+                    <!-- Nepali Option -->
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center {{ auth()->user()->locale === 'np' ? 'active-language' : '' }}"
+                           href="{{ route('account.locale', ['locale' => 'np']) }}">
+                            <img src="https://flagcdn.com/np.svg" width="24" height="18" alt="Nepali Flag" class="flag-icon me-2">
+                            <span class="small">नेपाली</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Login/Logout Button -->
             <div class="flex-shrink-0">
                 @auth
-                    <a href="{{ route('logout') }}" class="btn btn-primary btn-sm rounded-pill px-4" 
+                    <a href="{{ route('logout') }}" class="btn btn-primary btn-sm rounded-pill px-4"
                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <i class="bx bx-log-out me-1"></i> {{ __('Logout') }}
                     </a>
@@ -41,7 +73,7 @@
         </div>
     </div>
 </header>
-@push('styles')
+@section('page-style')
     <style>
         /* Header Styles */
         .header {
@@ -61,25 +93,12 @@
 
         .header-text {
             padding-left: 0.5rem;
-            width: 100%; /* Ensure full width for alignment */
+            width: 100%;
         }
 
         .header-text div {
             line-height: 1.2;
             transition: color 0.3s ease;
-        }
-
-        /* Adjust the margins as needed */
-        .header-text div:nth-child(1) {
-            font-size: 0.9rem;
-        }
-
-        .header-text div:nth-child(2) {
-            /* No margin needed since we're using text-start */
-        }
-
-        .header-text div:nth-child(3) {
-            font-size: 1rem;
         }
 
         .header-text span {
@@ -88,18 +107,52 @@
             transition: color 0.3s ease;
         }
 
-        .header-text span:nth-child(1) {
-            margin-left: 0;
-            font-size: 0.9rem;
+        /* Nepali Text Styling */
+        .nepali_td {
+            font-family: 'Preeti', 'Mangal', sans-serif; /* Use Nepali fonts */
+            font-weight: 600;
         }
 
-        .header-text span:nth-child(2) {
-            margin-left: 0.5rem;
+        /* Language Switcher Styles */
+        .language-toggle {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
-        .header-text span:nth-child(3) {
-            margin-left: 1rem;
-            font-size: 1rem;
+        .language-toggle:hover {
+            background-color: #f8f9fa;
+        }
+
+        .flag-icon {
+            border-radius: 2px;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .language-text {
+            color: #333;
+            transition: color 0.2s ease;
+        }
+
+        .dropdown-menu {
+            min-width: 150px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .active-language {
+            background-color: #e6f3ff;
+            color: #0b5ed7;
+            font-weight: 600;
         }
 
         .btn-primary {
@@ -122,10 +175,6 @@
                 font-size: 0.85rem;
             }
 
-            .header-text span:nth-child(2) {
-                font-size: 1.2rem;
-            }
-
             .nea-logo {
                 max-width: 60px;
             }
@@ -134,9 +183,22 @@
                 padding: 0.25rem 1rem;
                 font-size: 0.85rem;
             }
+
+            .language-toggle {
+                padding: 0.4rem 0.6rem;
+            }
+
+            .flag-icon {
+                width: 20px;
+                height: 15px;
+            }
+
+            .language-text {
+                font-size: 0.85rem;
+            }
         }
     </style>
-@endpush
+@endsection
 @push('scripts')
     <script type="module">
         const header = document.querySelector('.header');

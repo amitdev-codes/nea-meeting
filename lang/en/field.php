@@ -719,6 +719,10 @@ return [
 'Sms-configurations'=>'SMS Configurations',
 'no_documents'=>'No Documents',
 
+'upcoming_meetings'=>'Upcoming Meetings',
+'calendar'=>'Calendar',
+'dashboard'=>'Dashboard',
+
 
 
 

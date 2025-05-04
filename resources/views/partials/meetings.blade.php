@@ -3,7 +3,7 @@
 
 @php
     $locale = Session::get('locale');
-    App::setLocale('np');
+    App::setLocale($locale);
 @endphp
 
 @section('navbar')

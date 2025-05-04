@@ -53,7 +53,7 @@
         <i class="bx bx-calendar-x fs-1 mb-2"></i>
         <h6>No meetings scheduled for this date</h6>
         <p class="mb-0">There are no meetings scheduled for the selected date.</p>
-        <a href="{{ route('meetings.create') }}" class="btn btn-primary btn-sm mt-3">
+        <a href="{{ route('admin.meetings.create') }}" class="btn btn-primary btn-sm mt-3">
             <i class="bx bx-plus me-1"></i> Schedule New Meeting
         </a>
     </div>

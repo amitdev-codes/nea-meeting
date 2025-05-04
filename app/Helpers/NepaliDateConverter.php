@@ -23,12 +23,28 @@ class NepaliDateConverter
         12 => 'चैत',  // Chaitra
     ];
 
+    // English month names for Nepali months
+    public static $englishNepaliMonths = [
+        1 => 'Baishakh',
+        2 => 'Jestha',
+        3 => 'Asar',
+        4 => 'Shrawan',
+        5 => 'Bhadra',
+        6 => 'Ashoj',
+        7 => 'Kartik',
+        8 => 'Mangsir',
+        9 => 'Poush',
+        10 => 'Magh',
+        11 => 'Falgun',
+        12 => 'Chaitra',
+    ];
+
     // Nepali weekday names
     public static $nepaliWeekdays = [
         'Sunday' => 'आइतबार',    // Aaitabar
         'Monday' => 'सोमबार',    // Sombar
         'Tuesday' => 'मंगलबार',  // Mangalbar
-        'Wednesday' => 'बुधबार', // Budhbar
+        'Wednesday' => 'बुधबार', // Bud agricultur
         'Thursday' => 'बिहीबार', // Bihibar
         'Friday' => 'शुक्रबार',  // Shukrabar
         'Saturday' => 'शनिबार',  // Shanibar
@@ -70,6 +86,7 @@ class NepaliDateConverter
                 self::toNepaliDigits(sprintf('%02d', $nepaliDate['day']))),
             'formatted_date' => "{$year} {$nepaliDate['month_name']} {$day} गते",
             'month_name' => $nepaliDate['month_name'],
+            'english_month_name' => $nepaliDate['english_month_name'], // Added English month name
             'weekday' => $nepaliDate['weekday'],
             'time' => $time,
             'full_date_time' => "{$year} {$nepaliDate['month_name']} {$day} गते, {$nepaliDate['weekday']}"
@@ -103,7 +120,7 @@ class NepaliDateConverter
             throw new \Exception('Date out of range (2070–2085 BS)');
         }
         
-        // Calculate day within month - NOTE THE ORDER OF ARGUMENTS HERE
+        // Calculate day within month
         $startDate = Carbon::parse($record->start_date)->startOfDay();
         $day = $startDate->diffInDays($gregorianDate->startOfDay()) + 1;
         
@@ -111,11 +128,11 @@ class NepaliDateConverter
             'year' => $record->bs_year,
             'month' => $record->month,
             'month_name' => self::$nepaliMonths[$record->month],
+            'english_month_name' => self::$englishNepaliMonths[$record->month], // Added English month name
             'day' => $day,
             'weekday' => self::$nepaliWeekdays[$gregorianDate->englishDayOfWeek],
         ];
     }
-    
     /**
      * Convert Nepali (BS) date to Gregorian (AD) date with month and weekday names
      */
@@ -125,8 +142,6 @@ class NepaliDateConverter
             ->where('bs_year', $bsYear)
             ->where('month', $bsMonth)
             ->first();
-
-            // dd($record);
 
         if (!$record || $bsDay <= 0 || $bsDay > $record->days) {
             throw new \Exception('Invalid Nepali date');
@@ -141,6 +156,7 @@ class NepaliDateConverter
             'year' => $record->bs_year,
             'month' => $record->month,
             'month_name' => self::$nepaliMonths[$record->month],
+            'english_month_name' => self::$englishNepaliMonths[$record->month], // Added English month name
             'day' => $bsDay,
             'weekday' => self::$nepaliWeekdays[$weekday],
         ];
@@ -157,27 +173,34 @@ class NepaliDateConverter
         
         return "{$nepaliYear} {$monthName} {$nepaliDay} गते";
     }
+
+    /**
+     * Convert Nepali date to English Gregorian date
+     */
     public static function convertToEnglishDate($nepaliDate)
     {
-        // Ensure the date is in 'YYYY-MM-DD' format
         [$bsYear, $bsMonth, $bsDay] = explode('-', $nepaliDate);
-         $data= NepaliDateConverter::toGregorianDate((int)$bsYear, (int)$bsMonth, (int)$bsDay);
-         return $data['gregorian_date'];
+        $data = self::toGregorianDate((int)$bsYear, (int)$bsMonth, (int)$bsDay);
+        return $data['gregorian_date'];
     }
+
+    /**
+     * Convert Gregorian year to Nepali year
+     */
     public static function gregorianToNepaliYear(int $gregorianYear): int
     {
-        // Use the first day of the Gregorian year to determine the Nepali year
         $gregorianDate = Carbon::create($gregorianYear, 1, 1)->startOfDay();
         $nepaliDate = self::toNepaliDate($gregorianDate);
-
         return $nepaliDate['year'];
     }
+
+    /**
+     * Convert Gregorian month to Nepali month (English name)
+     */
     public static function gregorianToNepaliMonth(int $gregorianYear, int $gregorianMonth): string
     {
-        // Use the first day of the Gregorian month to determine the Nepali month
         $gregorianDate = Carbon::create($gregorianYear, $gregorianMonth, 1)->startOfDay();
         $nepaliDate = self::toNepaliDate($gregorianDate);
-
-        return $nepaliDate['month_name'];
+        return $nepaliDate['english_month_name']; // Return English month name
     }
 }

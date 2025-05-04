@@ -172,14 +172,19 @@ class MeetingNotificationListener
             $nepaliDate = NepaliDateConverter::toNepaliDate($meetingDate); // Adjust based on your class/namespace
 
             // Convert day and year to Nepali digits
-            $nepaliDay = NepaliDateConverter::toNepaliDigits($nepaliDate['day']);
-            $nepaliYear = NepaliDateConverter::toNepaliDigits($nepaliDate['year']);
-            $nepaliFormattedDate = "{$nepaliDate['month_name']} {$nepaliDay} {$nepaliYear}";
+            // $nepaliDay = NepaliDateConverter::toNepaliDigits($nepaliDate['day']);
+            // $nepaliYear = NepaliDateConverter::toNepaliDigits($nepaliDate['year']);
+            $nepaliDay= $nepaliDate['day'];
+            $nepaliYear= $nepaliDate['year'];
+
+
+            $nepaliFormattedDate = "{$nepaliDate['english_month_name']} {$nepaliDay} {$nepaliYear}";
 
             // Format time to 12-hour format and convert to Nepali digits
             $hour = $startTime->format('g'); // Hour without leading zero (e.g., "2")
             $nepaliHour = NepaliDateConverter::toNepaliDigits($hour);
-            $period = $startTime->format('A') === 'AM' ? 'बिहान' : 'बेलुका'; // AM = बिहान, PM = बेलुका
+            // $period = $startTime->format('A') === 'AM' ? 'बिहान' : 'बेलुका'; // AM = बिहान, PM = बेलुका
+            $period = $startTime->format('A') === 'AM' ? 'AM' : 'PM'; // AM = बिहान, PM = बेलुका
             $formattedTime = "{$nepaliHour} बजे"; // e.g., "२ बजे"
 
             // Combine Nepali date and time

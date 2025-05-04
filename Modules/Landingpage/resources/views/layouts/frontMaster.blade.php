@@ -32,7 +32,6 @@
         }
 
     </style>
-
     @include('landingpage::layouts/sections/stylesFront')
 </head>
 

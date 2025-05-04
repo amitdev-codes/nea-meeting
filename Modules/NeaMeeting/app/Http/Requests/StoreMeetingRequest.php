@@ -110,12 +110,12 @@ class StoreMeetingRequest extends FormRequest
             'organizations' => 'nullable|array', // Add validation for organizations as array
             'organizations.*' => 'integer|exists:organizations,id', 
             // External contact validation
-            'external_contacts' => 'nullable|array|required_if:is_external,1',
-            'external_contacts.*.name' => 'nullable|string|max:255|required_if:is_external,1',
-            'external_contacts.*.email' => 'nullable|email|max:255|required_if:is_external,1',
+            'external_contacts' => 'nullable|array',
+            'external_contacts.*.name' => 'nullable|string|max:255',
+            'external_contacts.*.email' => 'nullable|email|max:255',
             'external_contacts.*.mobile' => 'nullable|regex:/^\+977\d{10}$/', // Validate +977 followed by 10 digits
             'external_contacts.*.phone' => 'nullable|regex:/^\+977\d{7,8}$/', // Validate +977 followed by 7–8 digits
-            'external_contacts.*.office_name' => 'nullable|string|max:255|required_if:is_external,1',
+            'external_contacts.*.office_name' => 'nullable|string|max:255',
         ];
     }
 
