@@ -483,298 +483,326 @@
     </script>
 @endpush
 
-<style>
-    .calendar {
-        width: 100%;
-        border: none;
-        border-radius: 0.5rem;
-        overflow: hidden;
-        background: #fff;
-    }
+    <style>
+        /* Enhanced Nepali Calendar Styling */
+        .calendar {
+            width: 100%;
+            border: none;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background: #fff;
+        }
 
-    .calendar-header {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-bottom: 1px solid #dee2e6;
-        padding: 1rem;
-    }
-
-    .calendar-header .weekday {
-        padding: 0.5rem;
-        text-align: center;
-        font-weight: 700;
-        color: #2c3e50;
-    }
-
-    .nepali-weekday {
-        font-size: 1rem;
-        margin-bottom: 2px;
-    }
-
-    .english-weekday {
-        font-size: 0.75rem;
-        color: #6c757d;
-    }
-
-    .weekday.sunday,
-    .weekday.saturday {
-        color: #dc3545;
-    }
-
-    .calendar-day {
-        border: 1px solid #e9ecef;
-        padding: 0.5rem;
-        position: relative;
-        min-height: 70px;
-        transition: all 0.2s ease;
-        background-color: #fff;
-        cursor: pointer;
-    }
-
-    .calendar-day:hover {
-        background-color: #f8f9fa;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    }
-
-    .calendar-day.today {
-        background-color: rgba(255, 99, 71, 0.2);
-        border: none;
-        border-radius: 4px;
-    }
-
-    .calendar-day.selected {
-        background-color: rgba(13, 110, 253, 0.2);
-        border: 2px solid #0d6efd;
-        border-radius: 4px;
-    }
-
-    .calendar-day.today .nepali-date {
-        color: #dc3545;
-    }
-
-    .calendar-day.today::after {
-        content: 'आज';
-        position: absolute;
-        top: 3px;
-        right: 3px;
-        background: #dc3545;
-        color: #fff;
-        padding: 1px 5px;
-        border-radius: 8px;
-        font-size: 0.65rem;
-        font-weight: 600;
-    }
-
-    .calendar-day.has-meetings::before {
-        content: '';
-        position: absolute;
-        bottom: 3px;
-        left: 3px;
-        width: 8px;
-        height: 8px;
-        background-color: #198754;
-        border-radius: 50%;
-    }
-
-    .calendar-day.sunday,
-    .calendar-day.saturday {
-        background-color: rgba(220, 53, 69, 0.03);
-    }
-
-    .calendar-day.other-month {
-        background-color: #f8f9fa;
-        color: #adb5bd;
-    }
-
-    .calendar-day .nepali-date {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #2c3e50;
-        margin-bottom: 3px;
-    }
-
-    .calendar-day .english-date {
-        font-size: 0.7rem;
-        color: #6c757d;
-        margin-bottom: 3px;
-    }
-
-    .calendar-day.selected {
-        transition: background-color 0.3s ease, border 0.3s ease, color 0.3s ease;
-    }
-
-    .calendar-day .events {
-        margin-top: 3px;
-    }
-
-    .calendar-day .event {
-        background-color: #68ce9e;
-        color: white;
-        border-radius: 3px;
-        padding: 1px 4px;
-        margin-bottom: 2px;
-        font-size: 0.65rem;
-    }
-
-    .calendar-day .ad-date {
-        position: absolute;
-        bottom: 3px;
-        right: 3px;
-        font-size: 0.65rem;
-        color: #6c757d;
-        padding: 1px 4px;
-        border-radius: 2px;
-    }
-
-    .calendar-day.today .ad-date {
-        color: #dc3545;
-        font-weight: 600;
-    }
-
-    .calendar-day[data-nepali-date] {
-        border: 1px solid green;
-        /* Temporary for debugging */
-    }
-
-    /* Meeting List Styles */
-    .meeting-list-item {
-        border-left: 4px solid #0d6efd;
-        background-color: #f8f9fa;
-        margin-bottom: 10px;
-        border-radius: 6px;
-        transition: all 0.2s ease;
-    }
-
-    .meeting-list-item:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
-    }
-
-    .meeting-list-item.completed {
-        border-left-color: #198754;
-    }
-
-    .meeting-list-item.cancelled {
-        border-left-color: #dc3545;
-    }
-
-    .meeting-list-item.pending {
-        border-left-color: #fd7e14;
-    }
-
-    .meeting-time {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-
-    .meeting-location {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-
-    .no-meetings {
-        padding: 30px;
-        text-align: center;
-        color: #6c757d;
-        background-color: #f8f9fa;
-        border-radius: 8px;
-    }
-
-    /* Dropdown Styling */
-    .dropdown-container {
-        display: flex;
-        align-items: center;
-    }
-
-    .form-select {
-        padding: 0.5rem;
-        font-size: 0.9rem;
-        min-width: 80px;
-    }
-
-    .form-label {
-        margin-bottom: 0;
-        font-size: 0.9rem;
-    }
-
-    /* Card Enhancements */
-    .card {
-        border: none;
-        border-radius: 0.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .card:hover {
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Responsive Design */
-    @media (max-width: 991.98px) {
         .calendar-header {
-            padding: 0.75rem;
-        }
-
-        .dropdown-container {
-            margin-bottom: 0.5rem;
-        }
-
-        #monthYearRange {
-            font-size: 0.9rem;
-        }
-    }
-
-    @media (max-width: 767.98px) {
-        .calendar-day {
-            min-height: 60px;
-            padding: 0.3rem;
-        }
-
-        .calendar-day .nepali-date {
-            font-size: 1rem;
-        }
-
-        .calendar-day .english-date,
-        .calendar-day .event,
-        .calendar-day .ad-date {
-            font-size: 0.6rem;
-        }
-
-        .form-select {
-            font-size: 0.85rem;
-        }
-
-        #monthYearRange {
-            font-size: 0.85rem;
-        }
-    }
-
-    @media (max-width: 575.98px) {
-        .container-fluid {
-            margin: 1rem !important;
-        }
-
-        .calendar-day {
-            min-height: 50px;
-            padding: 0.2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem;
         }
 
         .calendar-header .weekday {
-            padding: 0.3rem;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 700;
+            color: #2c3e50;
         }
 
         .nepali-weekday {
-            font-size: 0.85rem;
+            font-size: 1rem;
+            margin-bottom: 2px;
         }
 
         .english-weekday {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        .weekday.sunday,
+        .weekday.saturday {
+            color: #dc3545;
+        }
+
+        .calendar-day {
+            border: 1px solid #e9ecef;
+            padding: 0.5rem;
+            position: relative;
+            min-height: 70px;
+            transition: all 0.2s ease;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        .calendar-day:hover {
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .calendar-day.today {
+            background-color: rgba(255, 99, 71, 0.2);
+            border: none;
+            border-radius: 4px;
+        }
+
+        .calendar-day.selected {
+            background-color: rgba(13, 110, 253, 0.2);
+            border: 2px solid #0d6efd;
+            border-radius: 4px;
+        }
+
+        .calendar-day.today .nepali-date {
+            color: #dc3545;
+        }
+
+        .calendar-day.today::after {
+            content: 'आज';
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            background: #dc3545;
+            color: #fff;
+            padding: 1px 5px;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .calendar-day.has-meetings::before {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            left: 3px;
+            width: 8px;
+            height: 8px;
+            background-color: #198754;
+            border-radius: 50%;
+        }
+
+        .calendar-day.sunday,
+        .calendar-day.saturday {
+            background-color: rgba(220, 53, 69, 0.03);
+        }
+
+        .calendar-day.other-month {
+            background-color: #f8f9fa;
+            color: #adb5bd;
+        }
+
+        .calendar-day .nepali-date {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 3px;
+        }
+
+        .calendar-day .english-date {
+            font-size: 0.7rem;
+            color: #6c757d;
+            margin-bottom: 3px;
+        }
+
+        .calendar-day.selected {
+            transition: background-color 0.3s ease, border 0.3s ease, color 0.3s ease;
+        }
+
+        .calendar-day .events {
+            margin-top: 3px;
+        }
+
+        .calendar-day .event {
+            background-color: #68ce9e;
+            color: white;
+            border-radius: 3px;
+            padding: 1px 4px;
+            margin-bottom: 2px;
             font-size: 0.65rem;
         }
 
-        .form-label {
-            font-size: 0.8rem;
+        .calendar-day .ad-date {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            font-size: 0.65rem;
+            color: #6c757d;
+            padding: 1px 4px;
+            border-radius: 2px;
         }
 
-        #monthYearRange {
-            font-size: 0.75rem;
+        .calendar-day.today .ad-date {
+            color: #dc3545;
+            font-weight: 600;
         }
-    }
-</style>
+
+        .calendar-day[data-nepali-date] {
+            border: 1px solid green;
+            /* Temporary for debugging */
+        }
+
+        .meeting-count-wrapper {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            z-index: 10;
+            /* Ensure tooltip appears above other elements */
+        }
+
+        /* Existing meeting-count styles (unchanged) */
+        .meeting-count {
+            position: relative;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            /* Indicate hoverability */
+        }
+
+        /* Meeting List Styles */
+        .meeting-list-item {
+            border-left: 4px solid #0d6efd;
+            background-color: #f8f9fa;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .meeting-list-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .meeting-list-item.completed {
+            border-left-color: #198754;
+        }
+
+        .meeting-list-item.cancelled {
+            border-left-color: #dc3545;
+        }
+
+        .meeting-list-item.pending {
+            border-left-color: #fd7e14;
+        }
+
+        .meeting-time {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .meeting-location {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .no-meetings {
+            padding: 30px;
+            text-align: center;
+            color: #6c757d;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        /* Dropdown Styling */
+        .dropdown-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .form-select {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            min-width: 80px;
+        }
+
+        .form-label {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Card Enhancements */
+        .card {
+            border: none;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 991.98px) {
+            .calendar-header {
+                padding: 0.75rem;
+            }
+
+            .dropdown-container {
+                margin-bottom: 0.5rem;
+            }
+
+            #monthYearRange {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .calendar-day {
+                min-height: 60px;
+                padding: 0.3rem;
+            }
+
+            .calendar-day .nepali-date {
+                font-size: 1rem;
+            }
+
+            .calendar-day .english-date,
+            .calendar-day .event,
+            .calendar-day .ad-date {
+                font-size: 0.6rem;
+            }
+
+            .form-select {
+                font-size: 0.85rem;
+            }
+
+            #monthYearRange {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .container-fluid {
+                margin: 1rem !important;
+            }
+
+            .calendar-day {
+                min-height: 50px;
+                padding: 0.2rem;
+            }
+
+            .calendar-header .weekday {
+                padding: 0.3rem;
+            }
+
+            .nepali-weekday {
+                font-size: 0.85rem;
+            }
+
+            .english-weekday {
+                font-size: 0.65rem;
+            }
+
+            .form-label {
+                font-size: 0.8rem;
+            }
+
+            #monthYearRange {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+

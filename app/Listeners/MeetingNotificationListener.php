@@ -182,7 +182,8 @@ class MeetingNotificationListener
 
             // Format time to 12-hour format and convert to Nepali digits
             $hour = $startTime->format('g'); // Hour without leading zero (e.g., "2")
-            $nepaliHour = NepaliDateConverter::toNepaliDigits($hour);
+            // $nepaliHour = NepaliDateConverter::toNepaliDigits($hour);
+            $nepaliHour = $hour;
             // $period = $startTime->format('A') === 'AM' ? 'बिहान' : 'बेलुका'; // AM = बिहान, PM = बेलुका
             $period = $startTime->format('A') === 'AM' ? 'AM' : 'PM'; // AM = बिहान, PM = बेलुका
             $formattedTime = "{$nepaliHour} बजे"; // e.g., "२ बजे"
