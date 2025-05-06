@@ -7,27 +7,34 @@
             @endif
         </label>
     @endif
-    <input type="text" name="{{ $name }}" id="{{ $id }}"  class="form-control @error($name) is-invalid @enderror"
-           placeholder="{{ $placeholder }}" value="{{ old($name, $value) }}" 
-           readonly @if ($required) required @endif {{ $attributes }}>
-        @error($name)
-           <span class="error invalid-feedback">{{ $message }}</span>
-       @enderror
+    <input type="text" name="{{ $name }}" id="{{ $id }}"
+        class="form-control @error($name) is-invalid @enderror" placeholder="{{ $placeholder }}"
+        value="{{ old($name, $value) }}" readonly @if ($required) required @endif {{ $attributes }}>
+    @error($name)
+        <span class="error invalid-feedback">{{ $message }}</span>
+    @enderror
 </div>
 
 @push('scripts')
     <script type="module">
-        document.addEventListener('DOMContentLoaded', function() {
-            new NepaliDatePicker('{{ $id }}', {
-                currentYear: {{ $currentNepaliYear }},
-                currentMonth: {{ $currentNepaliMonth }},
-                csrfToken: '{{ csrf_token() }}',
-                nepaliMonths: @json(\App\Helpers\NepaliDateConverter::$nepaliMonths),
-                toNepaliDigits: function(number) {
-                    const digits = @json(\App\Helpers\NepaliDateConverter::$nepaliDigits);
-                    return String(number).split('').map(d => digits[d] || d).join('');
-                }
-            });
+        // Get today's Nepali date
+        @php
+            $todayNepaliDate = \App\Helpers\NepaliDateConverter::getTodayNepaliDate();
+        @endphp
+        
+        new NepaliDatePicker('{{ $id }}', {
+            currentYear: {{ $currentNepaliYear }},
+            currentMonth: {{ $currentNepaliMonth }},
+            // Pass today's date information
+            todayNepaliYear: {{ $todayNepaliDate['year'] }},
+            todayNepaliMonth: {{ $todayNepaliDate['month'] }},
+            todayNepaliDay: {{ $todayNepaliDate['day'] }},
+            csrfToken: '{{ csrf_token() }}',
+            nepaliMonths: @json(\App\Helpers\NepaliDateConverter::$nepaliMonths),
+            toNepaliDigits: function(number) {
+                const digits = @json(\App\Helpers\NepaliDateConverter::$nepaliDigits);
+                return String(number).split('').map(d => digits[d] || d).join('');
+            }
         });
     </script>
 @endpush

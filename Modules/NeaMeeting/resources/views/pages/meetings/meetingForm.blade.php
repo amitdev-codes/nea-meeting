@@ -103,6 +103,8 @@
                                 )" placeholder="{{ __('Select Local Levels') }}"
                                 multiple />
                         </div>
+
+                        
                         <div class="mb-3 col-md-2">
                             <x-forms.input-switch name="is_external" :label="__('is_external')" :value="old('is_external', $model->is_external ?? 0)" />
                         </div>

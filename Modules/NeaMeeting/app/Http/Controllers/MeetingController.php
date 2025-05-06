@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use App\Helpers\NepaliDateConverter;
 use Illuminate\Support\Facades\Auth;
 use Modules\NeaMeeting\Models\Meeting;
+use Modules\Master\Models\Organization;
 use App\Notifications\MeetingNotification;
 use Illuminate\Support\Facades\Notification;
 use App\Http\Controllers\BaseAdminController;
@@ -59,7 +60,19 @@ class MeetingController extends BaseAdminController
     public function create(Request $request)
     {
         $users=User::all();
-        return $this->renderForm($this->formView,null,['users' => $users,'googleCalendarEnabled' => app(GoogleCalendarService::class)->isEnabled()]);
+        $organizations = Organization::all();
+    
+        // Convert JSON to array if needed
+        $selectedOrganizations = [];
+        if (!empty($model->organizations)) {
+            if (is_string($model->organizations)) {
+                $selectedOrganizations = json_decode($model->organizations, true) ?? [];
+            } else {
+                $selectedOrganizations = (array)$model->organizations;
+            }
+        }
+        return $this->renderForm($this->formView,null,['users' => $users,'googleCalendarEnabled' => app(GoogleCalendarService::class)->isEnabled(),
+        'organizations' => $organizations,'selectedOrganizations' => $selectedOrganizations]);
     }
     
 

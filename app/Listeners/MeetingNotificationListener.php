@@ -178,7 +178,7 @@ class MeetingNotificationListener
             $nepaliYear= $nepaliDate['year'];
 
 
-            $nepaliFormattedDate = "{$nepaliDate['english_month_name']} {$nepaliDay} {$nepaliYear}";
+            $nepaliFormattedDate = "{$nepaliDate['english_month_name']} {$nepaliDay}, {$nepaliYear}";
 
             // Format time to 12-hour format and convert to Nepali digits
             $hour = $startTime->format('g'); // Hour without leading zero (e.g., "2")
@@ -186,7 +186,7 @@ class MeetingNotificationListener
             $nepaliHour = $hour;
             // $period = $startTime->format('A') === 'AM' ? 'बिहान' : 'बेलुका'; // AM = बिहान, PM = बेलुका
             $period = $startTime->format('A') === 'AM' ? 'AM' : 'PM'; // AM = बिहान, PM = बेलुका
-            $formattedTime = "{$nepaliHour} बजे"; // e.g., "२ बजे"
+            $formattedTime = "{$nepaliHour} {$period} "; // e.g., "२ बजे"
 
             // Combine Nepali date and time
             $formattedDateTime = "{$nepaliFormattedDate}, {$formattedTime}";
@@ -200,18 +200,18 @@ class MeetingNotificationListener
         // Standardize SMS message format based on notification type
         switch ($notificationType) {
             case 'scheduled':
-                return "Dear {$name}, you are cordially invited to attend \"{$meetingTitle}\" scheduled for {$formattedDateTime} at {$meeting->meeting_location}";
+                return "Dear {$name}, you are cordially invited to attend \"{$meetingTitle}\" scheduled for {$formattedDateTime} at {$meeting->meeting_location}.";
             case 'reminder':
-                    return "Reminder: Dear {$name}, This is a gentle reminder for \"{$meetingTitle}\" today at {$startTime}  {$meeting->meeting_location}";
+                    return "Reminder: Dear {$name}, This is a gentle reminder for \"{$meetingTitle}\" today at {$startTime}  {$meeting->meeting_location}.";
             case 'rescheduled':
                 return "Dear {$name}, This is to inform you that the \"{$meetingTitle}\" has been rescheduled to {$formattedDateTime} at {$meeting->meeting_location}.
                 We apologize for any inconvenience caused.";
             case 'cancellation':
                 $reason = isset($options['reason']) ? " Reason: {$options['reason']}" : '';
-                return "Dear {$name}, This is to inform you that the \"{$meetingTitle}\" scheduled for {$formattedDateTime} has been cancelled. Sorry for the inconvenience";
+                return "Dear {$name}, This is to inform you that the \"{$meetingTitle}\" scheduled for {$formattedDateTime} has been cancelled. Sorry for the inconvenience.";
 
             default:
-                return "Dear {$name}, update for meeting \"{$meetingTitle}\" on {$formattedDateTime}. - {$appName}";
+                return "Dear {$name}, update for meeting \"{$meetingTitle}\" on {$formattedDateTime}. - {$appName}.";
         }
     }
     private function storeNotificationRecords($meeting, string $type, array $ids, string $notificationType): void

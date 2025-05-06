@@ -24,14 +24,11 @@ class ResourceSeeder extends Seeder
             // Route-based (Imports)
             // URL-based
             ['name' => 'Dashboard', 'icon' => 'bx-home', 'type' => 'url', 'url' => '/dashboard'],
-            ['name' => 'SiteSettings', 'icon' => 'bx-home', 'type' => 'url', 'url' => '/site-settings'],
-            ['name' => 'groupReport', 'icon' => 'bx-home', 'type' => 'url', 'url' => '/group-reports'],
-            ['name' => 'lmbisReport', 'icon' => 'bx-home', 'type' => 'url', 'url' => '/lmbis-reports'],
             //meetings
             ['name' => 'meetings', 'icon' => 'bx-lock', 'type' => 'resource'],
             ['name' => 'organizations', 'icon' => 'bx-lock', 'type' => 'resource'],
-            ['name' => 'meeting-rooms', 'icon' => 'bx-lock', 'type' => 'resource'],
-            ['name' => 'meeting-attendees', 'icon' => 'bx-lock', 'type' => 'resource'],
+            // ['name' => 'meeting-rooms', 'icon' => 'bx-lock', 'type' => 'resource'],
+            // ['name' => 'meeting-attendees', 'icon' => 'bx-lock', 'type' => 'resource'],
             ['name' => 'meeting-minutes', 'icon' => 'bx-lock', 'type' => 'resource'],
 
             ['name' => 'faqs', 'icon' => 'bx bx-question-mark', 'type' => 'resource'],

@@ -19,8 +19,7 @@
                     "icon": "menu-icon tf-icons bx bx bxs-check-shield",
                     "slug": [
                         "admin.meetings.*",
-                        "admin.meeting-attendees.*",
-                        "admin.meeting-minutes.*"
+                        "admin.meeting-attendees.*"
                     ],
                     "submenu": [
                         {
@@ -28,13 +27,6 @@
                             "name": "menu.meetings",
                             "slug": "admin.meetings.*",
                             "permission": "view-meetings"
-                        },
-
-                        {
-                            "url": "admin.meeting-minutes.index",
-                            "name": "menu.meeting-minutes",
-                            "slug": "admin.meeting-minutes*",
-                            "permission": "view-meeting-minutes"
                         }
                     ]
                 }
@@ -64,12 +56,6 @@
                             "name": "menu.organizations",
                             "slug": "admin.organizations.*",
                             "permission": "view-organizations"
-                        },
-                        {
-                            "url": "admin.meeting-rooms.index",
-                            "name": "menu.meeting-rooms",
-                            "slug": "admin.meeting-rooms*",
-                            "permission": "view-meeting-rooms"
                         }
                     ]
                 },

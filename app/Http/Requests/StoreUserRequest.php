@@ -28,7 +28,7 @@ class StoreUserRequest extends FormRequest
             'password' => 'required|string|min:8',
             'email' => 'required|email|unique:users,email|max:255',
             'mobile_no' => 'required|digits:10|numeric|unique:users,mobile_no',
-            'phone' => 'nullable|digits:10|numeric',
+            'phone' => 'nullable|numeric',
             // Fansep Information
             'organization_id' => 'required|exists:organizations,id',
             'remarks' => 'nullable|string|max:1000',

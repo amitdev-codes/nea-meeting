@@ -13,7 +13,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('update users');
+        return true;
     }
 
     /**

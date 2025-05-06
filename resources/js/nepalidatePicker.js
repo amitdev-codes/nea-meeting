@@ -8,6 +8,12 @@ class NepaliDatePicker {
         this.csrfToken = options.csrfToken || document.querySelector('meta[name="csrf-token"]').content;
         this.nepaliMonths = options.nepaliMonths || {};
         this.toNepaliDigits = options.toNepaliDigits || ((num) => num.toString());
+        
+        // Today's Nepali date (should be passed from the server)
+        this.todayNepaliYear = options.todayNepaliYear || this.currentYear;
+        this.todayNepaliMonth = options.todayNepaliMonth || this.currentMonth;
+        this.todayNepaliDay = options.todayNepaliDay || 1;
+        
         this.init();
     }
 
@@ -86,8 +92,6 @@ class NepaliDatePicker {
             const startDate = new Date(data.start_date || '2025-03-14');
             const daysInMonth = data.days || 30;
             const startDay = startDate.getDay();
-            const today = new Date();
-            const isCurrentMonth = (startDate.getMonth() === today.getMonth() && startDate.getFullYear() === today.getFullYear());
 
             const html = `
             <div class="datepicker-header" style="display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0.5rem !important; background: #f8f9fa !important; border-bottom: 1px solid #dee2e6 !important;">
@@ -96,7 +100,7 @@ class NepaliDatePicker {
             </div>
             <div class="datepicker-grid" style="display: grid !important; grid-template-columns: repeat(7, 1fr) !important; gap: 2px !important; padding: 0.5rem !important; background: #f0f0f0 !important; width: 100% !important;">
                 ${['आइत', 'सोम', 'मंगल', 'बुध', 'बिही', 'शुक्र', 'शनि'].map(day => `<div class="datepicker-day" style="text-align: center !important; padding: 0.35rem !important; font-size: 0.75rem !important; background: #fff !important;">${day}</div>`).join('')}
-                ${this.renderDays(startDay, daysInMonth, isCurrentMonth, startDate)}
+                ${this.renderDays(startDay, daysInMonth, startDate)}
             </div>
         `;
             this.picker.innerHTML = html;
@@ -143,30 +147,57 @@ class NepaliDatePicker {
         return options;
     }
 
-    renderDays(startDay, daysInMonth, isCurrentMonth, startDate) {
-        // console.log('Rendering days with:', { startDay, daysInMonth, isCurrentMonth, startDate });
+    renderDays(startDay, daysInMonth, startDate) {
         let html = '';
-        const today = new Date();
 
+        // Empty cells for days before the first day of month
         for (let i = 0; i < startDay; i++) {
             html += '<div class="datepicker-day disabled" style="text-align: center !important; padding: 0.5rem !important; font-size: 0.9rem !important; color: #adb5bd !important; background: #f1f1f1 !important;"></div>';
         }
 
+        // Cells for days in month
         for (let day = 1; day <= daysInMonth; day++) {
             const dateForDay = new Date(startDate);
             dateForDay.setDate(startDate.getDate() + day - 1);
-            const isToday = isCurrentMonth && dateForDay.toDateString() === today.toDateString();
+            
+            // Check if this day is today in Nepali calendar
+            const isToday = (
+                this.currentYear === this.todayNepaliYear && 
+                this.currentMonth === this.todayNepaliMonth && 
+                day === this.todayNepaliDay
+            );
+            
+            // Weekend checks
             const isSaturday = (startDay + day - 1) % 7 === 6;
             const isSunday = (startDay + day - 1) % 7 === 0;
 
+            // Enhanced styling for today's date
+            const todayStyles = isToday ? `
+                background: #007bff !important; 
+                color: white !important;
+                font-weight: 700 !important;
+                box-shadow: 0 0 0 2px #007bff !important;
+                transform: scale(1.05) !important;
+            ` : '';
+
             html += `
-            <div class="datepicker-day ${isToday ? 'today' : ''} ${isSaturday ? 'saturday' : ''} ${isSunday ? 'sunday' : ''}" data-day="${day}" style="text-align: center !important; padding: 0.35rem !important; font-size: 0.75rem !important; cursor: pointer !important; border-radius: 4px !important; background: ${isToday ? 'rgba(255, 99, 71, 0.2)' : '#fff'} !important; color: ${isSaturday || isSunday ? '#dc3545' : '#000'} !important; ${isToday ? 'font-weight: 600 !important;' : ''}">
+            <div class="datepicker-day ${isToday ? 'today' : ''} ${isSaturday ? 'saturday' : ''} ${isSunday ? 'sunday' : ''}" 
+                data-day="${day}" 
+                style="text-align: center !important; 
+                       padding: 0.35rem !important; 
+                       font-size: 0.75rem !important; 
+                       cursor: pointer !important; 
+                       border-radius: 4px !important; 
+                       background: ${isToday ? '#007bff' : '#fff'} !important; 
+                       color: ${isToday ? 'white' : (isSaturday || isSunday ? '#dc3545' : '#000')} !important;
+                       ${isToday ? 'font-weight: 600 !important;' : ''}
+                       transition: all 0.2s ease !important;
+                       ${todayStyles}">
                 ${this.toNepaliDigits(day)}
             </div>
         `;
         }
 
-        console.log('Days HTML length:', html.length);
         return html;
     }
 }
