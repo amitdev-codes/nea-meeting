@@ -44,7 +44,7 @@ class LandingpageController extends Controller
                 'meeting_date_ad' => $meeting->meeting_date_ad,
                 'start_time' => \Carbon\Carbon::parse($meeting->start_time)->format('h:i A'),
                 'end_time' => \Carbon\Carbon::parse($meeting->end_time)->format('h:i A'),
-                'meeting_room' => $meeting->meetingRoom,
+                'meeting_rooms' => $meeting->meeting_rooms,
                 'meeting_type' => $meeting->meeting_type,
                 'is_external' => $meeting->is_external ? __('field.yes') : __('field.no'),
                 'is_virtual_meeting' => $meeting->is_virtual_meeting ? __('field.yes') : __('field.no'),

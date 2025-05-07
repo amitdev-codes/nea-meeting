@@ -22,16 +22,6 @@
         content="{{ config('variables.templateKeyword') ? config('variables.templateKeyword') : '' }}" />
     <!-- Laravel CSRF token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <style>
-        @font-face {
-            font-family: Kalimati;
-            src: url('/fonts/kalimati.ttf');
-        }
-        .nepali_td {
-            font-family: kalimati, serif; /* Replace 'Your-English-Font' with the desired English font */
-        }
-
-    </style>
     @include('landingpage::layouts/sections/stylesFront')
 </head>
 

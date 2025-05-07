@@ -149,15 +149,13 @@ class MeetingDataTable extends DataTable
         ];
         $today = Carbon::today();
         $filter = request()->query('filter', 'total'); // Get the filter parameter, default to 'total'
-
+    
         // Organization-based filtering
         if (auth()->check() && !auth()->user()->hasRole(['admin', 'superadmin'])) {
             $organizationId = auth()->user()->organization_id;
             $query->whereRaw('JSON_CONTAINS(organizations, ?)', [json_encode((string)$organizationId)]);
         }
-
-        // dd($today->copy()->subDay()->format('Y-m-d'));
-
+    
         // Time-based filtering based on the filter parameter
         switch ($filter) {
             case 'yesterday':
@@ -180,10 +178,10 @@ class MeetingDataTable extends DataTable
                 // No date filter for total meetings
                 break;
         }
-
+    
         // Default filter: Show only Ongoing or Scheduled meetings (unless filtered otherwise)
         $isStatusFiltered = false;
-
+    
         // Check if status filter is applied (dropdown search)
         if (request()->has('columns')) {
             foreach (request('columns') as $column) {
@@ -195,7 +193,7 @@ class MeetingDataTable extends DataTable
                 }
             }
         }
-
+    
         // Global search
         if (request()->has('search') && request('search')['value']) {
             $search = request('search')['value'];
@@ -209,7 +207,7 @@ class MeetingDataTable extends DataTable
                 }
             });
         }
-
+    
         // Column-specific search (excluding status, already handled)
         if (request()->has('columns')) {
             foreach (request('columns') as $i => $column) {
@@ -226,8 +224,12 @@ class MeetingDataTable extends DataTable
                 }
             }
         }
-
-        $query->orderBy('meeting_date_ad', 'asc')->orderBy('start_time', 'asc');
+    
+        // Custom status ordering: Ongoing, Scheduled, Completed, Cancelled
+        $query->orderByRaw("FIELD(status, 'Ongoing', 'Scheduled', 'Completed', 'Cancelled')")
+        
+              ->orderBy('start_time', 'asc');
+    
         return $query;
     }
 

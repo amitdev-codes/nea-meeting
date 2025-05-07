@@ -204,8 +204,7 @@ class MeetingNotificationListener
             case 'reminder':
                     return "Reminder: Dear {$name}, This is a gentle reminder for \"{$meetingTitle}\" today at {$startTime}  {$meeting->meeting_location}.";
             case 'rescheduled':
-                return "Dear {$name}, This is to inform you that the \"{$meetingTitle}\" has been rescheduled to {$formattedDateTime} at {$meeting->meeting_location}.
-                We apologize for any inconvenience caused.";
+                return "Dear {$name}, This is to inform you that the \"{$meetingTitle}\" has been rescheduled to {$formattedDateTime} at {$meeting->meeting_location}.We apologize for any inconvenience caused.";
             case 'cancellation':
                 $reason = isset($options['reason']) ? " Reason: {$options['reason']}" : '';
                 return "Dear {$name}, This is to inform you that the \"{$meetingTitle}\" scheduled for {$formattedDateTime} has been cancelled. Sorry for the inconvenience.";

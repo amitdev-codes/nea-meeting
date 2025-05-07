@@ -615,7 +615,7 @@
                         `${data.meeting_date} (${data.meeting_date_ad})` || 'N/A';
                     document.getElementById('start-time').querySelector('p').textContent = data.start_time || 'N/A';
                     document.getElementById('end-time').querySelector('p').textContent = data.end_time || 'N/A';
-                    document.getElementById('meeting-room').querySelector('p').textContent = data.meeting_room?.name ||
+                    document.getElementById('meeting-room').querySelector('p').textContent = data.meeting_rooms ||
                         'N/A';
                     document.getElementById('meeting-type').querySelector('p').textContent = data.meeting_type || 'N/A';
                     document.getElementById('is-external').querySelector('p').textContent = data.is_external || 'N/A';

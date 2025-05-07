@@ -48,7 +48,7 @@
                             </div>
                             
                             <x-resource.detail-item label="{{ __('field.meeting_room_id') }}" 
-                                :value="$resource->meetingRoom->name ?? 'N/A'" 
+                                :value="$resource->meeting_rooms ?? 'N/A'" 
                                 class="col-md-6" />
                             <x-resource.detail-item label="{{ __('field.meeting_type') }}" 
                                 :value="$resource->meeting_type ?? ''" 

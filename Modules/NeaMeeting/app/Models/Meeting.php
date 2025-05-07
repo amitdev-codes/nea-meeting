@@ -63,7 +63,7 @@ class Meeting extends Model implements HasMedia
 
     public function meetingRoom(): BelongsTo
     {
-        return $this->belongsTo(MeetingRoom::class, 'meeting_room_id', 'id');
+        return $this->belongsTo(MeetingRoom::class, 'meeting_room_id');
     }
 
     public function registerMediaCollections(): void

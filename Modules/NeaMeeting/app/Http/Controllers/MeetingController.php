@@ -139,6 +139,7 @@ class MeetingController extends BaseAdminController
         $meeting->load(['media' => function($query) {
             $query->where('collection_name', 'meetings');
         }]);
+        // dd($meeting);
         return view('neameeting::pages.meetings.show', ['resource' => $meeting]);
     }
     
@@ -173,6 +174,7 @@ class MeetingController extends BaseAdminController
              }else{
                 $meeting->externalContacts()->delete();
             }
+            //documents
             $this->handleMediaUploads($request, $meeting);
             if ($request->hasFile('meetingDocuments')) {
                 $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
