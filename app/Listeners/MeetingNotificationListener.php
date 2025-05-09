@@ -178,7 +178,7 @@ class MeetingNotificationListener
 
     private function formatSmsMessage($meeting, $recipient, string $notificationType, bool $isExternal, array $options): string
     {
-        $name = $isExternal ? ($recipient->name ?? 'Sir/Madam') : ($recipient->name ?? 'Sir/Madam');
+        $name =  'Sir/Madam';
         $appName = config('app.name');
         $meetingTitle = $meeting->title;
 
@@ -186,12 +186,13 @@ class MeetingNotificationListener
             $meetingDate = Carbon::parse($meeting->meeting_date_ad);
             $startTime = Carbon::parse($meeting->start_time);
 
-            $nepaliDate = (new NepaliDateConverter())->toNepaliDate($meetingDate->year, $meetingDate->month, $meetingDate->day);
+            $nepaliDate = NepaliDateConverter::toNepaliDate($meetingDate); 
+
             $nepaliDay = $nepaliDate['day'];
             $nepaliYear = $nepaliDate['year'];
             $nepaliFormattedDate = "{$nepaliDate['english_month_name']} {$nepaliDay}, {$nepaliYear}";
 
-            $hour = $startTime->format('g');
+            $hour = $startTime->format('g:i');
             $period = $startTime->format('A') === 'AM' ? 'AM' : 'PM';
             $formattedTime = "{$hour} {$period}";
 
@@ -210,7 +211,7 @@ class MeetingNotificationListener
                 return "Dear {$name}, the \"{$meetingTitle}\" has been rescheduled to {$formattedDateTime} at {$meeting->meeting_location}. We apologize for any inconvenience.";
             case 'cancellation':
                 $reason = isset($options['reason']) ? " Reason: {$options['reason']}" : '';
-                return "Dear {$name}, the \"{$meetingTitle}\" scheduled for {$formattedDateTime} has been cancelled.{$reason}";
+                return "Dear {$name}, the \"{$meetingTitle}\" scheduled for {$formattedDateTime} has been cancelled.Sorry for the inconvenience.";
             default:
                 return "Dear {$name}, update for meeting \"{$meetingTitle}\" on {$formattedDateTime}. - {$appName}.";
         }

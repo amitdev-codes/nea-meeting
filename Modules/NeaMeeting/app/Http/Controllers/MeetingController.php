@@ -212,7 +212,17 @@ class MeetingController extends BaseAdminController
     public function destroy(Request $request, Meeting $meeting)
     {
         return $this->handleRequest($request, function () use ($meeting) {
+
+            $organizations = $meeting->organizations;
+            event(new MeetingEvent($meeting, 'cancellation', [
+                'send_email' => true,
+                'send_sms' => true,
+                'reason' => '',
+                'organization_ids' =>$organizations??[],
+            ]));
+
             $meeting->delete();
+
         }, 'admin.meetings.index', 'Meeting deleted successfully.', 'Failed to delete the Meeting.');
     }
     private function handleMediaUploads(Request $request, Meeting $meeting)
@@ -401,6 +411,7 @@ class MeetingController extends BaseAdminController
     {
         // Find the meeting
         $meeting = Meeting::find($id);
+        $organizations = $meeting->organizations;
     
         if (!$meeting) {
             return response()->json([
@@ -428,21 +439,12 @@ class MeetingController extends BaseAdminController
         // Update the meeting status to Cancelled
         $meeting->status = 'Cancelled';
         $meeting->save();
-    
-        if ($this->googleCalendarService->isEnabled() && !empty($meeting->google_calendar_event_id)) {
-            try {
-                $this->googleCalendarService->updateEvent($meeting);
-                Log::info('Google Calendar event updated for cancelled meeting #' . $meeting->id);
-            } catch (\Exception $e) {
-                Log::error('Failed to update Google Calendar event for cancelled meeting: ' . $e->getMessage());
-            }
-        }
-    
+
         event(new MeetingEvent($meeting, 'cancellation', [
-            'send_email' => $request->boolean('send_email', true),
-            'send_sms' => $request->boolean('send_sms', true),
+            'send_email' => true,
+            'send_sms' => true,
             'reason' => $request->input('cancellation_reason', ''),
-            'organization_ids' => $request->input('organizations', []),
+            'organization_ids' =>$organizations??[],
         ]));
     
         return response()->json([
@@ -470,7 +472,7 @@ class MeetingController extends BaseAdminController
     
             event(new MeetingEvent($meeting, $notificationType, [
                 'send_email' => true,
-                'send_sms' => false,
+                'send_sms' => true,
                 'organization_ids' => is_string($organization_ids) ? json_decode($organization_ids, true) : $organization_ids,
             ]));
     

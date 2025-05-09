@@ -55,8 +55,9 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
         $login = $this->input('login');
         $siteSettings=Cache::get('site_settings');
+
         // $failed_attempts=$siteSettings->failed_attempts;
-        $failed_attempts=$siteSettings['failed_attempts']??5;
+        // $failed_attempts=$siteSettings['failed_attempts']??5;
 
 
         // dd($siteSettings,$failed_attempts);
@@ -68,43 +69,20 @@ class LoginRequest extends FormRequest
         $user = User::where($field, $login)->first();
 
         // Check if the user is locked
-        if ($user && $user->is_locked) {
-            throw ValidationException::withMessages([
-                'login' => 'Your account is locked due to too many failed login attempts. Please contact support.',
-            ]);
-        }
+        // if ($user && $user->is_locked) {
+        //     throw ValidationException::withMessages([
+        //         'login' => 'Your account is locked due to too many failed login attempts. Please contact support.',
+        //     ]);
+        // }
 
         // Attempt authentication
         if (! Auth::attempt([$field => $login, 'password' => $this->input('password')], $this->boolean('remember'))) {
-            if ($user) {
-                $user->increment('wrong_password_attempts');
-
-                // Lock the user after 5 failed attempts
-                if ($user->wrong_password_attempts >= $failed_attempts) {
-                    $user->update([
-                        'is_locked' => true,
-                        'locked_at' => Carbon::now(),
-                    ]);
-
-                    throw ValidationException::withMessages([
-                        'login' => 'Your account has been locked due to too many failed login attempts. Please contact support.',
-                    ]);
-                }
-            }
-
             RateLimiter::hit($this->throttleKey());
-
             throw ValidationException::withMessages([
                 'login' => trans('auth.failed'), // Use 'login' instead of 'email'
             ]);
         }
         // Reset wrong password attempts on successful login
-        if ($user) {
-            $user->update([
-                'wrong_password_attempts' => 0,
-                'locked_at' => null,
-            ]);
-        }
 
         RateLimiter::clear($this->throttleKey());
     }

@@ -104,7 +104,7 @@ class UsersTableSeeder extends Seeder
                 'organization_id' => '1',
                 'password'=>Hash::make('md@#Nea2026'),
                 'role' => 'md',
-                'phone' => '0014153007',
+                'phone' => '14153007',
                 'mobile_no' => '9825361471',
                 'email' => 'neamd1@nea.org.np',
             ],

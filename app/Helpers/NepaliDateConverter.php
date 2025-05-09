@@ -107,6 +107,7 @@ class NepaliDateConverter
      */
     public static function toNepaliDate(Carbon $gregorianDate): array
     {
+        // dd($gregorianDate);
         // Find the correct record that contains the given date
         $record = DB::table('nepali_calendar')
             ->where(function ($query) use ($gregorianDate) {
