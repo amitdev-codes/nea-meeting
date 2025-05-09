@@ -92,15 +92,17 @@ class UsersTableSeeder extends Seeder
         $adminUsers = [
             [
                 'name' => 'superadmin',
-                'email' => 'superadmin@dryice.com',
+                'email' => 'superadmin@nea.com',
                 'phone' => '01253645785',
                 'mobile_no' => '9800000010',
+                'password'=>Hash::make('superadmin@#nea2025'),
                 'role' => 'superadmin',
                 'organization_id'=>3,
             ],
             [
                 'name' => 'md',
                 'organization_id' => '1',
+                'password'=>Hash::make('md@#Nea2026'),
                 'role' => 'md',
                 'phone' => '0014153007',
                 'mobile_no' => '9825361471',
@@ -205,7 +207,7 @@ class UsersTableSeeder extends Seeder
                 'office_email' => $adminUser['email'],
                 'office_mobile_no' => $adminUser['mobile_no'],
                 'organization_id' => $adminUser['organization_id'],
-                'password' => Hash::make('password'),
+                'password' => $adminUser['password'] ?? Hash::make('password'),
                 'status' => true,
                 'password_changed_at' => now(),
                 'locale' => 'np'

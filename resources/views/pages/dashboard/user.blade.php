@@ -117,28 +117,23 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Documents Tab -->
-                                    <!-- Documents Tab -->
-                                    <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
-                                        <div class="p-3 p-md-4">
-                                            <div class="documents-grid" id="documents-grid">
-                                                <!-- Images will be placed here dynamically -->
-                                            </div>
-                                            <div class="text-center mt-3" id="view-all-documents" style="display: none;">
-                                                <a href="#" class="btn btn-primary btn-sm view-all-btn">
-                                                    <i class="bx bx-folder-open me-1"></i>
-                                                    {{ __('common.view_all_files') }} (<span id="document-count"></span>)
-                                                </a>
-                                            </div>
-                                            <div class="empty-documents" id="empty-documents">
-                                                <i class="bx bx-file-blank"></i>
-                                                <p>{{ __('field.no_documents') }}</p>
-                                            </div>
+                                <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
+                                    <div class="p-3 p-md-4">
+                                        <div class="documents-grid" id="documents-grid">
+                                            <!-- Images will be placed here dynamically -->
+                                        </div>
+                                        <div class="text-center mt-3" id="view-all-documents" style="display: none;">
+                                            <a href="#" class="btn btn-primary btn-sm view-all-btn">
+                                                <i class="bx bx-folder-open me-1"></i>
+                                                {{ __('common.view_all_files') }} (<span id="document-count"></span>)
+                                            </a>
+                                        </div>
+                                        <div class="empty-documents" id="empty-documents">
+                                            <i class="bx bx-file-blank"></i>
+                                            <p>{{ __('field.no_documents') }}</p>
                                         </div>
                                     </div>
-
-
-
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -619,23 +614,11 @@
                         'N/A';
                     document.getElementById('meeting-type').querySelector('p').textContent = data.meeting_type || 'N/A';
                     document.getElementById('is-external').querySelector('p').textContent = data.is_external || 'N/A';
+                    document.getElementById('status').querySelector('p').textContent = data.status || 'N/A';
                     document.getElementById('is-virtual-meeting').querySelector('p').textContent = data
                         .is_virtual_meeting || 'N/A';
                     document.getElementById('virtual-meeting-link').querySelector('p').textContent = data
                         .virtual_meeting_link || 'N/A';
-
-                    // Handle virtual meeting link
-                    // const virtualMeetingLinkP = document.getElementById('virtual-meeting-link').querySelector('p');
-                    // const isValidUrl = url => /^https?:\/\//.test(url); // Simple URL validation
-                    // if (data.virtual_meeting_link && isValidUrl(data.virtual_meeting_link)) {
-                    //     virtualMeetingLinkP.innerHTML =
-                    //         `<a href="${data.virtual_meeting_link}" target="_blank" class="text-primary"><i class="bx bx-link me-2 detail-icon"></i>${data.virtual_meeting_link}</a>`;
-                    // } else {
-                    //     virtualMeetingLinkP.innerHTML =
-                    //         `<i class="bx bx-link me-2 detail-icon"></i>{{ __('N/A') }}`;
-                    // }
-
-
 
                     // In your fetchMeetingDetails function:
                     const linkElement = document.getElementById('virtual-meeting-link');

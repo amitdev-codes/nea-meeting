@@ -9,7 +9,7 @@ return [
 'site_visitors' => 'Site Visited',
 
 //login
-'Please sign-in to your account and start the adventure' => 'Please sign-in to your account and start the adventure',
+'Please sign-in to your account and start the adventure' => 'Please sign-in to your account',
 "Enter your email and we'll send you instructions to reset your password" => 'Enter your email and we will send you instructions to reset your password.',
 'remember_me' => 'Remember Me',
 'forgot_password' => 'Forgot your password?',

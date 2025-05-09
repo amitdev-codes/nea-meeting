@@ -2,7 +2,7 @@
 # NEA Meeting Reminder
 
 <div style="text-align: center; margin-bottom: 25px;">
-    <img src="{{ asset('assets/img/nea-logo.png') }}" alt="NEA Logo" style="max-width: 100px;">
+    <img src="{{ asset('assets/img/nea-logo.png') }}" alt="NEA Logo" style="max-width: 80px;">
 </div>
 
 Dear Sir/Madam,

@@ -30,7 +30,16 @@ class MeetingNotificationListener
         $sendEmail = $options['send_email'] ?? true;
         $sendSms = $options['send_sms'] ?? false;
 
+        Log::info('Handling MeetingEvent', [
+            'meeting_id' => $event->meeting->id,
+            'notification_type' => $event->notificationType,
+            'send_email' => $sendEmail,
+            'send_sms' => $sendSms,
+            'options' => $options,
+        ]);
+
         if (!$sendEmail && !$sendSms) {
+            Log::info('No notifications to send (both email and SMS disabled).');
             return;
         }
 
@@ -42,13 +51,21 @@ class MeetingNotificationListener
             return;
         }
 
-        $organizationIds = $options['organization_ids'] ?? json_decode($event->meeting->organizations, true) ?? [];
+        $organizationIds = $options['organization_ids'] ?? json_decode($event->meeting->organizations ?? '[]', true);
+        Log::info('Organization IDs for notification', ['organization_ids' => $organizationIds]);
+
         $users = !empty($organizationIds)
             ? User::whereIn('organization_id', $organizationIds)->get()
             : collect();
         $externalContacts = $event->meeting->externalContacts ?? collect();
 
+        Log::info('Notification recipients', [
+            'user_count' => $users->count(),
+            'external_contact_count' => $externalContacts->count(),
+        ]);
+
         if ($users->isEmpty() && $externalContacts->isEmpty()) {
+            Log::warning('No users or external contacts found for notifications.');
             return;
         }
 
@@ -80,10 +97,11 @@ class MeetingNotificationListener
         $smsUserIds = [];
 
         foreach ($users as $user) {
-            if ($sendEmail && $emailActive) {
+            if ($sendEmail && $emailActive && !empty($user->email)) {
                 try {
                     $user->notify(new MeetingStatusNotification($event->meeting, $event->notificationType, false));
                     $notifiedUserIds[] = $user->id;
+                    Log::info("Sent {$event->notificationType} email to user #{$user->id}");
                 } catch (\Exception $e) {
                     Log::error("Failed to send {$event->notificationType} email to user #{$user->id}: {$e->getMessage()}");
                 }
@@ -96,6 +114,7 @@ class MeetingNotificationListener
 
                     if ($result['success']) {
                         $smsUserIds[] = $user->id;
+                        Log::info("Sent {$event->notificationType} SMS to user #{$user->id}");
                     } else {
                         Log::error("Failed to send {$event->notificationType} SMS to user #{$user->id}: {$result['message']}");
                     }
@@ -121,7 +140,7 @@ class MeetingNotificationListener
         $smsExternalIds = [];
 
         foreach ($externalContacts as $contact) {
-            if ($sendEmail && $emailActive) {
+            if ($sendEmail && $emailActive && !empty($contact->email)) {
                 if (!filter_var($contact->email, FILTER_VALIDATE_EMAIL)) {
                     Log::warning("Invalid email for external contact #{$contact->id}: {$contact->email}");
                     continue;
@@ -130,6 +149,7 @@ class MeetingNotificationListener
                 try {
                     $contact->notify(new MeetingStatusNotification($event->meeting, $event->notificationType, true));
                     $notifiedExternalIds[] = $contact->id;
+                    Log::info("Sent {$event->notificationType} email to external contact #{$contact->id}");
                 } catch (\Exception $e) {
                     Log::error("Failed to send {$event->notificationType} email to external contact #{$contact->id}: {$e->getMessage()}");
                 }
@@ -142,6 +162,7 @@ class MeetingNotificationListener
 
                     if ($result['success']) {
                         $smsExternalIds[] = $contact->id;
+                        Log::info("Sent {$event->notificationType} SMS to external contact #{$contact->id}");
                     } else {
                         Log::error("Failed to send {$event->notificationType} SMS to external contact #{$contact->id}: {$result['message']}");
                     }
@@ -157,62 +178,44 @@ class MeetingNotificationListener
 
     private function formatSmsMessage($meeting, $recipient, string $notificationType, bool $isExternal, array $options): string
     {
-        // Use recipient's name if available, otherwise fallback to a neutral greeting
-        // $name = $recipient->name ?? 'Sir/Madam';
-        $name =  'Sir/Madam';
+        $name = $isExternal ? ($recipient->name ?? 'Sir/Madam') : ($recipient->name ?? 'Sir/Madam');
         $appName = config('app.name');
         $meetingTitle = $meeting->title;
-    
-        // Safely parse meeting date and start time with fallback
+
         try {
             $meetingDate = Carbon::parse($meeting->meeting_date_ad);
             $startTime = Carbon::parse($meeting->start_time);
-    
-            // Convert to Nepali date using the helper function
-            $nepaliDate = NepaliDateConverter::toNepaliDate($meetingDate); // Adjust based on your class/namespace
 
-            // Convert day and year to Nepali digits
-            // $nepaliDay = NepaliDateConverter::toNepaliDigits($nepaliDate['day']);
-            // $nepaliYear = NepaliDateConverter::toNepaliDigits($nepaliDate['year']);
-            $nepaliDay= $nepaliDate['day'];
-            $nepaliYear= $nepaliDate['year'];
-
-
+            $nepaliDate = (new NepaliDateConverter())->toNepaliDate($meetingDate->year, $meetingDate->month, $meetingDate->day);
+            $nepaliDay = $nepaliDate['day'];
+            $nepaliYear = $nepaliDate['year'];
             $nepaliFormattedDate = "{$nepaliDate['english_month_name']} {$nepaliDay}, {$nepaliYear}";
 
-            // Format time to 12-hour format and convert to Nepali digits
-            $hour = $startTime->format('g'); // Hour without leading zero (e.g., "2")
-            // $nepaliHour = NepaliDateConverter::toNepaliDigits($hour);
-            $nepaliHour = $hour;
-            // $period = $startTime->format('A') === 'AM' ? 'बिहान' : 'बेलुका'; // AM = बिहान, PM = बेलुका
-            $period = $startTime->format('A') === 'AM' ? 'AM' : 'PM'; // AM = बिहान, PM = बेलुका
-            $formattedTime = "{$nepaliHour} {$period} "; // e.g., "२ बजे"
+            $hour = $startTime->format('g');
+            $period = $startTime->format('A') === 'AM' ? 'AM' : 'PM';
+            $formattedTime = "{$hour} {$period}";
 
-            // Combine Nepali date and time
             $formattedDateTime = "{$nepaliFormattedDate}, {$formattedTime}";
-        
-            // Combine Nepali date and time;
         } catch (\Exception $e) {
             Log::warning("Invalid date or time for meeting #{$meeting->id}: {$e->getMessage()}");
-            $formattedDateTime = 'at a scheduled date and time'; // Fallback message
+            $formattedDateTime = 'at a scheduled date and time';
         }
-    
-        // Standardize SMS message format based on notification type
+
         switch ($notificationType) {
             case 'scheduled':
                 return "Dear {$name}, you are cordially invited to attend \"{$meetingTitle}\" scheduled for {$formattedDateTime} at {$meeting->meeting_location}.";
             case 'reminder':
-                    return "Reminder: Dear {$name}, This is a gentle reminder for \"{$meetingTitle}\" today at {$startTime}  {$meeting->meeting_location}.";
+                return "Reminder: Dear {$name}, this is a reminder for \"{$meetingTitle}\" on {$formattedDateTime} at {$meeting->meeting_location}.";
             case 'rescheduled':
-                return "Dear {$name}, This is to inform you that the \"{$meetingTitle}\" has been rescheduled to {$formattedDateTime} at {$meeting->meeting_location}.We apologize for any inconvenience caused.";
+                return "Dear {$name}, the \"{$meetingTitle}\" has been rescheduled to {$formattedDateTime} at {$meeting->meeting_location}. We apologize for any inconvenience.";
             case 'cancellation':
                 $reason = isset($options['reason']) ? " Reason: {$options['reason']}" : '';
-                return "Dear {$name}, This is to inform you that the \"{$meetingTitle}\" scheduled for {$formattedDateTime} has been cancelled. Sorry for the inconvenience.";
-
+                return "Dear {$name}, the \"{$meetingTitle}\" scheduled for {$formattedDateTime} has been cancelled.{$reason}";
             default:
                 return "Dear {$name}, update for meeting \"{$meetingTitle}\" on {$formattedDateTime}. - {$appName}.";
         }
     }
+
     private function storeNotificationRecords($meeting, string $type, array $ids, string $notificationType): void
     {
         if (empty($ids)) {
@@ -227,8 +230,9 @@ class MeetingNotificationListener
                 'notification_type' => $notificationType,
                 'notification_status' => 'sent',
             ]);
+            Log::info("Stored notification records for {$notificationType} ({$type})", ['ids' => $ids]);
         } catch (\Exception $e) {
-            Log::error("Failed to save {$notificationType } notification record for {$type}: {$e->getMessage()}");
+            Log::error("Failed to save {$notificationType} notification record for {$type}: {$e->getMessage()}");
         }
     }
 }

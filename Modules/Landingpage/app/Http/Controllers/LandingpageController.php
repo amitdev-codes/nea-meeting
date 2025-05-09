@@ -35,7 +35,6 @@ class LandingpageController extends Controller
         $meeting = Meeting::with('meetingRoom', 'media')->findOrFail($id);
 
         if ($request->ajax()) {
-            // dd($request->all());
             return response()->json([
                 'title' => $meeting->title,
                 'meeting_location' => $meeting->meeting_location,
@@ -49,7 +48,7 @@ class LandingpageController extends Controller
                 'is_external' => $meeting->is_external ? __('field.yes') : __('field.no'),
                 'is_virtual_meeting' => $meeting->is_virtual_meeting ? __('field.yes') : __('field.no'),
                 'virtual_meeting_link' => $meeting->virtual_meeting_link,
-                'status' => $meeting->status ? __('field.active') : __('field.inactive'),
+                'status' => $meeting->status,
                 'media' => $meeting->media->map(function ($media) {
                     return [
                         'name' => $media->name,

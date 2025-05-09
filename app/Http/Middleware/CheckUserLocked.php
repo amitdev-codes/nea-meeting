@@ -13,11 +13,11 @@ class CheckUserLocked
         $user = Auth::user();
 
         // Check if the user is locked
-        if ($user && $user->is_locked) {
-            Auth::logout(); // Log out the user
+        // if ($user && $user->is_locked) {
+        //     Auth::logout(); // Log out the user
 
-            return redirect()->route('login')->with('error', 'Your account is locked due to too many failed login attempts. Please contact support.');
-        }
+        //     return redirect()->route('login')->with('error', 'Your account is locked due to too many failed login attempts. Please contact support.');
+        // }
 
         return $next($request);
     }

@@ -109,7 +109,7 @@
 
         /* Nepali Text Styling */
         .nepali_td {
-            font-family: 'Preeti', 'Mangal', sans-serif; /* Use Nepali fonts */
+
             font-weight: 600;
         }
 
