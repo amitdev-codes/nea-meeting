@@ -246,11 +246,33 @@ class MeetingDataTable extends DataTable
                 )
             )
             ->parameters([
-                'initComplete' => 'function() {
-                    ' . $this->initBulkDeleteScript('meeting_ids[]') . '
-                    ' . $this->initDeleteScript() . '
-                    ' . $this->initColumnSearch() . '
-                }',
+                    'responsive' => true,
+                    'responsive' => [
+                        'details' => [
+                            'display' => 'auto'
+                        ]
+                    ],
+                    'initComplete' => 'function() {
+                                    ' . $this->initBulkDeleteScript('meeting_ids[]') . '
+                                    ' . $this->initDeleteScript() . '
+                                    ' . $this->initColumnSearch() . '
+                                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                                        if (isMobile) {
+                                            $(".dt-buttons").css({
+                                                "display": "flex",
+                                                "flex-wrap": "wrap",
+                                                "position": "static",
+                                                "margin-bottom": "10px",
+                                                "width": "100%"
+                                            });
+                                            
+                                            $(".dt-buttons .btn").css({
+                                                "display": "inline-block",
+                                                "margin": "2px",
+                                                "float": "none"
+                                            });
+                                        }
+                   }',
                 'headerCallback' => 'function(thead) {
                     $(thead).find("th").css({
                         "font-weight": "800",

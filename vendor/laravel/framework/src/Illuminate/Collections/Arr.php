@@ -4,9 +4,15 @@ namespace Illuminate\Support;
 
 use ArgumentCountError;
 use ArrayAccess;
+use Closure;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
+use JsonSerializable;
 use Random\Randomizer;
+use Traversable;
+use WeakMap;
 
 class Arr
 {
@@ -21,6 +27,21 @@ class Arr
     public static function accessible($value)
     {
         return is_array($value) || $value instanceof ArrayAccess;
+    }
+
+    /**
+     * Determine whether the given value is arrayable.
+     *
+     * @param  mixed  $value
+     * @return bool
+     */
+    public static function arrayable($value)
+    {
+        return is_array($value)
+            || $value instanceof Arrayable
+            || $value instanceof Traversable
+            || $value instanceof Jsonable
+            || $value instanceof JsonSerializable;
     }
 
     /**
@@ -379,6 +400,32 @@ class Arr
     }
 
     /**
+     * Get the underlying array of items from the given argument.
+     *
+     * @template TKey of array-key = array-key
+     * @template TValue = mixed
+     *
+     * @param  array<TKey, TValue>|Enumerable<TKey, TValue>|Arrayable<TKey, TValue>|WeakMap<object, TValue>|Traversable<TKey, TValue>|Jsonable|JsonSerializable|object  $items
+     * @return ($items is WeakMap ? list<TValue> : array<TKey, TValue>)
+     *
+     * @throws \InvalidArgumentException
+     */
+    public static function from($items)
+    {
+        return match (true) {
+            is_array($items) => $items,
+            $items instanceof Enumerable => $items->all(),
+            $items instanceof Arrayable => $items->toArray(),
+            $items instanceof WeakMap => iterator_to_array($items, false),
+            $items instanceof Traversable => iterator_to_array($items),
+            $items instanceof Jsonable => json_decode($items->toJson(), true),
+            $items instanceof JsonSerializable => (array) $items->jsonSerialize(),
+            is_object($items) => (array) $items,
+            default => throw new InvalidArgumentException('Items cannot be represented by a scalar value.'),
+        };
+    }
+
+    /**
      * Get an item from an array using "dot" notation.
      *
      * @param  \ArrayAccess|array  $array
@@ -450,6 +497,30 @@ class Arr
     }
 
     /**
+     * Determine if all keys exist in an array using "dot" notation.
+     *
+     * @param  \ArrayAccess|array  $array
+     * @param  string|array  $keys
+     * @return bool
+     */
+    public static function hasAll($array, $keys)
+    {
+        $keys = (array) $keys;
+
+        if (! $array || $keys === []) {
+            return false;
+        }
+
+        foreach ($keys as $key) {
+            if (! static::has($array, $key)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Determine if any of the keys exist in an array using "dot" notation.
      *
      * @param  \ArrayAccess|array  $array
@@ -488,7 +559,7 @@ class Arr
     {
         $value = Arr::get($array, $key, $default);
 
-        if (! is_integer($value)) {
+        if (! is_int($value)) {
             throw new InvalidArgumentException(
                 sprintf('Array value for key [%s] must be an integer, %s found.', $key, gettype($value))
             );
@@ -616,8 +687,8 @@ class Arr
      * Pluck an array of values from an array.
      *
      * @param  iterable  $array
-     * @param  string|array|int|null  $value
-     * @param  string|array|null  $key
+     * @param  string|array|int|Closure|null  $value
+     * @param  string|array|Closure|null  $key
      * @return array
      */
     public static function pluck($array, $value, $key = null)
@@ -627,7 +698,9 @@ class Arr
         [$value, $key] = static::explodePluckParameters($value, $key);
 
         foreach ($array as $item) {
-            $itemValue = data_get($item, $value);
+            $itemValue = $value instanceof Closure
+                ? $value($item)
+                : data_get($item, $value);
 
             // If the key is "null", we will just append the value to the array and keep
             // looping. Otherwise we will key the array using the value of the key we
@@ -635,7 +708,9 @@ class Arr
             if (is_null($key)) {
                 $results[] = $itemValue;
             } else {
-                $itemKey = data_get($item, $key);
+                $itemKey = $key instanceof Closure
+                    ? $key($item)
+                    : data_get($item, $key);
 
                 if (is_object($itemKey) && method_exists($itemKey, '__toString')) {
                     $itemKey = (string) $itemKey;
@@ -651,15 +726,15 @@ class Arr
     /**
      * Explode the "value" and "key" arguments passed to "pluck".
      *
-     * @param  string|array  $value
-     * @param  string|array|null  $key
+     * @param  string|array|Closure  $value
+     * @param  string|array|Closure|null  $key
      * @return array
      */
     protected static function explodePluckParameters($value, $key)
     {
         $value = is_string($value) ? explode('.', $value) : $value;
 
-        $key = is_null($key) || is_array($key) ? $key : explode('.', $key);
+        $key = is_null($key) || is_array($key) || $key instanceof Closure ? $key : explode('.', $key);
 
         return [$value, $key];
     }
@@ -878,10 +953,10 @@ class Arr
     }
 
     /**
-     * Get the first item in the collection, but only if exactly one item exists. Otherwise, throw an exception.
+     * Get the first item in the array, but only if exactly one item exists. Otherwise, throw an exception.
      *
      * @param  array  $array
-     * @param  callable  $callback
+     * @param  (callable(mixed, array-key): array)|null  $callback
      *
      * @throws \Illuminate\Support\ItemNotFoundException
      * @throws \Illuminate\Support\MultipleItemsFoundException
@@ -989,7 +1064,7 @@ class Arr
     /**
      * Conditionally compile classes from an array into a CSS class list.
      *
-     * @param  array  $array
+     * @param  array|string  $array
      * @return string
      */
     public static function toCssClasses($array)
@@ -1012,7 +1087,7 @@ class Arr
     /**
      * Conditionally compile styles from an array into a style list.
      *
-     * @param  array  $array
+     * @param  array|string  $array
      * @return string
      */
     public static function toCssStyles($array)

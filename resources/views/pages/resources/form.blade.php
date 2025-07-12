@@ -39,6 +39,7 @@
 
 @push('scripts')
     <script type="module">
+        // Handle Save and Add More button click
         document.getElementById('saveAndAddMore')?.addEventListener('click', function() {
             const form = document.getElementById('{{ $resourceName }}Form');
             const input = document.createElement('input');
@@ -47,6 +48,40 @@
             input.value = '1';
             form.appendChild(input);
             form.submit();
+        });
+
+        // Disable submit buttons on form submission
+        document.getElementById('{{ $resourceName }}Form').addEventListener('submit', function() {
+            // Disable the Submit button
+            const submitButton = document.getElementById('submitButton');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="bx bx-loader bx-spin"></i> Processing...';
+            }
+
+            // Disable the Save and Add More button
+            const saveAndAddMoreButton = document.getElementById('saveAndAddMore');
+            if (saveAndAddMoreButton) {
+                saveAndAddMoreButton.disabled = true;
+                saveAndAddMoreButton.innerHTML = '<i class="bx bx-loader bx-spin"></i> Processing...';
+            }
+        });
+
+        // Re-enable buttons if validation errors exist
+        window.addEventListener('load', function() {
+            @if ($errors->any())
+                const submitButton = document.getElementById('submitButton');
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '{{ isset($model) ? __('button.update') : __('button.submit') }}';
+                }
+
+                const saveAndAddMoreButton = document.getElementById('saveAndAddMore');
+                if (saveAndAddMoreButton) {
+                    saveAndAddMoreButton.disabled = false;
+                    saveAndAddMoreButton.innerHTML = '{{ __('button.save_and_add_more') }}';
+                }
+            @endif
         });
     </script>
 @endpush

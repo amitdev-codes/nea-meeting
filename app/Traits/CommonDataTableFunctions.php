@@ -59,12 +59,13 @@ trait CommonDataTableFunctions
         return view('components.datatables.checkbox', ['name' => $model_ids, 'id' => $id])->render();
     }
 
-    protected function getCommonDom(): string
-    {
-        return "<'row align-items-center'<'col-md-3'l><'col-md-6 text-center'B><'col-md-3'f>>".
-               "<'row'<'col-md-12'tr>>".
-               "<'row'<'col-md-6'i><'col-md-6'p>>";
-    }
+protected function getCommonDom(): string
+{
+    return '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' .
+           '<"row"<"col-sm-12"Br>>' . // Add 'r' for responsive control column
+           '<"row"<"col-sm-12"t>>' .
+           '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>';
+}
 
     protected function generateFilename(string $modelName): string
     {

@@ -40,7 +40,7 @@ class NepaliCalendarSeeder extends Seeder
             // BS 2025
             2025 => [
                 'start_date' => '1968-04-13', // Leap year adjustment
-                'months' => [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 29],
+                'months' => [31, 31, 32, 32, 31, 30, 30, 30, 29, 30, 30, 29],
             ],
             // BS 2026
             2026 => [
@@ -302,7 +302,7 @@ class NepaliCalendarSeeder extends Seeder
             // BS 2082
             2082 => [
                 'start_date' => '2025-04-14',
-                'months' => [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 30],
+                'months' => [31, 31, 32, 32, 31, 30, 30, 30, 29, 30, 29, 30],
             ],
             // BS 2083
             2083 => [

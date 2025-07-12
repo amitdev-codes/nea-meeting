@@ -124,6 +124,8 @@ class QueryDataTable extends DataTableAbstract
     public function make(bool $mDataSupport = true): JsonResponse
     {
         try {
+            $this->validateMinLengthSearch();
+
             $results = $this->prepareQuery()->results();
             $processed = $this->processResults($results, $mDataSupport);
             $data = $this->transform($results, $processed);
@@ -388,7 +390,7 @@ class QueryDataTable extends DataTableAbstract
      */
     protected function resolveRelationColumn(string $column): string
     {
-        return $column;
+        return $this->addTablePrefix($this->query, $column);
     }
 
     /**
@@ -451,7 +453,7 @@ class QueryDataTable extends DataTableAbstract
      */
     protected function compileQuerySearch($query, string $column, string $keyword, string $boolean = 'or'): void
     {
-        $column = $this->addTablePrefix($query, $column);
+        $column = $this->wrap($this->addTablePrefix($query, $column));
         $column = $this->castColumn($column);
         $sql = $column.' LIKE ?';
 
@@ -470,20 +472,96 @@ class QueryDataTable extends DataTableAbstract
      */
     protected function addTablePrefix($query, string $column): string
     {
-        if (! str_contains($column, '.')) {
-            $q = $this->getBaseQueryBuilder($query);
-            $from = $q->from ?? '';
+        // Column is already prefixed
+        if (str_contains($column, '.')) {
+            return $column;
+        }
 
-            if (! $from instanceof Expression) {
-                if (str_contains((string) $from, ' as ')) {
-                    $from = explode(' as ', (string) $from)[1];
+        // Extract selected columns from the query
+        $selects = $this->getSelectedColumns($query);
+
+        // We have a match
+        if (isset($selects['columns'][$column])) {
+            return $selects['columns'][$column];
+        }
+
+        // Multiple wildcards => Unable to determine prefix
+        if (in_array('*', $selects['wildcards']) || count(array_unique($selects['wildcards'])) > 1) {
+            return $column;
+        }
+
+        // Use the only wildcard available
+        if (! empty($selects['wildcards'])) {
+            return $selects['wildcards'][0].'.'.$column;
+        }
+
+        // Fallback on table prefix
+        return ltrim($this->getTablePrefix($query).'.'.$column, '.');
+    }
+
+    /**
+     * Try to get the base table prefix.
+     * To be used to prevent ambiguous field name.
+     *
+     * @param  QueryBuilder|EloquentBuilder  $query
+     */
+    protected function getTablePrefix($query): ?string
+    {
+        $q = $this->getBaseQueryBuilder($query);
+        $from = $q->from ?? '';
+
+        if (! $from instanceof Expression) {
+            if (str_contains((string) $from, ' as ')) {
+                $from = explode(' as ', (string) $from)[1];
+            }
+
+            return $from;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get declared column names from the query.
+     *
+     * @param  QueryBuilder|EloquentBuilder  $query
+     */
+    protected function getSelectedColumns($query): array
+    {
+        $q = $this->getBaseQueryBuilder($query);
+
+        $selects = [
+            'wildcards' => [],
+            'columns' => [],
+        ];
+
+        foreach ($q->columns ?? [] as $select) {
+            $sql = trim($select instanceof Expression ? $select->getValue($this->getConnection()->getQueryGrammar()) : $select);
+            // Remove expressions
+            $sql = preg_replace('/\s*\w*\((?:[^()]*|(?R))*\)/', '_', $sql);
+            // Remove multiple spaces
+            $sql = preg_replace('/\s+/', ' ', $sql);
+            // Remove wrappers
+            $sql = str_replace(['`', '"', '[', ']'], '', $sql);
+            // Loop on select columns
+            foreach (explode(',', $sql) as $column) {
+                $column = trim($column);
+                if (preg_match('/[\w.]+\s+(?:as\s+)?([a-zA-Z0-9_]+)$/i', $column, $matches)) {
+                    // Column with alias
+                    $selects['columns'][$matches[1]] = $matches[1];
+                } elseif (preg_match('/^([\w.]+)$/i', $column)) {
+                    // Column without alias
+                    [$table, $name] = str_contains($column, '.') ? explode('.', $column) : [null, $column];
+                    if ($name === '*') {
+                        $selects['wildcards'][] = $table ?? '*';
+                    } else {
+                        $selects['columns'][$name] = $column;
+                    }
                 }
-
-                $column = $from.'.'.$column;
             }
         }
 
-        return $this->wrap($column);
+        return $selects;
     }
 
     /**
@@ -666,11 +744,10 @@ class QueryDataTable extends DataTableAbstract
             })
             ->reject(fn ($orderable) => $this->isBlacklisted($orderable['name']) && ! $this->hasOrderColumn($orderable['name']))
             ->each(function ($orderable) {
-                $column = $this->resolveRelationColumn($orderable['name']);
-
                 if ($this->hasOrderColumn($orderable['name'])) {
-                    $this->applyOrderColumn($column, $orderable);
+                    $this->applyOrderColumn($orderable);
                 } else {
+                    $column = $this->resolveRelationColumn($orderable['name']);
                     $nullsLastSql = $this->getNullsLastSql($column, $orderable['direction']);
                     $normalSql = $this->wrap($column).' '.$orderable['direction'];
                     $sql = $this->nullsLast ? $nullsLastSql : $normalSql;
@@ -690,7 +767,7 @@ class QueryDataTable extends DataTableAbstract
     /**
      * Apply orderColumn custom query.
      */
-    protected function applyOrderColumn(string $column, array $orderable): void
+    protected function applyOrderColumn(array $orderable): void
     {
         $sql = $this->columnDef['order'][$orderable['name']]['sql'];
         if ($sql === false) {
@@ -698,7 +775,7 @@ class QueryDataTable extends DataTableAbstract
         }
 
         if (is_callable($sql)) {
-            call_user_func($sql, $this->query, $orderable['direction'], $column);
+            call_user_func($sql, $this->query, $orderable['direction'], fn ($column) => $this->resolveRelationColumn($column));
         } else {
             $sql = str_replace('$1', $orderable['direction'], (string) $sql);
             $bindings = $this->columnDef['order'][$orderable['name']]['bindings'];

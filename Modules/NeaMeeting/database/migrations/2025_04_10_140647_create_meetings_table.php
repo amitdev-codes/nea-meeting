@@ -36,6 +36,8 @@ return new class extends Migration
             $table->string('google_calendar_event_id')->nullable();
             $table->string('google_calendar_link')->nullable();
             $table->timestamps();
+
+            $table->unique(['title', 'meeting_date', 'start_time']);
         });
     }
 
