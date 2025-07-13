@@ -74,16 +74,49 @@ class MeetingController extends BaseAdminController
         return $this->renderForm($this->formView,null,['users' => $users,'googleCalendarEnabled' => app(GoogleCalendarService::class)->isEnabled(),
         'organizations' => $organizations,'selectedOrganizations' => $selectedOrganizations]);
     }
-    
+    // public function store(StoreMeetingRequest $request)
+    // {
+    //     return $this->handleRequest($request, function () use ($request) {
+    //         DB::beginTransaction();
+            
+    //         try {
+    //             $validated = $request->validated();
+    //             $meeting = Meeting::create($validated);
+
+    //             // Handle external contacts
+    //             $this->handleExternalContacts($meeting, $validated);
+                
+    //             // Handle media uploads
+    //             $this->handleMediaUploads($request, $meeting);
+    //             $this->handleMeetingDocuments($request, $meeting);
+
+    //             // Handle Google Calendar integration
+    //             $this->handleGoogleCalendarIntegration($request, $meeting);
+
+    //             // Send notifications
+    //             $this->handleNotifications($request, $meeting);
+
+    //             DB::commit();
+                
+    //             return $this->handleSuccessRedirect($request);
+                
+    //         } catch (\Exception $e) {
+    //             DB::rollBack();
+    //             throw $e;
+    //         }
+    //     }, 'admin.meetings.index', 'Meeting created successfully.', 'Failed to create the Meeting.');
+    // }
+        
 
     public function store(StoreMeetingRequest $request)
     {
         return $this->handleRequest($request, function () use ($request) {
             DB::beginTransaction();
-            
             try {
                 $validated=$request->validated();
+                // dd($validated);
                 $meeting = Meeting::create($validated);
+
                 if ($validated['is_external'] && isset($validated['external_contacts'])) {
                     foreach ($validated['external_contacts'] as $contact) {
                         $meeting->externalContacts()->create($contact);
@@ -97,10 +130,23 @@ class MeetingController extends BaseAdminController
                     $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
                 }
 
+                // dd($meeting);
+
                 // Add Google Calendar integration - Only if enabled in settings
                 if ($this->googleCalendarService->isEnabled() && $request->boolean('add_to_google_calendar', true)) {
                     try {
-                        $googleEvent = $this->googleCalendarService->createEvent($meeting);
+                        $organizationIds = $request->organizations ?? [];
+                        $users = User::whereIn('organization_id', $organizationIds)->whereNotNull('google_access_token')->get();
+                        $usersArray = $users->toArray();
+                        $eventData = [
+                            'title' => $meeting->title,
+                            'description' => $meeting->description,
+                            'start_time' => $meeting->start_time,
+                            'end_time' => $meeting->end_time,
+                            'attendees' => $users->pluck('email')->toArray()
+                        ];
+                        $googleEvent = $this->googleCalendarService->createEventForMultipleUsers($users, $eventData);
+
                         if ($googleEvent) {
                             Log::info('Google Calendar event created for meeting #' . $meeting->id);
                         }
@@ -118,8 +164,9 @@ class MeetingController extends BaseAdminController
                         'organization_ids' => $request->organizations ?? [],
                     ]));
                 }
-                
 
+
+        
                 DB::commit();
                 if ($request->has('save_and_add_more')) {
                     return redirect()
@@ -483,5 +530,6 @@ class MeetingController extends BaseAdminController
             return redirect()->back()->with('error', 'Failed to send notifications. Please try again.');
         }
     }
-    
+
+        
 }

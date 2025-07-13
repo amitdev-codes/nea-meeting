@@ -17,48 +17,12 @@ class MeetingDataTable extends DataTable
 {
     use CommonDataTableFunctions;
 
-    protected array $searchableColumns = [
-        'status',
-        'meeting_type',
-        'title',
-        'meeting_location',
-        'meeting_date',
-    ];
-
-    protected array $dropdownColumns = [
-        'status' => [
-            'options' => [], // Populated in constructor
-            'searchBy' => 'value' // Search by enum value
-        ],
-        'meeting_type' => [
-            'options' => [], // Populated in constructor
-            'searchBy' => 'value' // Search by enum value
-        ],
-    ];
+    protected array $searchableColumns = [];
+    protected array $dropdownColumns = [];
 
     public function __construct()
     {
         parent::__construct();
-
-        // Populate meeting_type dropdown
-        $this->dropdownColumns['meeting_type']['options'] = array_reduce(
-            MeetingType::toArray(),
-            function ($carry, $item) {
-                $carry[$item[0]] = $item[1]; // Map value => formatted_name
-                return $carry;
-            },
-            []
-        );
-
-        // Populate status dropdown (assuming MeetingStatus has a similar toArray method)
-        $this->dropdownColumns['status']['options'] = array_reduce(
-            MeetingStatus::toArray(),
-            function ($carry, $item) {
-                $carry[$item[0]] = $item[1]; // Map value => formatted_name
-                return $carry;
-            },
-            []
-        );
     }
 
     public function dataTable(QueryBuilder $query): EloquentDataTable
@@ -114,11 +78,6 @@ class MeetingDataTable extends DataTable
 
                 return $this->getMeetingStatusBadge($calculatedStatus);
             })
-            // ->addColumn('action', $this->addActionColumn(
-            //     'form',
-            //     $this->getRoutes(),
-            //     $this->getPermissions('meetings')
-            // ))
             ->addColumn('action', function ($row) {
                 // Get the Closure from addActionColumn and evaluate it with the current row
                 $actionClosure = $this->addActionColumn(
@@ -226,10 +185,7 @@ class MeetingDataTable extends DataTable
         }
     
         // Custom status ordering: Ongoing, Scheduled, Completed, Cancelled
-        $query->orderByRaw("FIELD(status, 'Ongoing', 'Scheduled', 'Completed', 'Cancelled')")
-        
-              ->orderBy('start_time', 'asc');
-    
+        $query->orderByRaw("FIELD(status, 'Ongoing', 'Scheduled', 'Completed', 'Cancelled')")->orderBy('start_time', 'asc');
         return $query;
     }
 
@@ -239,40 +195,19 @@ class MeetingDataTable extends DataTable
             ->setTableId('meetings-table')
             ->columns($this->getColumns())
             ->dom($this->getCommonDom())
-            ->orderBy(0)
+           ->orderBy(1)
             ->buttons(
                 array_merge(
                     $this->dtActionButtons('meetings', 'Meeting'),
                 )
             )
             ->parameters([
-                    'responsive' => true,
-                    'responsive' => [
-                        'details' => [
-                            'display' => 'auto'
-                        ]
-                    ],
-                    'initComplete' => 'function() {
-                                    ' . $this->initBulkDeleteScript('meeting_ids[]') . '
-                                    ' . $this->initDeleteScript() . '
-                                    ' . $this->initColumnSearch() . '
-                                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                                        if (isMobile) {
-                                            $(".dt-buttons").css({
-                                                "display": "flex",
-                                                "flex-wrap": "wrap",
-                                                "position": "static",
-                                                "margin-bottom": "10px",
-                                                "width": "100%"
-                                            });
-                                            
-                                            $(".dt-buttons .btn").css({
-                                                "display": "inline-block",
-                                                "margin": "2px",
-                                                "float": "none"
-                                            });
-                                        }
-                   }',
+                'initComplete' => 'function() {
+                    ' . $this->initBulkDeleteScript('meeting_ids[]') . '
+                    ' . $this->initDeleteScript() . '
+                    ' . $this->initColumnSearch() . '
+                    ' . $this->initStickyColumnsStyles() . '
+                }',
                 'headerCallback' => 'function(thead) {
                     $(thead).find("th").css({
                         "font-weight": "800",
@@ -281,6 +216,12 @@ class MeetingDataTable extends DataTable
                         "letter-spacing": "0.5px"
                     });
                 }',
+                'columnDefs' => [
+                    [
+                        'targets' => '_all', // Applies to all columns
+                        'className' => 'dt-head-nowrap' // Prevents text wrapping in headers
+                    ]
+                ]
             ]);
     }
 

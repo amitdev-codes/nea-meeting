@@ -10,10 +10,6 @@ use Illuminate\Support\Facades\Auth;
 trait CommonDataTableFunctions
 {
    
-
-    /**
-     * Add a checkbox column to the DataTable.
-     */
     protected function checkboxColumn(): Column
     {
         return Column::make('checkbox')
@@ -22,7 +18,8 @@ trait CommonDataTableFunctions
             ->searchable(false)
             ->exportable(false)
             ->printable(false)
-            ->width('1%');
+            ->width('2%')
+            ->addClass('position-sticky start-0');
     }
 
     /**
@@ -37,35 +34,21 @@ trait CommonDataTableFunctions
             ->exportable(false)
             ->searchable(false)
             ->printable(false)
-            ->width('10%');
+            ->width('13%')
+            ->addClass('text-center action-column position-sticky end-0');
     }
 
-
-    /**
-     * Make a column inline editable
-     * 
-     * @param string $field The field/column name
-     * @param mixed $value The field value
-     * @param mixed $id The row ID
-     * @return string HTML for the editable cell
-     */
-    protected function renderEditableCell(string $field, $value, $id, string $type = 'text', array $options = []): string
-    {
-        $optionsAttr = $type === 'select' ? 'data-options="' . htmlspecialchars(json_encode($options)) . '"' : '';
-        return '<div class="editable-cell w-100 h-100" data-field="' . $field . '" data-id="' . $id . '" data-type="' . $type . '" ' . $optionsAttr . '>' . $value . '</div>';
-    }
     protected function renderCheckbox($model_ids, $id): string
     {
         return view('components.datatables.checkbox', ['name' => $model_ids, 'id' => $id])->render();
     }
 
-protected function getCommonDom(): string
-{
-    return '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' .
-           '<"row"<"col-sm-12"Br>>' . // Add 'r' for responsive control column
-           '<"row"<"col-sm-12"t>>' .
-           '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>';
-}
+    protected function getCommonDom(): string
+    {
+        return "<'row align-items-center'<'col-md-3'l><'col-md-6 text-center'B><'col-md-3'f>>".
+               "<'row'<'col-md-12'tr>>".
+               "<'row'<'col-md-6'i><'col-md-6'p>>";
+    }
 
     protected function generateFilename(string $modelName): string
     {
@@ -94,12 +77,16 @@ protected function getCommonDom(): string
                     "gap": "2px"
                 });
                 
+                // Ensure sticky columns maintain their background color for current theme
                 const isDarkMode = document.documentElement.getAttribute("data-style") === "dark";
                 const bgColor = isDarkMode ? "#222" : "white";
                 const headerBgColor = isDarkMode ? "#333" : "#f8f9fa";
                 const oddRowBgColor = isDarkMode ? "#2d2d2d" : "#f9f9f9";
                 const evenRowBgColor = isDarkMode ? "#333" : "white";
-
+                
+                $("table.dataTable th.position-sticky").css("background-color", headerBgColor);
+                $("table.dataTable tbody tr.odd td.position-sticky").css("background-color", oddRowBgColor);
+                $("table.dataTable tbody tr.even td.position-sticky").css("background-color", evenRowBgColor);
             }',
             'createdRow' => 'function(row, data, dataIndex) {
                 // Apply custom styling to the action cell
@@ -109,7 +96,12 @@ protected function getCommonDom(): string
                 const isDarkMode = document.documentElement.getAttribute("data-style") === "dark";
                 const oddRowBgColor = isDarkMode ? "#2d2d2d" : "#f9f9f9";
                 const evenRowBgColor = isDarkMode ? "#333" : "white";
-            
+                
+                if ($(row).hasClass("odd")) {
+                    $("td.position-sticky", row).css("background-color", oddRowBgColor);
+                } else {
+                    $("td.position-sticky", row).css("background-color", evenRowBgColor);
+                }
             }'  
         ];
     }
@@ -167,7 +159,7 @@ protected function getCommonDom(): string
             [
                 'text' => '<i class="bx bx-plus me-1"></i>'.__('field.add_new'),
                 'action' => 'function() { window.location.href = "'.route($route).'"; }',
-                'className' => 'btn-primary add-btn me-2', 
+                'className' => 'btn-primary add-btn me-1', 
             ],
         ];
     }
@@ -295,167 +287,40 @@ protected function getCommonDom(): string
      * @return string JavaScript for inline editing
      */
 
-    protected function initInlineEditingScript(string $resource): string
-    {
-        return '
-        // Add styles for editable cells
-        if (!document.getElementById("inline-editing-styles")) {
-            $("<style id=\"inline-editing-styles\">")
-                .text(`
-                    .editable-cell { cursor: pointer; }
-                    .editable-cell:hover { background-color: #f8f9fa; }
-                    .editing-cell { padding: 0 !important; }
-                    .form-control-sm { width: 100%; }
-                `)
-                .appendTo("head");
-        }
-
-        // Click handler for editable cells
-        $(document).off("click", ".editable-cell").on("click", ".editable-cell", function(e) {
-            if ($(this).hasClass("being-edited")) return;
-
-            const cell = $(this);
-            const originalValue = cell.text().trim(); // Default for text/number
-            const field = cell.data("field");
-            const id = cell.data("id");
-            const type = cell.data("type");
-            const options = cell.data("options") || []; // For select type
-
-            // Create input container
-            const inputContainer = $("<div class=\"p-1\"></div>");
-            let input;
-
-            // Generate input based on type
-            if (type === "select") {
-                input = $("<select class=\"form-control form-control-sm\"></select>");
-                $.each(options, function(value, label) {
-                    input.append($("<option></option>").attr("value", value).text(label));
-                });
-                input.val(cell.data("options")[originalValue] ? originalValue : Object.keys(options)[0]); // Set default or original value
-            } else if (type === "number") {
-                input = $("<input type=\"number\" class=\"form-control form-control-sm\" />").val(originalValue);
-            } else {
-                input = $("<input type=\"text\" class=\"form-control form-control-sm\" />").val(originalValue);
-            }
-
-            // Replace cell content with input
-            cell.html(inputContainer.append(input));
-            cell.addClass("being-edited");
-            cell.parent().addClass("editing-cell");
-            input.focus();
-
-            // Function to save changes
-            function saveChanges(newValue) {
-                cell.html("<i class=\"fas fa-spinner fa-spin\"></i>"); // Loading indicator
-
-                const baseUrl = window.location.pathname.split("/").slice(0, -1).join("/");
-                const inlineEditUrl = `${baseUrl}/'.$resource.'/${id}/inline-edit`;
-
-                $.ajax({
-                    url: inlineEditUrl,
-                    method: "PATCH",
-                    headers: {
-                        "X-CSRF-TOKEN": $("meta[name=\"csrf-token\"]").attr("content")
-                    },
-                    data: {
-                        field: field,
-                        value: newValue
-                    },
-                    success: function(response) {
-                        cell.html(type === "select" ? options[newValue] : newValue); // Display label for select
-                        cell.removeClass("being-edited");
-                        cell.parent().removeClass("editing-cell");
-                        toastr.success(response.message || "Updated successfully");
-                    },
-                    error: function(xhr) {
-                        cell.html(originalValue);
-                        cell.removeClass("being-edited");
-                        cell.parent().removeClass("editing-cell");
-                        toastr.error(xhr.responseJSON?.message || "Update failed");
-                    }
-                });
-            }
-
-            // Save on blur (all types)
-            input.on("blur", function() {
-                const newValue = input.val();
-                if (newValue !== originalValue) {
-                    saveChanges(newValue);
-                } else {
-                    cell.html(originalValue);
-                    cell.removeClass("being-edited");
-                    cell.parent().removeClass("editing-cell");
-                }
-            });
-
-            // Save on Enter key (text and number)
-            if (type !== "select") {
-                input.on("keypress", function(e) {
-                    if (e.which === 13) { // Enter key
-                        const newValue = input.val();
-                        saveChanges(newValue);
-                    }
-                });
-            }
-
-            // Save on change (select)
-            if (type === "select") {
-                input.on("change", function() {
-                    const newValue = input.val();
-                    saveChanges(newValue);
-                });
-            }
-
-            // Cancel on Escape key (all types)
-            input.on("keydown", function(e) {
-                if (e.which === 27) { // Escape key
-                    cell.html(originalValue);
-                    cell.removeClass("being-edited");
-                    cell.parent().removeClass("editing-cell");
-                }
-            });
-
-            e.stopPropagation();
-        });
-        ';
-    }
     protected function initBulkDeleteScript(string $checkboxName): string
     {
-        if(auth()->user()->hasRole(['admin', 'superadmin'])) {
-            return '
-                $("#select-all").on("click", function() {
-                    var isChecked = this.checked;
-                    $("input[name=\''.$checkboxName.'\']").prop("checked", isChecked);
-                    updateBulkDeleteButton();
-                });
+        return '
+            $("#select-all").on("click", function() {
+                var isChecked = this.checked;
+                $("input[name=\''.$checkboxName.'\']").prop("checked", isChecked);
+                updateBulkDeleteButton();
+            });
 
-                $(document).on("change", "input[name=\''.$checkboxName.'\']", function() {
-                    updateBulkDeleteButton();
-                    if (!$(this).prop("checked")) {
-                        $("#select-all").prop("checked", false);
-                    } else {
-                        // Check if all checkboxes are checked
-                        if ($("input[name=\''.$checkboxName.'\']").length === $("input[name=\''.$checkboxName.'\']:checked").length) {
-                            $("#select-all").prop("checked", true);
-                        }
-                    }
-                });
-
-                function updateBulkDeleteButton() {
-                    var checkedCount = $("input[name=\''.$checkboxName.'\']:checked").length;
-                    var bulkDeleteBtn = $("#bulk-delete-btn");
-
-                    if (checkedCount > 0) {
-                        bulkDeleteBtn.removeClass("d-none");
-                        $(".bulk-delete-count").html("(" + checkedCount + " selected)");
-                    } else {
-                        bulkDeleteBtn.addClass("d-none");
-                        $(".bulk-delete-count").html("");
+            $(document).on("change", "input[name=\''.$checkboxName.'\']", function() {
+                updateBulkDeleteButton();
+                if (!$(this).prop("checked")) {
+                    $("#select-all").prop("checked", false);
+                } else {
+                    // Check if all checkboxes are checked
+                    if ($("input[name=\''.$checkboxName.'\']").length === $("input[name=\''.$checkboxName.'\']:checked").length) {
+                        $("#select-all").prop("checked", true);
                     }
                 }
-            ';
-        }
-        return '';
+            });
+
+            function updateBulkDeleteButton() {
+                var checkedCount = $("input[name=\''.$checkboxName.'\']:checked").length;
+                var bulkDeleteBtn = $("#bulk-delete-btn");
+
+                if (checkedCount > 0) {
+                    bulkDeleteBtn.removeClass("d-none");
+                    $(".bulk-delete-count").html("(" + checkedCount + " selected)");
+                } else {
+                    bulkDeleteBtn.addClass("d-none");
+                    $(".bulk-delete-count").html("");
+                }
+            }
+        ';
     }
 
     protected function generateBadges($items, array $options = []): string
@@ -520,11 +385,21 @@ protected function getCommonDom(): string
             })
             ->implode($options['separator']);
     }
-    public function getStatusBadge($status): string
+    public function getStatusBadge($status, $activeText = 'सक्रिय छ', $inactiveText = 'सक्रिय छैन'): string
     {
         $class = $status == 1 ? 'bg-primary' : 'bg-danger';
-        $text = $status == 1 ? __('field.active') : __('field.inactive');
-        // $text = $status == 1 ? $activeText : $inactiveText;
+        $text = $status == 1 ? $activeText : $inactiveText;
+
+        return sprintf(
+            '<span class="badge %s">%s</span>',
+            $class,
+            $text
+        );
+    }
+    public function getVerificationBadge($status, $activeText = 'स्वीकृत छ', $inactiveText = 'स्वीकृत छैन'): string
+    {
+        $class = $status == 1 ? 'bg-primary' : 'bg-danger';
+        $text = $status == 1 ? $activeText : $inactiveText;
 
         return sprintf(
             '<span class="badge %s">%s</span>',
@@ -703,7 +578,9 @@ protected function getCommonDom(): string
                 // console.log(columnData);
    
                 if (columnData === 'checkbox') {
-                    th.addClass('position-sticky start-0 sorting_disabled sorting_desc"').attr('style', 'left: 0; z-index: 1');
+                    console.log('amit');
+                    // th.addClass('position-sticky start-0').attr('style', 'left: 0; z-index: 1;' + (isDarkMode ? 'background-color: #333 !important;' : ''));
+                    th.addClass('position-sticky start-0 sorting_disabled sorting_desc"').attr('style', 'left: 0; z-index: 1;background-color:#333 !important;');
 
 
                 } else if (columnData === 'action') {
@@ -824,106 +701,6 @@ protected function getCommonDom(): string
      * 
      * @return string JavaScript for initializing sticky styles
      */
-
-    protected function getPermissions($resource): array
-    {
-        return [
-            'view' => "view-{$resource}",
-            'create' => "create-{$resource}",
-            'edit' => "edit-{$resource}",
-            'delete' => "delete-{$resource}",
-            'export' => "export-{$resource}",
-        ];
-    }
-    // starts advanced filter and column searching
-    protected function applyGlobalSearch($query, $searchValue)
-    {
-        if (!$searchValue) return $query;
-        
-        return $query->where(function ($q) use ($searchValue) {
-            foreach ($this->searchableColumns as $column) {
-                $this->applyColumnSearch($q, $column, $searchValue, true);
-            }
-        });
-    }
-    
-    protected function applyColumnSearch($query, $column, $value, $isOr = false)
-    {
-        if (empty($value)) return $query;
-        
-        $method = $isOr ? 'orWhere' : 'where';
-        
-        // Handle dropdown fields first (exact matches)
-        if (isset($this->dropdownFields[$column])) {
-            $fieldName = $this->dropdownFields[$column];
-            return $query->$method($fieldName, $value);
-        }
-        
-        // Handle relationships
-        if (isset($this->relationshipColumns[$column])) {
-            $relation = $this->relationshipColumns[$column];
-            return $query->$method(function ($q) use ($relation, $value) {
-                foreach ($relation['fields'] as $field) {
-                    $q->orWhere("{$relation['table']}.{$field}", 'like', "%{$value}%");
-                }
-            });
-        }
-        
-        // Handle multi-field columns (like name and name_np)
-        if (isset($this->multiFieldColumns[$column])) {
-            return $query->$method(function ($q) use ($column, $value) {
-                foreach ($this->multiFieldColumns[$column] as $field) {
-                    $q->orWhere($field, 'like', "%{$value}%");
-                }
-            });
-        }
-        
-        // Handle exact match columns
-        if (in_array($column, $this->exactMatchColumns)) {
-            return $query->$method("{$this->tableName}.{$column}", $value);
-        }
-        
-        // Regular column search
-        return $query->$method("{$this->tableName}.{$column}", 'like', "%{$value}%");
-    }
-    
-    protected function applyColumnSpecificSearch($query)
-    {
-        if (!request()->has('columns')) return $query;
-        
-        foreach (request('columns') as $column) {
-            $value = $column['search']['value'] ?? '';
-            if ($value === '') continue;
-            
-            $columnData = $column['data'];
-            if (!in_array($columnData, $this->searchableColumns)) continue;
-            
-            $this->applyColumnSearch($query, $columnData, $value);
-        }
-        
-        return $query;
-    }
-    public function getMeetingStatusBadge($status): string
-    {
-        // Convert string to enum if necessary
-        $status = $status instanceof MeetingStatus ? $status : MeetingStatus::from($status);
-        // Map enum cases to Bootstrap badge classes
-        $statusStyles = [
-            MeetingStatus::Scheduled->value => 'bg-info',
-            MeetingStatus::Ongoing->value => 'bg-warning',
-            MeetingStatus::Completed->value => 'bg-success',
-            MeetingStatus::Cancelled->value => 'bg-danger',
-        ];
-
-        $class = $statusStyles[$status->value] ?? 'bg-secondary'; // Fallback class
-        $text = ucfirst(strtolower($status->value)); // Format text (e.g., "Scheduled")
-
-        return sprintf(
-            '<span class="badge %s">%s</span>',
-            $class,
-            $text
-        );
-    }
     protected function initStickyColumnsStyles(): string
     {
         return <<<JS
@@ -1032,5 +809,101 @@ protected function getCommonDom(): string
             document.addEventListener('themeChanged', applyThemeStyles);
     JS;
     }
+    protected function getPermissions($resource): array
+    {
+        return [
+            'view' => "view-{$resource}",
+            'create' => "create-{$resource}",
+            'edit' => "edit-{$resource}",
+            'delete' => "delete-{$resource}",
+            'export' => "export-{$resource}",
+        ];
+    }
+    // starts advanced filter and column searching
+    protected function applyGlobalSearch($query, $searchValue)
+    {
+        if (!$searchValue) return $query;
+        return $query->where(function ($q) use ($searchValue) {
+            foreach ($this->searchableColumns as $column) {
+                $this->applyColumnSearch($q, $column, $searchValue, true);
+            }
+        });
+    }
+    
+    protected function applyColumnSearch($query, $column, $value, $isOr = false)
+    {
+        if (empty($value)) return $query;
+        
+        $method = $isOr ? 'orWhere' : 'where';
+        
+        // Handle dropdown fields first (exact matches)
+        if (isset($this->dropdownFields[$column])) {
+            $fieldName = $this->dropdownFields[$column];
+            return $query->$method($fieldName, $value);
+        }
+        
+        // Handle relationships
+        if (isset($this->relationshipColumns[$column])) {
+            $relation = $this->relationshipColumns[$column];
+            return $query->$method(function ($q) use ($relation, $value) {
+                foreach ($relation['fields'] as $field) {
+                    $q->orWhere("{$relation['table']}.{$field}", 'like', "%{$value}%");
+                }
+            });
+        }
+        
+        // Handle multi-field columns (like name and name_np)
+        if (isset($this->multiFieldColumns[$column])) {
+            return $query->$method(function ($q) use ($column, $value) {
+                foreach ($this->multiFieldColumns[$column] as $field) {
+                    $q->orWhere($field, 'like', "%{$value}%");
+                }
+            });
+        }
+        
+        // Handle exact match columns
+        if (in_array($column, $this->exactMatchColumns)) {
+            return $query->$method("{$this->tableName}.{$column}", $value);
+        }
+        
+        return $query->$method("{$this->tableName}.{$column}", 'like', "%{$value}%");
+    }
+    public function getMeetingStatusBadge($status): string
+    {
+        // Convert string to enum if necessary
+        $status = $status instanceof MeetingStatus ? $status : MeetingStatus::from($status);
+        // Map enum cases to Bootstrap badge classes
+        $statusStyles = [
+            MeetingStatus::Scheduled->value => 'bg-info',
+            MeetingStatus::Ongoing->value => 'bg-warning',
+            MeetingStatus::Completed->value => 'bg-success',
+            MeetingStatus::Cancelled->value => 'bg-danger',
+        ];
 
+        $class = $statusStyles[$status->value] ?? 'bg-secondary'; // Fallback class
+        $text = ucfirst(strtolower($status->value)); // Format text (e.g., "Scheduled")
+
+        return sprintf(
+            '<span class="badge %s">%s</span>',
+            $class,
+            $text
+        );
+    }
+    
+    protected function applyColumnSpecificSearch($query)
+    {
+        if (!request()->has('columns')) return $query;
+        
+        foreach (request('columns') as $column) {
+            $value = $column['search']['value'] ?? '';
+            if ($value === '') continue;
+            
+            $columnData = $column['data'];
+            if (!in_array($columnData, $this->searchableColumns)) continue;
+            
+            $this->applyColumnSearch($query, $columnData, $value);
+        }
+        
+        return $query;
+    }
 }

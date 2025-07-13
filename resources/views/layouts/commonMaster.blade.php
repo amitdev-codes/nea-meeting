@@ -95,16 +95,14 @@
 
     </style>
     <!-- Include Styles -->
-    @include('layouts/sections/styles' . $isFront)
+    @include('layouts/sections/styles')
     @vite('resources/css/stylesheets/style.css')
     <!-- Helpers -->
-    @include('layouts/sections/scriptsIncludes' . $isFront)
+    @include('layouts/sections/scriptsIncludes')
 </head>
 
 <body>
-    <!-- Layout Content -->
     @yield('layoutContent')
-    <!-- Include Scripts -->
     <script>
         if (typeof require === 'undefined') {
             window.require = function(module) {
@@ -115,17 +113,5 @@
     </script>
     @include('layouts/sections/scripts')
     @stack('scripts')
-    <script type="module">
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }, function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
-            });
-        }
-    </script>
 </body>
-
 </html>

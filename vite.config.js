@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import laravel from "laravel-vite-plugin";
 import { glob } from "glob";
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 
 function GetFilesArray(query) {
     return glob.sync(query);
@@ -38,7 +39,10 @@ const LibsCssFiles = GetFilesArray("resources/assets/vendor/libs/**/*.css");
 const FontsScssFiles = GetFilesArray(
     "resources/assets/vendor/fonts/!(_)*.scss"
 );
-const imageFiles = GetFilesArray("resources/assets/img/**/*.{png,jpg,jpeg,gif,svg}");
+
+const imgFiles = GetFilesArray("resources/assets/img/**/*.{png,jpg,jpeg,gif,svg}");
+const imageFiles = GetFilesArray("resources/assets/images/**/*.{png,jpg,jpeg,gif,svg}");
+
 
 export default defineConfig({
     css: {
@@ -65,6 +69,7 @@ export default defineConfig({
                 ...LibsScssFiles,
                 ...LibsCssFiles,
                 ...FontsScssFiles,
+                ...imgFiles,
                 ...imageFiles,
             ],
             resolve: {
@@ -73,13 +78,38 @@ export default defineConfig({
                     jQuery: "jquery",
                     "window.jQuery": "jquery",
                     "~": "/node_modules",
-                    "@": "/resources/js",
+                    '@': '/resources/js',
                     "@assets": "/resources/assets",
-                    "@images": "/resources/assets/img",
+                    '@img': '/resources/assets/img', // Alias for img directory
+                    '@images': '/resources/assets/images', // Alias for images directory
                 },
             },
             refresh: true,
         }),
+        ViteImageOptimizer({
+            png: {
+                quality: 100,
+            },
+            jpeg: {
+                quality: 50,
+            },
+            jpg: {
+                quality: 50,
+            },
+            tiff: {
+                quality: 100,
+            },
+            gif: {},
+            webp: {
+                lossless: true,
+            },
+            avif: {
+                lossless: true,
+            },
+            cache: false,
+            cacheLocation: undefined,
+        }),
+
     ],
     optimizeDeps: {
         include: [
@@ -94,7 +124,6 @@ export default defineConfig({
     build: {
         outDir: 'public/build',
         assetsDir: 'assets',
-        cssCodeSplit: true, // Ensure CSS is split and loaded properly
         rollupOptions: {
             output: {
                 assetFileNames: (assetInfo) => {

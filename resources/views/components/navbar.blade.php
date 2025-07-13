@@ -10,7 +10,21 @@
     </div>
 
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-        <ul class="navbar-nav flex-row align-items-center ms-auto">
+        @if(auth()->user()->google_access_token)
+            <div class="alert alert-success">
+                ✅ Google Calendar is connected
+                <form method="POST" action="{{ route('google.disconnect') }}" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Disconnect</button>
+                </form>
+            </div>
+        @else
+            <div class="alert alert-info">
+                Connect your Google Calendar to sync meetings
+                <a href="{{ route('google.auth') }}" class="btn btn-primary">Connect Google Calendar</a>
+            </div>
+        @endif
+                <ul class="navbar-nav flex-row align-items-center ms-auto">
             <li class="nav-item dropdown dropdown-language me-2 me-xl-0">
                 <!-- Language Switcher -->
                 <a class="nav-link d-flex align-items-center" href="#" id="navbarDropdownLanguage" role="button"
