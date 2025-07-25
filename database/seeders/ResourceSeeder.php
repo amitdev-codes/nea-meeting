@@ -27,10 +27,7 @@ class ResourceSeeder extends Seeder
             //meetings
             ['name' => 'meetings', 'icon' => 'bx-lock', 'type' => 'resource'],
             ['name' => 'organizations', 'icon' => 'bx-lock', 'type' => 'resource'],
-            // ['name' => 'meeting-rooms', 'icon' => 'bx-lock', 'type' => 'resource'],
-            // ['name' => 'meeting-attendees', 'icon' => 'bx-lock', 'type' => 'resource'],
             ['name' => 'meeting-minutes', 'icon' => 'bx-lock', 'type' => 'resource'],
-
             ['name' => 'faqs', 'icon' => 'bx bx-question-mark', 'type' => 'resource'],
         ];
 
