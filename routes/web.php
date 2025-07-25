@@ -20,8 +20,6 @@ Route::middleware(['locale'])->group(function () {
         Route::middleware('verified')->group(function () {
             Route::get('/dashboard', [DashBoardController::class, 'dashboard'])->name('dashboard');
             Route::get('/proxy-image', [ImageController::class, 'proxy'])->name('proxy.image');
-            Route::resource('cumulative-progress',CumulativeProgressController::class)->names('admin.cumulative-progress');
-
         });
 
         Route::as('account.')->group(function () {

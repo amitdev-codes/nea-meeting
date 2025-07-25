@@ -1,5 +1,7 @@
 @extends('pages.resources.form')
-
+@push('vendor-style')
+    @vite('resources/assets/vendor/libs/dropzone5/dropzone.css')
+@endpush
 @section('form-fields')
     <div class="accordion" id="meetingFormAccordion">
         <!-- Section 1: Meeting Details -->
@@ -421,7 +423,9 @@
         color: #dc3545;
     }
 </style>
-
+@push('vendor-script')
+    @vite('resources/assets/vendor/libs/dropzone5/dropzone.js')
+@endpush
 @push('scripts')
     <script type="module">
         // Handle virtual meeting toggle

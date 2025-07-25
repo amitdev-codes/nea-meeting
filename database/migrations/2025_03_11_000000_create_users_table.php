@@ -34,6 +34,7 @@ return new class extends Migration
             $table->timestamp('last_login_at')->nullable();
             $table->timestamp('last_logout_at')->nullable();
             $table->rememberToken();
+
             $table->softDeletes();
             $table->timestamps();
         });

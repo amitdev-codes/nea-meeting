@@ -1,22 +1,7 @@
 @extends('layouts/contentNavbarLayout')
-
-<style>
-    table.dataTable thead th {
-        text-transform: none !important;
-    }
-    .filter-row th {
-        padding: 5px;
-    }
-    .filter-row input {
-        width: 100%;
-    }
-</style>
-
 @section('content')
     <x-breadcrumb :model="$modelClass" />
-
     <div class="container-xxl">
-        <!-- DataTable Grid -->
         <div class="card">
             <div class="card-header">
                 {{ $title }}
@@ -27,32 +12,29 @@
         </div>
     </div>
 @endsection
+@push('vendor-style')
+    @vite('resources/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css')
+@endpush
+
+@push('vendor-script')
+    @vite('resources/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js')
+@endpush
 
 @push('scripts')
     {{ $dataTable->scripts(attributes: ['type' => 'module']) }}
 @endpush
-@push('styles')
+@push('vendor-style')
 <style>
-    /* DataTable header styling */
-    .dataTable thead th {
-        font-weight: 800 !important;
-        font-size: 0.85rem !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
-        white-space: nowrap !important;
-        padding-top: 0.75rem !important;
-        padding-bottom: 0.75rem !important;
+    table.dataTable thead th {
+        text-transform: none !important;
     }
-    
-    /* Prevent header text wrapping */
-    .dt-head-nowrap {
-        white-space: nowrap !important;
+
+    .filter-row th {
+        padding: 5px;
     }
-    
-    /* Dark mode support */
-    html[data-style="dark"] .dataTable thead th {
-        background-color: #2d3748 !important;
-        color: #f7fafc !important;
+
+    .filter-row input {
+        width: 100%;
     }
 </style>
 @endpush

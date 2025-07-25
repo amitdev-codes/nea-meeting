@@ -85,14 +85,6 @@ class MeetingReminderCommand extends Command
                 return 1;
             }
 
-            // Process reminders based on the type
-            // if ($type === 'all' || $type === 'daily') {
-            //     if ($this->reminderConfig['daily']['enabled']) {
-            //         $this->processDailyReminders($emailActive, $smsActive);
-            //     } else {
-            //         $this->info('Daily reminders are disabled in configuration.');
-            //     }
-            // }
 
             if ($type === 'all' || $type === 'twoHour') {
                 if ($this->reminderConfig['twoHour']['enabled']) {
@@ -101,14 +93,6 @@ class MeetingReminderCommand extends Command
                     $this->info('Two-hour reminders are disabled in configuration.');
                 }
             }
-
-            // if ($type === 'all' || $type === 'halfHour') {
-            //     if ($this->reminderConfig['halfHour']['enabled']) {
-            //         $this->processHalfHourReminders($emailActive, $smsActive);
-            //     } else {
-            //         $this->info('Half-hour reminders are disabled in configuration.');
-            //     }
-            // }
 
             $this->info('Meeting reminders job completed.');
             Log::info('Meeting reminders job completed');

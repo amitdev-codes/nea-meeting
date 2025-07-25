@@ -22,16 +22,19 @@ class SmsServiceFactory
             ->with('provider')
             ->latest()
             ->first();
-        
-            if (!$activeConfig) {
-                \Log::warning('No active SMS configuration found, returning null');
-                return null; // Return null to skip SMS service initialization
+            if($activeConfig){
+                return match ($activeConfig->provider->code) {
+                    'sparrow' => new SparrowSmsService(),
+                    'generic' => new GenericSmsService(),
+                    default => throw new \Exception('Unsupported SMS provider: ' . $activeConfig->provider->code),
+                };
             }
         
-        return match ($activeConfig->provider->code) {
-            'sparrow' => new SparrowSmsService(),
-            'generic' => new GenericSmsService(),
-            default => throw new \Exception('Unsupported SMS provider: ' . $activeConfig->provider->code),
-        };
+            // if (!$activeConfig) {
+            //     \Log::warning('No active SMS configuration found, returning null');
+            //     return null; // Return null to skip SMS service initialization
+            // }
+        
+
     }
 }

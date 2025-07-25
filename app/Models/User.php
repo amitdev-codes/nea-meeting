@@ -16,12 +16,14 @@ use Modules\Master\Models\SubComponent;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Modules\GoogleCalendar\Models\UserGoogleToken;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable;
+    use  HasFactory, HasRoles, Notifiable;
+
     use LogsActivity;
 
     protected $fillable = [
@@ -45,7 +47,12 @@ class User extends Authenticatable
         'force_password_change',
         'last_login_at',
         'last_logout_at',
-        'organization_id'
+        'organization_id',
+
+        'google_access_token',
+        'google_refresh_token',
+        'google_token_expires_at',
+        'google_calendar_id',
     ];
 
     protected static $logName = 'User';
@@ -153,23 +160,8 @@ class User extends Authenticatable
         return $this->belongsTo(Category::class, 'category_id', 'id');
     }
 
-    // protected static function boot()
-    // {
-    //     parent::boot();
-
-    //     static::addGlobalScope('hideSuperadmin', function ($query) {
-    //         // Check if the current user is NOT a superadmin
-    //         if (!Auth::check() || !Auth::user()->hasRole('superadmin')) {
-    //             $query->whereDoesntHave('roles', function ($q) {
-    //                 $q->where('name', 'superadmin');
-    //             });
-    //         }
-    //     });
-    // }
-
-    // // If using Spatie Laravel Permission for roles
-    // public function hasRole($role)
-    // {
-    //     return $this->roles()->where('name', $role)->exists();
-    // }
+    public function googleToken()
+    {
+        return $this->hasOne(UserGoogleToken::class);
+    }
 }
