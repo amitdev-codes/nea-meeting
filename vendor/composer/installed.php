@@ -3,11 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-<<<<<<< HEAD
-        'reference' => '6b287700bbcdc8d50da954c82de3785edfe6dbd0',
-=======
-        'reference' => 'ad77f213740aee27278de3e0ffa8ed6c0c224ff2',
->>>>>>> google_calendar_integration
+        'reference' => '53306fef4ace27c7da3004e5b3cb1a5445aee9cd',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -536,11 +532,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-<<<<<<< HEAD
-            'reference' => '6b287700bbcdc8d50da954c82de3785edfe6dbd0',
-=======
-            'reference' => 'ad77f213740aee27278de3e0ffa8ed6c0c224ff2',
->>>>>>> google_calendar_integration
+            'reference' => '53306fef4ace27c7da3004e5b3cb1a5445aee9cd',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -592,9 +584,9 @@
             'dev_requirement' => false,
         ),
         'laravel/socialite' => array(
-            'pretty_version' => 'v5.21.0',
-            'version' => '5.21.0.0',
-            'reference' => 'd83639499ad14985c9a6a9713b70073300ce998d',
+            'pretty_version' => 'v5.23.0',
+            'version' => '5.23.0.0',
+            'reference' => 'e9e0fc83b9d8d71c8385a5da20e5b95ca6234cf5',
             'type' => 'library',
             'install_path' => __DIR__ . '/../laravel/socialite',
             'aliases' => array(),
