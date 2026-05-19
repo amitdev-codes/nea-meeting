@@ -17,10 +17,7 @@
                 {
                     "name": "menu.meetings",
                     "icon": "menu-icon tf-icons bx bx bxs-check-shield",
-                    "slug": [
-                        "admin.meetings.*",
-                        "admin.meeting-attendees.*"
-                    ],
+                    "slug": ["admin.meetings.*", "admin.meeting-attendees.*"],
                     "submenu": [
                         {
                             "url": "admin.meetings.index",
@@ -62,7 +59,11 @@
                 {
                     "name": "menu.settings",
                     "icon": "menu-icon tf-icons bx bx-cog",
-                    "slug": ["admin.sms-configurations.*", "admin.email-configurations.*"],
+                    "slug": [
+                        "admin.sms-configurations.*",
+                        "admin.email-configurations.*",
+                        "admin.nepali-calendars.*"
+                    ],
                     "submenu": [
                         {
                             "url": "admin.email-configurations.index",
@@ -75,6 +76,12 @@
                             "name": "menu.sms-configurations",
                             "slug": "admin.sms-configurations*",
                             "permission": "view-sms-configurations"
+                        },
+                        {
+                            "url": "admin.nepali-calendars.index",
+                            "name": "menu.nepali-calendars",
+                            "slug": "admin.nepali-calendars.*",
+                            "permission": "view-calendar"
                         }
                     ]
                 }

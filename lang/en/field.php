@@ -722,7 +722,13 @@ return [
 'upcoming_meetings'=>'Upcoming Meetings',
 'calendar'=>'Calendar',
 'dashboard'=>'Dashboard',
-
+'nepali-calendars'=>'Nepali Calendars',
+'years'=>'Years',
+'month'=>'Months',
+'days'=>'Days',
+'Nepali-calendars'=>'Nepali Calendars',
+'all_nepali-calendars'=>'Nepali Calendars',
+'bs_year'=>'BS Year',
 
 
 

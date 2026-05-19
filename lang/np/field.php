@@ -633,7 +633,13 @@ return [
     'all_sms-configurations' => 'सबै एसएमएस कन्फिगरेसनहरू',
     'Sms-configurations' => 'एसएमएस कन्फिगरेसनहरू',
 
-
+'years' => 'वर्ष',
+'month' => 'महिना',
+'days' => 'दिन',
+'Nepali-calendars' => 'नेपाली पात्रो',
+'all_nepali-calendars' => 'सबै नेपाली पात्रो',
+'NepaliCalendars'=>'नेपाली पात्रो',
+'bs_year'=>'ब्स वर्ष',
 
 
 

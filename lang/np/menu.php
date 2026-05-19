@@ -134,6 +134,8 @@ return [
     'sms-configurations' => 'एसएमएस कन्फिगरेसनहरू',
     'email-configurations' => 'इमेल कन्फिगरेसनहरू',
     'settings'=>'सेटिङहरू',
+    'nepali-calendars'=>'नेपाली कालेण्डर सेटिङहरू',
+
 
 
 

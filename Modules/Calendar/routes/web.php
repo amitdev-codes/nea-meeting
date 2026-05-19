@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Calendar\Http\Controllers\CalendarController;
+use Modules\Calendar\Http\Controllers\NepaliCalendarController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +17,10 @@ use Modules\Calendar\Http\Controllers\CalendarController;
 
 Route::group(['prefix' => 'calendar', 'middleware' => ['locale']], function () {
     // Route::resource('calendar', CalendarController::class)->names('calendar');
+    Route::resource('nepali-calendars',NepaliCalendarController::class)->names('admin.nepali-calendars');
+
+
+
     Route::get('/nepali-calendar', [CalendarController::class, 'index'])->name('admin.calendar');
     Route::get('/get-months/{year}', [CalendarController::class, 'getMonths'])->name('calendar.year');
     Route::get('/get-years', [CalendarController::class, 'getYears'])->name('calendar.get-year');

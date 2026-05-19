@@ -2,22 +2,22 @@
 
 namespace Modules\NeaMeeting\DataTables;
 
-use Carbon\Carbon;
-use App\Enums\MeetingType;
 use App\Enums\MeetingStatus;
-use Yajra\DataTables\Html\Column;
+use App\Traits\CommonDataTableFunctions;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Modules\NeaMeeting\Models\Meeting;
 use Yajra\DataTables\EloquentDataTable;
-use App\Traits\CommonDataTableFunctions;
-use Yajra\DataTables\Services\DataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
-use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Yajra\DataTables\Html\Column;
+use Yajra\DataTables\Services\DataTable;
 
 class MeetingDataTable extends DataTable
 {
     use CommonDataTableFunctions;
 
     protected array $searchableColumns = [];
+
     protected array $dropdownColumns = [];
 
     public function __construct()
@@ -45,8 +45,8 @@ class MeetingDataTable extends DataTable
                 $endTime = $row->end_time ? Carbon::parse($row->end_time)->format('H:i:s') : null;
 
                 // Combine meeting_date_ad with time
-                $startDateTime = Carbon::parse($row->meeting_date_ad . ' ' . $startTime);
-                $endDateTime = $endTime ? Carbon::parse($row->meeting_date_ad . ' ' . $endTime) : null;
+                $startDateTime = Carbon::parse($row->meeting_date_ad.' '.$startTime);
+                $endDateTime = $endTime ? Carbon::parse($row->meeting_date_ad.' '.$endTime) : null;
 
                 // Determine the status
                 $calculatedStatus = $row->status;
@@ -60,7 +60,7 @@ class MeetingDataTable extends DataTable
                         } elseif ($now->greaterThanOrEqualTo($startDateTime)) {
                             if ($endDateTime && $now->lessThan($endDateTime)) {
                                 $calculatedStatus = MeetingStatus::Ongoing->value;
-                            } elseif (!$endDateTime) {
+                            } elseif (! $endDateTime) {
                                 $calculatedStatus = MeetingStatus::Ongoing->value;
                             } else {
                                 $calculatedStatus = MeetingStatus::Completed->value;
@@ -79,21 +79,39 @@ class MeetingDataTable extends DataTable
                 return $this->getMeetingStatusBadge($calculatedStatus);
             })
             ->addColumn('action', function ($row) {
-                // Get the Closure from addActionColumn and evaluate it with the current row
+                // Generate the default action buttons (view/edit/delete)
                 $actionClosure = $this->addActionColumn(
                     'form',
                     $this->getRoutes(),
                     $this->getPermissions('meetings')
                 );
-                // Call the Closure to get the HTML string
+
                 $actionHtml = call_user_func($actionClosure, $row);
-    
-                // Append the notification button if the user has permission
-             
-                    $notifyButton = '<a href="' . route('admin.meetings.notify', ['meeting' => $row->id]) . '" class="btn btn-sm btn-outline-info notify-btn ms-1" title="Send Notification"><i class="bx bx-bell"></i></a>';
-                    $actionHtml = str_replace('</div>', $notifyButton . '</div>', $actionHtml);
-                
-    
+
+                // Disable notification button for Cancelled and Completed meetings
+                $isDisabled = in_array($row->status, [
+                    MeetingStatus::Cancelled->value,
+                    MeetingStatus::Completed->value,
+                ]);
+
+                if ($isDisabled) {
+                    $notifyButton = '<button type="button"
+                                class="btn btn-sm btn-outline-secondary ms-1"
+                                title="Notification not available for completed or cancelled meetings"
+                                disabled>
+                                <i class="bx bx-bell"></i>
+                         </button>';
+                } else {
+                    $notifyButton = '<a href="'.route('admin.meetings.notify', ['meeting' => $row->id]).'"
+                            class="btn btn-sm btn-outline-info notify-btn ms-1"
+                            title="Send Notification">
+                            <i class="bx bx-bell"></i>
+                         </a>';
+                }
+
+                // Append the button inside the action button group
+                $actionHtml = str_replace('</div>', $notifyButton.'</div>', $actionHtml);
+
                 return $actionHtml;
             })
             ->rawColumns(['checkbox', 'action', 'status']);
@@ -104,17 +122,17 @@ class MeetingDataTable extends DataTable
         $query = $model->newQuery();
         $dropdownFields = [
             'meeting_type' => 'meeting_type',
-            'status' => 'status'
+            'status' => 'status',
         ];
         $today = Carbon::today();
         $filter = request()->query('filter', 'total'); // Get the filter parameter, default to 'total'
-    
+
         // Organization-based filtering
-        if (auth()->check() && !auth()->user()->hasRole(['admin', 'superadmin'])) {
+        if (auth()->check() && ! auth()->user()->hasRole(['admin', 'superadmin'])) {
             $organizationId = auth()->user()->organization_id;
-            $query->whereRaw('JSON_CONTAINS(organizations, ?)', [json_encode((string)$organizationId)]);
+            $query->whereRaw('JSON_CONTAINS(organizations, ?)', [json_encode((string) $organizationId)]);
         }
-    
+
         // Time-based filtering based on the filter parameter
         switch ($filter) {
             case 'yesterday':
@@ -137,14 +155,14 @@ class MeetingDataTable extends DataTable
                 // No date filter for total meetings
                 break;
         }
-    
+
         // Default filter: Show only Ongoing or Scheduled meetings (unless filtered otherwise)
         $isStatusFiltered = false;
-    
+
         // Check if status filter is applied (dropdown search)
         if (request()->has('columns')) {
             foreach (request('columns') as $column) {
-                if (isset($column['data']) && $column['data'] === 'status' && !empty($column['search']['value'])) {
+                if (isset($column['data']) && $column['data'] === 'status' && ! empty($column['search']['value'])) {
                     $statusValue = $column['search']['value'];
                     $isStatusFiltered = true;
                     // Apply status filter from dropdown
@@ -152,7 +170,7 @@ class MeetingDataTable extends DataTable
                 }
             }
         }
-    
+
         // Global search
         if (request()->has('search') && request('search')['value']) {
             $search = request('search')['value'];
@@ -166,7 +184,7 @@ class MeetingDataTable extends DataTable
                 }
             });
         }
-    
+
         // Column-specific search (excluding status, already handled)
         if (request()->has('columns')) {
             foreach (request('columns') as $i => $column) {
@@ -183,9 +201,10 @@ class MeetingDataTable extends DataTable
                 }
             }
         }
-    
+
         // Custom status ordering: Ongoing, Scheduled, Completed, Cancelled
         $query->orderByRaw("FIELD(status, 'Ongoing', 'Scheduled', 'Completed', 'Cancelled')")->orderBy('start_time', 'asc');
+
         return $query;
     }
 
@@ -195,7 +214,7 @@ class MeetingDataTable extends DataTable
             ->setTableId('meetings-table')
             ->columns($this->getColumns())
             ->dom($this->getCommonDom())
-           ->orderBy(1)
+            ->orderBy(1)
             ->buttons(
                 array_merge(
                     $this->dtActionButtons('meetings', 'Meeting'),
@@ -203,10 +222,10 @@ class MeetingDataTable extends DataTable
             )
             ->parameters([
                 'initComplete' => 'function() {
-                    ' . $this->initBulkDeleteScript('meeting_ids[]') . '
-                    ' . $this->initDeleteScript() . '
-                    ' . $this->initColumnSearch() . '
-                    ' . $this->initStickyColumnsStyles() . '
+                    '.$this->initBulkDeleteScript('meeting_ids[]').'
+                    '.$this->initDeleteScript().'
+                    '.$this->initColumnSearch().'
+                    '.$this->initStickyColumnsStyles().'
                 }',
                 'headerCallback' => 'function(thead) {
                     $(thead).find("th").css({
@@ -219,9 +238,9 @@ class MeetingDataTable extends DataTable
                 'columnDefs' => [
                     [
                         'targets' => '_all', // Applies to all columns
-                        'className' => 'dt-head-nowrap' // Prevents text wrapping in headers
-                    ]
-                ]
+                        'className' => 'dt-head-nowrap', // Prevents text wrapping in headers
+                    ],
+                ],
             ]);
     }
 
@@ -236,13 +255,13 @@ class MeetingDataTable extends DataTable
             Column::make('end_time')->title(__('field.end_time')),
             Column::make('meeting_type')->title(__('field.meeting_type')),
             Column::make('status')->title(__('field.status')),
-            $this->actionColumn('admin.meetings')
+            $this->actionColumn('admin.meetings'),
         ];
     }
 
     protected function filename(): string
     {
-        return 'Meeting_' . date('YmdHis');
+        return 'Meeting_'.date('YmdHis');
     }
 
     protected function getRoutes(): array

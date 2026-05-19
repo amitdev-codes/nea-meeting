@@ -135,5 +135,6 @@ return [
 'sms-configurations'=>'SMS Configurations',
 'email-configurations'=>'Email Configurations',
 'settings'=>'Settings',
+'nepali-calendars'=>'Nepali Calendars',
 
 ];
