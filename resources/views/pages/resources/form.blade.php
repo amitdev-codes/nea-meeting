@@ -1,6 +1,15 @@
 @extends('layouts/contentNavbarLayout')
+@push('vendor-style')
+    @vite('resources/assets/vendor/libs/select2/select2.css')
+@endpush
+
+@push('vendor-script')
+    @vite('resources/assets/vendor/libs/select2/select2.js')
+@endpush
+@push('page-script')
+    @vite('resources/assets/js/forms-selects.js')
+@endpush
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
     <x-breadcrumb :model="$modelClass" />
     <div class="card">
         <div class="card-header">
@@ -34,7 +43,6 @@
             </form>
         </div>
     </div>
-</div>
 @endsection
 
 @push('scripts')

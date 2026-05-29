@@ -13,12 +13,12 @@ use Yajra\DataTables\Services\DataTable;
 class OrganizationDataTable extends DataTable
 {
     use CommonDataTableFunctions;
-    
+
     protected array $searchableColumns = [
         'name',
         'code'
     ];
-    
+
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return datatables()
@@ -28,15 +28,16 @@ class OrganizationDataTable extends DataTable
             ->addColumn('action', $this->addActionColumn(
                 'modal',
                 $this->getRoutes(),
-                $this->getPermissions('organizations')
+                $this->getPermissions('organizations'),
+                'organizations'
             ))
             ->rawColumns(['checkbox', 'action','status']);
     }
-    
+
     public function query(Organization $model): QueryBuilder
     {
         $query = $model->newQuery();
-        
+
         if (request()->has('search') && request('search')['value']) {
             $search = request('search')['value'];
             $query->where(function ($q) use ($search) {
@@ -45,7 +46,7 @@ class OrganizationDataTable extends DataTable
                 }
             });
         }
-        
+
         if (request()->has('columns')) {
             foreach (request('columns') as $i => $column) {
                 if (isset($column['search']['value']) && $column['search']['value'] !== '') {
@@ -56,10 +57,10 @@ class OrganizationDataTable extends DataTable
                 }
             }
         }
-        
+
         return $query;
     }
-    
+
     public function html(): HtmlBuilder
     {
         return $this->builder()
@@ -74,10 +75,10 @@ class OrganizationDataTable extends DataTable
             )
             ->parameters([
                 'initComplete' => 'function() {
-                    ' . $this->initBulkDeleteScript('organizations[]') . '
+                    ' . $this->initBulkDeleteScript('organization_ids[]') . '
                     ' . $this->initDeleteScript() . '
                     ' . $this->initColumnSearch() . '
-                    ' . $this->initStickyColumnsStyles() . ' 
+                    ' . $this->initStickyColumnsStyles() . '
                 }',
                 'headerCallback' => 'function(thead) {
                     $(thead).find("th").css({
@@ -90,12 +91,12 @@ class OrganizationDataTable extends DataTable
                 'columnDefs' => [
                     [
                         'targets' => '_all', // Applies to all columns
-                        'className' => 'dt-head-nowrap' // Prevents text wrapping in headers
-                    ]
-                ]
+                        'className' => 'dt-head-nowrap', // Prevents text wrapping in headers
+                    ],
+                ],
             ]);
     }
-    
+
     public function getColumns(): array
     {
         return [
@@ -107,12 +108,12 @@ class OrganizationDataTable extends DataTable
             $this->actionColumn()
         ];
     }
-    
+
     protected function filename(): string
     {
         return 'Organization_' . date('YmdHis');
     }
-    
+
     protected function getRoutes(): array
     {
         return [

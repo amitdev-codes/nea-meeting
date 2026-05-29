@@ -6,20 +6,19 @@
 @endphp
 
 <html class="light-style layout-navbar-fixed layout-compact layout-menu-fixed" lang="{{ $locale }}"
-    data-theme="theme-default" dir="ltr" data-assets-path="../../assets/" data-base-url="{{ url('/') }}"
-    data-framework="laravel" data-template="vertical-menu-template-" data-style="light">
+      data-theme="theme-default" dir="ltr" data-assets-path="../../../assets/" data-base-url="{{ url('/') }}"
+      data-framework="laravel" data-template="vertical-menu-template-" data-style="light">
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport"content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <!-- PWA Meta Tags -->
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="{{ config('app.name', 'Laravel') }}">
-    
+
     <!-- iOS Icons -->
     <link rel="apple-touch-icon" href="{{ asset('icons/icon-152x152.png') }}">
     <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('icons/icon-152x152.png') }}">
@@ -71,7 +70,6 @@
     <link rel="apple-touch-startup-image" media="screen and (device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="{{ asset('splash_screens /8.3__iPad_Mini_portrait.png')}}">
 
 
-    
     <title>@yield('title') | {{ config('app.name') }} </title>
     <link rel="icon" href="{{ asset('img/favicon.png') }}" type="image/x-icon">
     <meta name="description"
@@ -81,23 +79,10 @@
         content="{{ config('variables.templateKeyword') ? config('variables.templateKeyword') : '' }}">
     <!-- laravel CRUD token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <style>
-        @font-face {
-            font-family: Kalimati;
-            src: url('/fonts/kalimati.ttf');
-        }
-        .nepali_td {
-            font-family: kalimati, serif; /* Replace 'Your-English-Font' with the desired English font */
-        }
-        .dropdown-language {
-                z-index: 1000;
-            }
 
-    </style>
     <!-- Include Styles -->
     @include('layouts/sections/styles')
     @vite('resources/css/stylesheets/style.css')
-    <!-- Helpers -->
     @include('layouts/sections/scriptsIncludes')
 </head>
 

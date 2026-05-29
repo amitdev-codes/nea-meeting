@@ -1,91 +1,105 @@
 <?php
+
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class MenuHelper
 {
-    public static function canAccessMenu($menu): bool
+    /**
+     * Determine if the user can access the menu item.
+     */
+    public static function canAccessMenu($menu, array $userPermissions = []): bool
     {
-        if (!auth()->check()) {
-            //\Log::info("No authenticated user for menu: " . ($menu->name ?? 'unknown'));
+        $user = Auth::user();
+        if (! $user) {
             return false;
         }
 
-        if (isset($menu->url) && $menu->url === 'dashboard') {
-            //\Log::info("Dashboard access granted");
+        $url = $menu->url ?? null;
+
+        // Always allow dashboard
+        if ($url === 'dashboard') {
             return true;
         }
 
-        if (isset($menu->submenu)) {
-            $accessible = false;
+        // If menu has submenus, allow if any submenu is accessible
+        if (isset($menu->submenu) && is_iterable($menu->submenu)) {
             foreach ($menu->submenu as $submenu) {
-                if (static::hasPermissionForMenuItem($submenu)) {
-                    //\Log::info("Submenu accessible: " . ($submenu->name ?? 'unknown') . " with permission: " . ($submenu->permission ?? 'none'));
-                    $accessible = true;
-                }
-            }
-            //\Log::info("Menu: " . ($menu->name ?? 'unknown') . " - Any submenu accessible: " . ($accessible ? 'true' : 'false'));
-            return $accessible;
-        }
-
-        $access = static::hasPermissionForMenuItem($menu);
-        //\Log::info("Single menu: " . ($menu->name ?? 'unknown') . " - Access: " . ($access ? 'true' : 'false'));
-        return $access;
-    }
-
-    private static function hasPermissionForMenuItem($menu): bool
-    {
-        if (isset($menu->permission)) {
-            $can = auth()->user()->can($menu->permission);
-            //\Log::info("Checking explicit permission: {$menu->permission} - User can: " . ($can ? 'true' : 'false'));
-            return $can;
-        }
-
-        $slug = $menu->slug ?? $menu->url ?? '';
-        if (is_array($slug)) {
-            foreach ($slug as $pattern) {
-                if (static::hasPermissionForSlug($pattern)) {
-                    //\Log::info("Array slug pattern accessible: {$pattern}");
+                if (static::hasPermissionForMenuItem($submenu, $userPermissions)) {
                     return true;
                 }
             }
-            //\Log::info("No access for array slug: " . json_encode($slug));
+
             return false;
         }
 
-        $access = static::hasPermissionForSlug($slug);
-        //\Log::info("Slug: {$slug} - Access: " . ($access ? 'true' : 'false'));
-        return $access;
+        return static::hasPermissionForMenuItem($menu, $userPermissions);
     }
 
-    private static function hasPermissionForSlug(string $slug): bool
+    /**
+     * Check if the menu item has permission or slug access.
+     */
+    public static function hasPermissionForMenuItem($menu, array $userPermissions): bool
     {
-        if (empty($slug)) {
-            //\Log::info("Empty slug, denying access");
+        // 1️⃣ Direct permission
+        $permissionName = $menu->permission ?? null;
+        if ($permissionName) {
+            return in_array($permissionName, $userPermissions);
+        }
+
+        // 2️⃣ Check slug if permission not defined
+        $slugs = $menu->slug ?? $menu->url ?? '';
+        if (! is_array($slugs)) {
+            $slugs = [$slugs];
+        }
+
+        foreach ($slugs as $slug) {
+            if (static::hasPermissionForSlug($slug, $userPermissions)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check slug against preloaded permissions.
+     */
+    private static function hasPermissionForSlug(string $slug, array $userPermissions): bool
+    {
+        if ($slug === '') {
             return false;
         }
 
+        // Wildcard slug: admin.form-entries.* -> view-form-entries
         if (Str::endsWith($slug, '.*')) {
-            $resource = Str::replaceLast('.*', '', $slug);
-            $resource = explode('.', $resource)[1] ?? $resource;
-            $permission = "view-{$resource}";
-            $can = auth()->user()->can($permission);
-            //\Log::info("Wildcard slug: {$slug} - Checking permission: {$permission} - User can: " . ($can ? 'true' : 'false'));
-            return $can;
+            $resource = Str::beforeLast($slug, '.*'); // admin.form-entries
+            $segments = explode('.', $resource);
+            $permission = "view-{$segments[1]}"; // take second segment as resource
+
+            return in_array($permission, $userPermissions);
         }
 
+        // Standard slug: admin.users.index -> view-users
         $segments = explode('.', $slug);
         if (count($segments) >= 2) {
-            $resource = $segments[1];
-            $permission = "view-{$resource}";
-            $can = auth()->user()->can($permission);
-            //\Log::info("Route slug: {$slug} - Checking permission: {$permission} - User can: " . ($can ? 'true' : 'false'));
-            return $can;
+            $permission = "view-{$segments[1]}";
+
+            return in_array($permission, $userPermissions);
         }
 
-        $can = auth()->user()->can($slug);
-        //\Log::info("Fallback slug: {$slug} - User can: " . ($can ? 'true' : 'false'));
-        return $can;
+        // Fallback: slug as permission
+        return in_array($slug, $userPermissions);
+    }
+
+    /**
+     * Resolve dynamic menu labels (for roles like cluster data entry forms)
+     */
+    public static function resolveLabel($nameKey): ?string
+    {
+        $user = Auth::user();
+        return __($nameKey);
     }
 }

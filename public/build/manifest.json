@@ -19,6 +19,54 @@
     "src": "resources/assets/css/demo.css",
     "isEntry": true
   },
+  "resources/assets/images/android-chrome-192x192.png": {
+    "file": "assets/img/android-chrome-192x192-CPhSzSSr.png",
+    "src": "resources/assets/images/android-chrome-192x192.png"
+  },
+  "resources/assets/images/android-chrome-512x512.png": {
+    "file": "assets/img/android-chrome-512x512-CnDt4b7t.png",
+    "src": "resources/assets/images/android-chrome-512x512.png"
+  },
+  "resources/assets/images/apple-touch-icon.png": {
+    "file": "assets/img/apple-touch-icon-DrFZySLM.png",
+    "src": "resources/assets/images/apple-touch-icon.png"
+  },
+  "resources/assets/images/favicon-16x16.png": {
+    "file": "assets/img/favicon-16x16-BE6aVEFw.png",
+    "src": "resources/assets/images/favicon-16x16.png"
+  },
+  "resources/assets/images/favicon-32x32.png": {
+    "file": "assets/img/favicon-32x32-pFNH-dki.png",
+    "src": "resources/assets/images/favicon-32x32.png"
+  },
+  "resources/assets/images/favicon.png": {
+    "file": "assets/img/favicon-Bjk3OYIF.png",
+    "src": "resources/assets/images/favicon.png"
+  },
+  "resources/assets/images/gov.png": {
+    "file": "assets/img/gov-as8FLWdF.png",
+    "src": "resources/assets/images/gov.png"
+  },
+  "resources/assets/images/nea-logo.png": {
+    "file": "assets/img/nea-logo-Cru7UDgq.png",
+    "src": "resources/assets/images/nea-logo.png"
+  },
+  "resources/assets/images/nepal-map.png": {
+    "file": "assets/img/nepal-map-CHNHO2uE.png",
+    "src": "resources/assets/images/nepal-map.png"
+  },
+  "resources/assets/images/nepalflag.gif": {
+    "file": "assets/img/nepalflag-CBVq6uIe.gif",
+    "src": "resources/assets/images/nepalflag.gif"
+  },
+  "resources/assets/images/no-image.png": {
+    "file": "assets/img/no-image-DI69CNkT.png",
+    "src": "resources/assets/images/no-image.png"
+  },
+  "resources/assets/images/social-share.png": {
+    "file": "assets/img/social-share-CWFHxwm7.png",
+    "src": "resources/assets/images/social-share.png"
+  },
   "resources/assets/img/customizer/1.png": {
     "file": "assets/img/1-C3Yu_o2r.png",
     "src": "resources/assets/img/customizer/1.png"
@@ -230,6 +278,66 @@
   "resources/assets/img/customizer/windows.png": {
     "file": "assets/img/windows-vUBFvEL3.png",
     "src": "resources/assets/img/customizer/windows.png"
+  },
+  "resources/assets/img/illustrations/banner1.jpg": {
+    "file": "assets/img/banner1-BsogQj2G.jpg",
+    "src": "resources/assets/img/illustrations/banner1.jpg"
+  },
+  "resources/assets/img/illustrations/boy-with-rocket-dark.png": {
+    "file": "assets/img/boy-with-rocket-dark-C91bHcXf.png",
+    "src": "resources/assets/img/illustrations/boy-with-rocket-dark.png"
+  },
+  "resources/assets/img/illustrations/boy-with-rocket-light.png": {
+    "file": "assets/img/boy-with-rocket-dark-C91bHcXf.png",
+    "src": "resources/assets/img/illustrations/boy-with-rocket-dark.png"
+  },
+  "resources/assets/img/illustrations/girl-doing-yoga-light.png": {
+    "file": "assets/img/girl-doing-yoga-light-DykREklA.png",
+    "src": "resources/assets/img/illustrations/girl-doing-yoga-light.png"
+  },
+  "resources/assets/img/illustrations/girl-unlock-password-light.png": {
+    "file": "assets/img/girl-unlock-password-light-QVg2E64s.png",
+    "src": "resources/assets/img/illustrations/girl-unlock-password-light.png"
+  },
+  "resources/assets/img/illustrations/girl-with-laptop-dark.png": {
+    "file": "assets/img/girl-with-laptop-dark-BKR3nTUD.png",
+    "src": "resources/assets/img/illustrations/girl-with-laptop-dark.png"
+  },
+  "resources/assets/img/illustrations/girl-with-laptop-light.png": {
+    "file": "assets/img/girl-with-laptop-dark-BKR3nTUD.png",
+    "src": "resources/assets/img/illustrations/girl-with-laptop-dark.png"
+  },
+  "resources/assets/img/illustrations/login-bg.jpg": {
+    "file": "assets/img/login-bg-vGKBvPY2.jpg",
+    "src": "resources/assets/img/illustrations/login-bg.jpg"
+  },
+  "resources/assets/img/illustrations/login.jpg": {
+    "file": "assets/img/login-DJFSmFfz.jpg",
+    "src": "resources/assets/img/illustrations/login.jpg"
+  },
+  "resources/assets/img/illustrations/login.png": {
+    "file": "assets/img/login-pxAUzbDK.png",
+    "src": "resources/assets/img/illustrations/login.png"
+  },
+  "resources/assets/img/illustrations/man-with-laptop-light.png": {
+    "file": "assets/img/man-with-laptop-light-u9IY78oD.png",
+    "src": "resources/assets/img/illustrations/man-with-laptop-light.png"
+  },
+  "resources/assets/img/illustrations/man-with-laptop.png": {
+    "file": "assets/img/man-with-laptop-CHN0IFr3.png",
+    "src": "resources/assets/img/illustrations/man-with-laptop.png"
+  },
+  "resources/assets/img/illustrations/nea-login-bg.jpg": {
+    "file": "assets/img/nea-login-bg-CfLPfiv4.jpg",
+    "src": "resources/assets/img/illustrations/nea-login-bg.jpg"
+  },
+  "resources/assets/img/illustrations/nea-login-front.png": {
+    "file": "assets/img/nea-login-front-B6N3mNAg.png",
+    "src": "resources/assets/img/illustrations/nea-login-front.png"
+  },
+  "resources/assets/img/illustrations/page-misc-error-light.png": {
+    "file": "assets/img/page-misc-error-light-Bb3LAn_Z.png",
+    "src": "resources/assets/img/illustrations/page-misc-error-light.png"
   },
   "resources/assets/js/config.js": {
     "file": "js/config-IeXDgBW3.js",
@@ -773,14 +881,26 @@
     "isEntry": true
   },
   "resources/css/stylesheets/style.css": {
-    "file": "assets/css/style-BWVzycKi.css",
+    "file": "assets/css/style-C6rx6jMf.css",
     "src": "resources/css/stylesheets/style.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "js/app-CMZpMcq2.js",
+    "file": "js/app-BqWFgEuB.js",
     "name": "app",
     "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "resources/js/laravel-datatables.js",
+      "__commonjsHelpers-CqkleIqs.js",
+      "_jquery-D39sRDH4.js",
+      "_bootstrap.esm-G9-_ouNT.js"
+    ]
+  },
+  "resources/js/laravel-datatables.js": {
+    "file": "js/laravel-datatables-COoJauYO.js",
+    "name": "laravel-datatables",
+    "src": "resources/js/laravel-datatables.js",
     "isEntry": true,
     "imports": [
       "_jquery-D39sRDH4.js",

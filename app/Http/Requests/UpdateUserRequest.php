@@ -31,7 +31,7 @@ class UpdateUserRequest extends FormRequest
             'rolename' => 'required|string|exists:roles,name',
             'password' => 'nullable|string|min:8',
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($userId)],
-            'mobile_no' => ['required', 'digits:10', 'numeric', Rule::unique('users')->ignore($userId)],
+            'mobile_no' => ['required', 'digits:10', 'numeric'],
             'phone' => 'nullable|numeric',
             'organization_id' => 'required|exists:organizations,id',
             'remarks' => 'nullable|string|max:1000',

@@ -1,157 +1,5 @@
 <?php use App\Helpers\NepaliDateConverter; ?>
 @extends('landingpage::layouts/frontMaster')
-
-@php
-    $locale = Session::get('locale');
-    App::setLocale($locale);
-@endphp
-
-@section('navbar')
-    @include('landingpage::partials.header')
-@endsection
-
-@section('content')
-    <main class="main-content py-4 py-md-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-12">
-                    <div class="card meeting-card shadow-lg border-1 rounded-4 overflow-hidden">
-                        <!-- Tab Navigation -->
-                        <div class="card-header bg-gradient-primary text-white py-3">
-                            @include('partials.tab-navigation', [
-                                'upcomingMeetings' => $dashboardData['upcomingMeetings'],
-                            ])
-                        </div>
-
-                        <!-- Tab Content -->
-                        <div class="card-body p-0 tab-content" id="myTabContent">
-                            @include('pages.dashboard.tabs.meetings-tab', [
-                                'upcomingMeetings' => $dashboardData['upcomingMeetings'],
-                            ])
-                            @include('pages.dashboard.tabs.dashboard-tab', $dashboardData)
-                            @include('pages.dashboard.tabs.calendar-tab')
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal for Meeting Details -->
-            <div class="modal fade" id="meetingModal" tabindex="-1" aria-labelledby="meetingModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                    <div class="modal-content">
-                        <div class="modal-header bg-gradient-primary text-white">
-                            <h5 class="modal-title" id="meetingModalLabel">{{ __('Meeting Details') }}</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body p-0">
-                            <!-- Tabs -->
-                            <ul class="nav nav-tabs" id="meetingTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="info-tab" data-bs-toggle="tab"
-                                        data-bs-target="#info" type="button" role="tab" aria-controls="info"
-                                        aria-selected="true">{{ __('field.meeting_information') }}</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="documents-tab" data-bs-toggle="tab"
-                                        data-bs-target="#documents" type="button" role="tab" aria-controls="documents"
-                                        aria-selected="false">{{ __('field.meeting_documents') }}</button>
-                                </li>
-                            </ul>
-                            <div class="tab-content" id="meetingTabContent">
-                                <!-- Meeting Information Tab -->
-                                <div class="tab-pane fade show active" id="info" role="tabpanel"
-                                    aria-labelledby="info-tab">
-                                    <div class="p-3 p-md-4">
-                                        <div class="row gy-3 nepali_td">
-                                            <x-resource.detail-items label="{{ __('field.title') }}" id="meeting-title"
-                                                class="col-12">
-                                                <i class="bx bx-calendar me-2 detail-icon"></i>
-                                            </x-resource.detail-items>
-                                            <x-resource.detail-items label="{{ __('field.meeting_location') }}"
-                                                id="meeting-location" class="col-12">
-                                                <i class="bx bx-map me-2 detail-icon"></i>
-                                            </x-resource.detail-items>
-
-
-                                            <x-resource.detail-items label="{{ __('field.meeting_date') }}"
-                                                id="meeting-date" class="col-12 col-md-12">
-                                                <i class="bx bx-calendar me-2 detail-icon"></i>
-                                            </x-resource.detail-items>
-                                            <x-resource.detail-items label="{{ __('field.start_time') }}" id="start-time"
-                                                class="col-12 col-md-12">
-                                                <i class="bx bx-time me-2 detail-icon"></i>
-                                            </x-resource.detail-items>
-                                            <x-resource.detail-items label="{{ __('field.end_time') }}" id="end-time"
-                                                class="col-12 col-md-12">
-                                                <i class="bx bx-time-five me-2 detail-icon"></i>
-                                            </x-resource.detail-items>
-
-                                            <x-resource.detail-items label="{{ __('field.meeting_room_id') }}"
-                                                id="meeting-room" class="col-12 col-md-6">
-                                                <i class="bx bx-door-open me-2 detail-icon"></i>
-                                            </x-resource.detail-items>
-                                            <x-resource.detail-items label="{{ __('field.meeting_type') }}"
-                                                id="meeting-type" class="col-12 col-md-6">
-                                                <i class="bx bx-category me-2 detail-icon"></i>
-                                            </x-resource.detail-items>
-
-                                            <x-resource.detail-items label="{{ __('field.is_virtual_meeting') }}"
-                                                id="is-virtual-meeting" class="col-12 col-md-6" />
-
-                                            <x-resource.detail-items label="{{ __('field.virtual_meeting_link') }}"
-                                                id="virtual-meeting-link" class="col-12 col-md-6">
-                                                <i class="bx bx-link me-2 detail-icon"></i>
-
-                                                <a href="#" id="virtual-meeting-link" target="_blank"
-                                                    class="text-primary text-decoration-underline">
-                                                    <i class="bx bx-link me-2 detail-icon"></i>
-                                                </a>
-
-                                            </x-resource.detail-items>
-
-                                            <x-resource.detail-items label="{{ __('field.is_external') }}" id="is-external"
-                                                class="col-12 col-md-6" />
-                                            <x-resource.detail-items label="{{ __('field.status') }}" id="status"
-                                                class="col-12 col-md-6" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
-                                    <div class="p-3 p-md-4">
-                                        <div class="documents-grid" id="documents-grid">
-                                            <!-- Images will be placed here dynamically -->
-                                        </div>
-                                        <div class="text-center mt-3" id="view-all-documents" style="display: none;">
-                                            <a href="#" class="btn btn-primary btn-sm view-all-btn">
-                                                <i class="bx bx-folder-open me-1"></i>
-                                                {{ __('common.view_all_files') }} (<span id="document-count"></span>)
-                                            </a>
-                                        </div>
-                                        <div class="empty-documents" id="empty-documents">
-                                            <i class="bx bx-file-blank"></i>
-                                            <p>{{ __('field.no_documents') }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary"
-                                data-bs-dismiss="modal">{{ __('Close') }}</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-@endsection
-
-@section('footer')
-    @include('landingpage::partials.footer')
-@endsection
-
-<link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 @section('page-style')
     <style>
         .modal-content {
@@ -403,6 +251,111 @@
             text-decoration: underline;
         }
 
+        .google-calendar-pane {
+            background: #f7f9fc;
+            padding: 1.5rem;
+        }
+
+        .google-calendar-panel {
+            align-items: center;
+            background: #fff;
+            border: 1px solid #e4e9f2;
+            border-radius: 8px;
+            display: flex;
+            gap: 1.5rem;
+            justify-content: space-between;
+            padding: 1.5rem;
+        }
+
+        .google-calendar-status {
+            align-items: center;
+            display: flex;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .google-calendar-icon {
+            align-items: center;
+            border-radius: 8px;
+            display: inline-flex;
+            flex: 0 0 58px;
+            height: 58px;
+            justify-content: center;
+            width: 58px;
+        }
+
+        .google-calendar-icon i {
+            font-size: 2rem;
+        }
+
+        .google-calendar-icon.is-connected {
+            background: #eaf7ef;
+            color: #188038;
+        }
+
+        .google-calendar-icon.is-disconnected {
+            background: #eef5ff;
+            color: #1a73e8;
+        }
+
+        .connection-badge {
+            align-items: center;
+            border-radius: 999px;
+            display: inline-flex;
+            font-size: 0.78rem;
+            font-weight: 700;
+            gap: 0.35rem;
+            line-height: 1;
+            padding: 0.45rem 0.7rem;
+        }
+
+        .connection-badge.connected {
+            background: #eaf7ef;
+            color: #188038;
+        }
+
+        .connection-badge.disconnected {
+            background: #eef5ff;
+            color: #1a73e8;
+        }
+
+        .google-calendar-actions {
+            flex: 0 0 auto;
+        }
+
+        .google-calendar-actions .btn {
+            align-items: center;
+            display: inline-flex;
+            font-weight: 700;
+            justify-content: center;
+            min-height: 42px;
+            white-space: nowrap;
+        }
+
+        .google-calendar-helper {
+            display: grid;
+            gap: 0.75rem;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            margin-top: 1rem;
+        }
+
+        .helper-item {
+            align-items: center;
+            background: #fff;
+            border: 1px solid #e8edf5;
+            border-radius: 8px;
+            color: #5f6b7a;
+            display: flex;
+            font-size: 0.9rem;
+            gap: 0.65rem;
+            padding: 0.85rem 1rem;
+        }
+
+        .helper-item i {
+            color: #0074d9;
+            font-size: 1.2rem;
+        }
+
         /* Mobile Responsiveness */
         @media (max-width: 767.98px) {
             .modal-dialog {
@@ -472,6 +425,253 @@
             .modal-footer {
                 padding: 0.75rem;
             }
+
+            .google-calendar-pane {
+                padding: 1rem;
+            }
+
+            .google-calendar-panel {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .google-calendar-actions .btn,
+            .google-calendar-actions form {
+                width: 100%;
+            }
+
+            .google-calendar-helper {
+                grid-template-columns: 1fr;
+            }
+        }
+        .google-calendar-pane {
+            padding: 1.5rem;
+            background: #f5f7fb;
+        }
+
+        /* Main Card */
+        .google-calendar-panel {
+            background: #fff;
+            border-radius: 1rem;
+            border: 1px solid rgba(67, 89, 113, 0.08);
+            box-shadow:
+                0 2px 6px rgba(67, 89, 113, 0.04),
+                0 8px 24px rgba(67, 89, 113, 0.06);
+            padding: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            transition: all 0.25s ease;
+        }
+
+        .google-calendar-panel:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 4px 12px rgba(67, 89, 113, 0.08),
+                0 14px 32px rgba(67, 89, 113, 0.10);
+        }
+
+        /* Left Content */
+        .google-calendar-status {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Icon */
+        .google-calendar-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .google-calendar-icon i {
+            font-size: 2rem;
+        }
+
+        .google-calendar-icon.is-connected {
+            background: rgba(113, 221, 55, 0.12);
+            color: #71dd37;
+        }
+
+        .google-calendar-icon.is-disconnected {
+            background: rgba(105, 108, 255, 0.12);
+            color: #696cff;
+        }
+
+        /* Typography */
+        .google-calendar-content h5 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #566a7f;
+            margin-bottom: 0.45rem;
+        }
+
+        .google-calendar-content p {
+            font-size: 0.92rem;
+            line-height: 1.65;
+            color: #8592a3;
+            margin-bottom: 0;
+            max-width: 640px;
+        }
+
+        /* Status Badge */
+        .connection-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.45rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .connection-badge.connected {
+            background: rgba(113, 221, 55, 0.16);
+            color: #5aa52a;
+        }
+
+        .connection-badge.disconnected {
+            background: rgba(105, 108, 255, 0.14);
+            color: #696cff;
+        }
+
+        /* Button Area */
+        .google-calendar-actions {
+            flex-shrink: 0;
+        }
+
+        .google-calendar-actions .btn {
+            min-width: 220px;
+            height: 46px;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            transition: all 0.2s ease;
+        }
+
+        .google-calendar-actions .btn-primary {
+            background: #696cff;
+            border-color: #696cff;
+            box-shadow: 0 4px 14px rgba(105, 108, 255, 0.25);
+        }
+
+        .google-calendar-actions .btn-primary:hover {
+            background: #5f62e8;
+            border-color: #5f62e8;
+            transform: translateY(-1px);
+        }
+
+        .google-calendar-actions .btn-outline-danger {
+            border-width: 1.5px;
+        }
+
+        /* Helper Grid */
+        .google-calendar-helper {
+            margin-top: 1.25rem;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .helper-item {
+            background: #fff;
+            border: 1px solid rgba(67, 89, 113, 0.08);
+            border-radius: 1rem;
+            padding: 1rem 1.1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .helper-item:hover {
+            border-color: rgba(105, 108, 255, 0.25);
+            background: rgba(105, 108, 255, 0.02);
+        }
+
+        .helper-item i {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: rgba(105, 108, 255, 0.12);
+            color: #696cff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+
+        .helper-item span {
+            color: #6b7a8c;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .google-calendar-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .google-calendar-actions {
+                width: 100%;
+            }
+
+            .google-calendar-actions .btn,
+            .google-calendar-actions form {
+                width: 100%;
+            }
+
+            .google-calendar-helper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .google-calendar-pane {
+                padding: 1rem;
+            }
+
+            .google-calendar-panel {
+                padding: 1.25rem;
+                border-radius: 1rem;
+            }
+
+            .google-calendar-status {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .google-calendar-icon {
+                width: 56px;
+                height: 56px;
+                border-radius: 16px;
+            }
+
+            .google-calendar-content h5 {
+                font-size: 1rem;
+            }
+
+            .google-calendar-content p {
+                font-size: 0.86rem;
+            }
         }
 
         @media (max-width: 575.98px) {
@@ -490,9 +690,258 @@
                 padding: 0.25rem;
             }
         }
-        
+
     </style>
 @endsection
+
+@php
+    $locale = Session::get('locale');
+    App::setLocale($locale);
+@endphp
+
+@section('navbar')
+    @include('landingpage::partials.header')
+@endsection
+
+@section('content')
+    <main class="main-content py-4 py-md-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12">
+                    <div class="card meeting-card shadow-lg border-1 rounded-4 overflow-hidden">
+                        <!-- Tab Navigation -->
+                        <div class="card-header bg-gradient-primary text-white py-3">
+                            @include('partials.tab-navigation', [
+                                'upcomingMeetings' => $dashboardData['upcomingMeetings'],
+                            ])
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="card-body p-0 tab-content" id="myTabContent">
+                            @include('pages.dashboard.tabs.meetings-tab', [
+                                'upcomingMeetings' => $dashboardData['upcomingMeetings'],
+                            ])
+                            @include('pages.dashboard.tabs.dashboard-tab', $dashboardData)
+                            @include('pages.dashboard.tabs.calendar-tab')
+
+                            <div class="tab-pane fade" id="google-calendar" role="tabpanel"
+                                 aria-labelledby="google-calendar-tab">
+
+                                <div class="google-calendar-pane">
+                                    <!-- Main Integration Card -->
+                                    <div class="google-calendar-panel">
+                                        <div class="google-calendar-status">
+                                            <!-- Google Icon -->
+                                            <span class="google-calendar-icon {{ auth()->user()->google_access_token ? 'is-connected' : 'is-disconnected' }}">
+                                              <i class="bx bxl-google"></i>
+                                             </span>
+
+                                            <!-- Content -->
+                                            <div class="google-calendar-content">
+                                                <span class="connection-badge {{ auth()->user()->google_access_token ? 'connected' : 'disconnected' }}">
+                                                    <i class="bx {{ auth()->user()->google_access_token ? 'bx-check-circle' : 'bx-link-alt' }}"></i>
+                                                    {{ auth()->user()->google_access_token ? __('Connected') : __('Not connected') }}
+                                                </span>
+
+                                                <h5 class="mt-3 mb-2">
+                                                    {{ __('Google Calendar Integration') }}
+                                                </h5>
+
+                                                <p>
+                                                    {{ __('Connect your Google Calendar to automatically sync meetings, schedules, reminders, and updates directly with your workspace calendar.') }}
+                                                </p>
+
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="google-calendar-actions">
+
+                                            @if(auth()->user()->google_access_token)
+                                                <form method="POST" action="{{ route('google.disconnect') }}">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-outline-danger">
+                                                        <i class="bx bx-unlink"></i>
+                                                        {{ __('Disconnect Calendar') }}
+                                                    </button>
+                                                </form>
+
+                                            @else
+
+                                                <a href="{{ route('google.auth') }}" class="btn btn-primary">
+                                                    <i class="bx bx-link"></i>
+                                                    {{ __('Connect Google Calendar') }}
+                                                </a>
+
+                                            @endif
+
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Helper Cards -->
+                                    <div class="google-calendar-helper">
+
+                                        <div class="helper-item">
+                                            <i class="bx bx-sync"></i>
+
+                                            <span>
+                    {{ __('Meetings and schedules are automatically synced with your Google Calendar after connection.') }}
+                </span>
+                                        </div>
+
+                                        <div class="helper-item">
+                                            <i class="bx bx-bell"></i>
+
+                                            <span>
+                    {{ __('Receive Google Calendar reminders and notifications for upcoming meetings.') }}
+                </span>
+                                        </div>
+
+                                        <div class="helper-item">
+                                            <i class="bx bx-shield-quarter"></i>
+
+                                            <span>
+                    {{ __('Your calendar access remains secure and can be disconnected anytime.') }}
+                </span>
+                                        </div>
+
+                                        <div class="helper-item">
+                                            <i class="bx bx-devices"></i>
+
+                                            <span>
+                    {{ __('Access your synchronized meetings seamlessly across mobile and desktop devices.') }}
+                </span>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for Meeting Details -->
+            <div class="modal fade" id="meetingModal" tabindex="-1" aria-labelledby="meetingModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header bg-gradient-primary text-white">
+                            <h5 class="modal-title" id="meetingModalLabel">{{ __('Meeting Details') }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <!-- Tabs -->
+                            <ul class="nav nav-tabs" id="meetingTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="info-tab" data-bs-toggle="tab"
+                                        data-bs-target="#info" type="button" role="tab" aria-controls="info"
+                                        aria-selected="true">{{ __('field.meeting_information') }}</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="documents-tab" data-bs-toggle="tab"
+                                        data-bs-target="#documents" type="button" role="tab" aria-controls="documents"
+                                        aria-selected="false">{{ __('field.meeting_documents') }}</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="meetingTabContent">
+                                <!-- Meeting Information Tab -->
+                                <div class="tab-pane fade show active" id="info" role="tabpanel"
+                                    aria-labelledby="info-tab">
+                                    <div class="p-3 p-md-4">
+                                        <div class="row gy-3 nepali_td">
+                                            <x-resource.detail-items label="{{ __('field.title') }}" id="meeting-title"
+                                                class="col-12">
+                                                <i class="bx bx-calendar me-2 detail-icon"></i>
+                                            </x-resource.detail-items>
+                                            <x-resource.detail-items label="{{ __('field.meeting_location') }}"
+                                                id="meeting-location" class="col-12">
+                                                <i class="bx bx-map me-2 detail-icon"></i>
+                                            </x-resource.detail-items>
+
+
+                                            <x-resource.detail-items label="{{ __('field.meeting_date') }}"
+                                                id="meeting-date" class="col-12 col-md-12">
+                                                <i class="bx bx-calendar me-2 detail-icon"></i>
+                                            </x-resource.detail-items>
+
+                                            <x-resource.detail-items label="{{ __('field.start_time') }}" id="start-time"
+                                                class="col-12 col-md-12">
+                                                <i class="bx bx-time me-2 detail-icon"></i>
+                                            </x-resource.detail-items>
+                                            <x-resource.detail-items label="{{ __('field.end_time') }}" id="end-time"
+                                                class="col-12 col-md-12">
+                                                <i class="bx bx-time-five me-2 detail-icon"></i>
+                                            </x-resource.detail-items>
+
+                                            <x-resource.detail-items label="{{ __('field.meeting_room_id') }}"
+                                                id="meeting-room" class="col-12 col-md-6">
+                                                <i class="bx bx-door-open me-2 detail-icon"></i>
+                                            </x-resource.detail-items>
+                                            <x-resource.detail-items label="{{ __('field.meeting_type') }}"
+                                                id="meeting-type" class="col-12 col-md-6">
+                                                <i class="bx bx-category me-2 detail-icon"></i>
+                                            </x-resource.detail-items>
+
+                                            <x-resource.detail-items label="{{ __('field.is_virtual_meeting') }}"
+                                                id="is-virtual-meeting" class="col-12 col-md-6" />
+
+                                            <x-resource.detail-items label="{{ __('field.virtual_meeting_link') }}"
+                                                id="virtual-meeting-link" class="col-12 col-md-6">
+                                                <i class="bx bx-link me-2 detail-icon"></i>
+
+                                                <a href="#" id="virtual-meeting-link" target="_blank"
+                                                    class="text-primary text-decoration-underline">
+                                                    <i class="bx bx-link me-2 detail-icon"></i>
+                                                </a>
+
+                                            </x-resource.detail-items>
+
+                                            <x-resource.detail-items label="{{ __('field.is_external') }}" id="is-external"
+                                                class="col-12 col-md-6" />
+                                            <x-resource.detail-items label="{{ __('field.status') }}" id="status"
+                                                class="col-12 col-md-6" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
+                                    <div class="p-3 p-md-4">
+                                        <div class="documents-grid" id="documents-grid">
+                                            <!-- Images will be placed here dynamically -->
+                                        </div>
+                                        <div class="text-center mt-3" id="view-all-documents" style="display: none;">
+                                            <a href="#" class="btn btn-primary btn-sm view-all-btn">
+                                                <i class="bx bx-folder-open me-1"></i>
+                                                {{ __('common.view_all_files') }} (<span id="document-count"></span>)
+                                            </a>
+                                        </div>
+                                        <div class="empty-documents" id="empty-documents">
+                                            <i class="bx bx-file-blank"></i>
+                                            <p>{{ __('field.no_documents') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">{{ __('Close') }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+@endsection
+
+@section('footer')
+    @include('landingpage::partials.footer')
+@endsection
+
+<link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+
 
 @push('scripts')
     <script type="module">
@@ -509,27 +958,27 @@
                 const emptyDocuments = document.getElementById('empty-documents');
                 const viewAllDocuments = document.getElementById('view-all-documents');
                 const documentCount = document.getElementById('document-count');
-                
+
                 // Clear existing content
                 documentsGrid.innerHTML = '';
-                
+
                 if (documentsList && documentsList.length > 0) {
                     // We have documents to display
                     emptyDocuments.style.display = 'none';
                     documentsGrid.style.display = 'grid';
-                    
+
                     documentsList.forEach(document => {
                         const documentElement = document.createElement('div');
                         documentElement.className = 'document-item';
 
                         alert('test');
 
-                        
+
                         // Check if document is an image
                         const isImage = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(
                             document.extension?.toLowerCase()
                         );
-                        
+
                                     // In your loadDocuments function, update the image handling:
                             if (isImage) {
                                 // Create image container with much smaller dimensions
@@ -548,10 +997,10 @@
                                 </div>
                             `;
                         }
-                        
+
                         documentsGrid.appendChild(documentElement);
                     });
-                    
+
                     // Update count and show view all button if there are many documents
                     documentCount.textContent = documentsList.length;
                     viewAllDocuments.style.display = documentsList.length > 6 ? 'block' : 'none';
@@ -575,7 +1024,7 @@
                     'pptx': 'bx-file-ppt',
                     // Add more mappings as needed
                 };
-                
+
                 return extensionMap[extension?.toLowerCase()] || 'bx-file';
             }
     </script>

@@ -22,7 +22,7 @@ use Modules\NeaMeeting\Models\MeetingNotifiedExternalContact;
 
 class Meeting extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia;
+    use  InteractsWithMedia;
 
     protected $table = 'meetings';
 
@@ -51,8 +51,8 @@ class Meeting extends Model implements HasMedia
         'start_time' => 'string', // or 'time' if using Laravel 9+
         'end_time' => 'string',
         'meeting_room_id' => 'integer',
-        'is_virtual' => 'boolean', 
-        'is_external' => 'boolean', 
+        'is_virtual' => 'boolean',
+        'is_external' => 'boolean',
         'created_by' => 'integer',
         // 'status' => MeetingStatus::class,
         'status' => 'string',
@@ -76,7 +76,7 @@ class Meeting extends Model implements HasMedia
                 'application/pdf',
                 'text/plain',
                 'application/octet-stream' // Allow generic type
-        
+
         ]);
     }
     public function registerMediaConversions(?Media $media = null): void
@@ -86,7 +86,7 @@ class Meeting extends Model implements HasMedia
             ->keepOriginalImageFormat()
             ->fit(Fit::Crop, 120, 120)
             ->nonQueued();
-            
+
         $this
             ->addMediaConversion('preview')
             ->keepOriginalImageFormat()

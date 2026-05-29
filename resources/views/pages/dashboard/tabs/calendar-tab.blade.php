@@ -313,8 +313,8 @@
                                         <i class="bx bx-time-five me-1"></i> ${startTime}${endTime ? ` - ${endTime}` : ''}
                                     </div>
                                     <div class="meeting-location">
-                                        ${meeting.is_virtual ? 
-                                            `<i class="bx bx-video me-1"></i> Virtual Meeting` : 
+                                        ${meeting.is_virtual ?
+                                            `<i class="bx bx-video me-1"></i> Virtual Meeting` :
                                             `<i class="bx bx-map me-1"></i> ${meeting.meeting_location || meeting.meeting_room?.name || 'Location not specified'}`
                                         }
                                     </div>
@@ -483,326 +483,328 @@
     </script>
 @endpush
 
-    <style>
-        /* Enhanced Nepali Calendar Styling */
-        .calendar {
-            width: 100%;
-            border: none;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            background: #fff;
+<style>
+        /* ─── Root tokens ───────────────────────────────────────────────── */
+        :root {
+            --cal-accent:          #D85A30;
+            --cal-accent-hover:    #B84A22;
+            --cal-accent-soft:     #FAECE7;
+            --cal-accent-mid:      #F0997B;
+            --cal-today-bg:        #FFF7F4;
+            --cal-today-border:    #D85A30;
+            --cal-red-fg:          #993C1D;
+            --cal-selected-bg:     #E1F5EE;
+            --cal-selected-border: #0F6E56;
+            --cal-selected-fg:     #085041;
+            --cal-header-bg:       #2C2C2A;
+            --cal-header-border:   #444441;
+            --cal-cell-border:     rgba(0,0,0,0.08);
+            --cal-other-bg:        #F8F7F5;
+            --cal-weekend-bg:      #FFF9F8;
+            --cal-radius:          10px;
+            --cal-cell-min-h:      108px;
+            --cal-np-size:         1.4rem;
+            --cal-en-size:         0.72rem;
+            --cal-ad-size:         0.68rem;
+            --cal-ev-size:         0.7rem;
+            --cal-badge-size:      20px;
         }
 
+        /* ─── Wrapper ───────────────────────────────────────────────────── */
+        .calendar {
+            width: 100%;
+            border-radius: var(--cal-radius);
+            overflow: hidden;
+            border: 1px solid var(--cal-cell-border);
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+        }
+
+        /* ─── Header row (weekday labels) ───────────────────────────────── */
         .calendar-header {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-bottom: 1px solid #dee2e6;
-            padding: 1rem;
+            background: var(--cal-header-bg);
+            padding: 0;
         }
 
         .calendar-header .weekday {
-            padding: 0.5rem;
+            padding: 11px 4px;
             text-align: center;
-            font-weight: 700;
-            color: #2c3e50;
         }
 
-        .nepali-weekday {
-            font-size: 1rem;
-            margin-bottom: 2px;
+        .calendar-header .nepali-weekday {
+            font-size: 13px;
+            font-weight: 500;
+            color: #B4B2A9;
+            display: block;
+            line-height: 1;
+            letter-spacing: 0.02em;
         }
 
-        .english-weekday {
-            font-size: 0.75rem;
-            color: #6c757d;
+        .calendar-header .english-weekday {
+            font-size: 10px;
+            color: #888780;
+            display: block;
+            margin-top: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .weekday.sunday,
-        .weekday.saturday {
-            color: #dc3545;
+        .calendar-header .weekday.sunday .nepali-weekday,
+        .calendar-header .weekday.saturday .nepali-weekday {
+            color: var(--cal-accent-mid);
+        }
+
+        .calendar-header .weekday.sunday .english-weekday,
+        .calendar-header .weekday.saturday .english-weekday {
+            color: var(--cal-accent-hover);
+            opacity: 0.7;
+        }
+
+        /* ─── Calendar body / cells ─────────────────────────────────────── */
+        .calendar-body {
+            background: #fff;
         }
 
         .calendar-day {
-            border: 1px solid #e9ecef;
-            padding: 0.5rem;
+            border-right: 1px solid var(--cal-cell-border);
+            border-bottom: 1px solid var(--cal-cell-border);
+            padding: 8px 8px 6px;
+            min-height: var(--cal-cell-min-h);
             position: relative;
-            min-height: 70px;
-            transition: all 0.2s ease;
-            background-color: #fff;
+            background: #fff;
+            transition: background 0.12s ease;
             cursor: pointer;
         }
 
         .calendar-day:hover {
-            background-color: #f8f9fa;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            background: #FAFAF9;
         }
 
-        .calendar-day.today {
-            background-color: rgba(255, 99, 71, 0.2);
-            border: none;
-            border-radius: 4px;
-        }
-
-        .calendar-day.selected {
-            background-color: rgba(13, 110, 253, 0.2);
-            border: 2px solid #0d6efd;
-            border-radius: 4px;
-        }
-
-        .calendar-day.today .nepali-date {
-            color: #dc3545;
-        }
-
-        .calendar-day.today::after {
-            content: 'आज';
-            position: absolute;
-            top: 3px;
-            right: 3px;
-            background: #dc3545;
-            color: #fff;
-            padding: 1px 5px;
-            border-radius: 8px;
-            font-size: 0.65rem;
-            font-weight: 600;
-        }
-
-        .calendar-day.has-meetings::before {
-            content: '';
-            position: absolute;
-            bottom: 3px;
-            left: 3px;
-            width: 8px;
-            height: 8px;
-            background-color: #198754;
-            border-radius: 50%;
-        }
-
+        /* Weekends */
         .calendar-day.sunday,
         .calendar-day.saturday {
-            background-color: rgba(220, 53, 69, 0.03);
+            background: var(--cal-weekend-bg);
+        }
+        .calendar-day.sunday:hover,
+        .calendar-day.saturday:hover {
+            background: var(--cal-accent-soft);
         }
 
+        /* Empty / other-month cells */
         .calendar-day.other-month {
-            background-color: #f8f9fa;
-            color: #adb5bd;
+            background: var(--cal-other-bg);
+            cursor: default;
+            pointer-events: none;
+        }
+        .calendar-day.other-month:hover {
+            background: var(--cal-other-bg);
         }
 
-        .calendar-day .nepali-date {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 3px;
+        /* Today */
+        .calendar-day.today {
+            background: var(--cal-today-bg);
+            outline: 2px solid var(--cal-today-border);
+            outline-offset: -2px;
+            border-radius: 2px;
+            z-index: 1;
         }
 
-        .calendar-day .english-date {
-            font-size: 0.7rem;
-            color: #6c757d;
-            margin-bottom: 3px;
-        }
-
+        /* Selected */
         .calendar-day.selected {
-            transition: background-color 0.3s ease, border 0.3s ease, color 0.3s ease;
+            background: var(--cal-selected-bg);
+            outline: 2px solid var(--cal-selected-border);
+            outline-offset: -2px;
+            border-radius: 2px;
+            z-index: 1;
         }
 
+        /* ─── Day content layout ────────────────────────────────────────── */
+        .day-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        /* ─── Nepali date number ────────────────────────────────────────── */
+        .calendar-day .nepali-date {
+            font-size: var(--cal-np-size);
+            font-weight: 500;
+            color: #2C2C2A;
+            line-height: 1;
+            padding: 2px 0 3px;
+            /* leave room for badge on the right */
+            padding-right: 26px;
+        }
+
+        .calendar-day.today .nepali-date     { color: var(--cal-today-border); }
+        .calendar-day.selected .nepali-date  { color: var(--cal-selected-fg);  }
+        .calendar-day.sunday .nepali-date,
+        .calendar-day.saturday .nepali-date  { color: var(--cal-red-fg);       }
+
+        /* Today overrides weekend colour */
+        .calendar-day.today.sunday .nepali-date,
+        .calendar-day.today.saturday .nepali-date { color: var(--cal-today-border); }
+
+        /* ─── English date label ────────────────────────────────────────── */
+        .calendar-day .english-date {
+            font-size: var(--cal-en-size);
+            color: #888780;
+            margin-bottom: 4px;
+            letter-spacing: 0.015em;
+        }
+
+        /* ─── Events list ───────────────────────────────────────────────── */
         .calendar-day .events {
-            margin-top: 3px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin: 2px 0;
         }
 
         .calendar-day .event {
-            background-color: #68ce9e;
-            color: white;
+            background: var(--cal-accent-soft);
+            color: var(--cal-accent);
             border-radius: 3px;
-            padding: 1px 4px;
-            margin-bottom: 2px;
-            font-size: 0.65rem;
+            padding: 2px 5px;
+            font-size: var(--cal-ev-size);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            font-weight: 500;
+            letter-spacing: 0.01em;
         }
 
+        .calendar-day.selected .event {
+            background: #9FE1CB;
+            color: var(--cal-selected-fg);
+        }
+
+        /* ─── AD date (bottom-right) ────────────────────────────────────── */
         .calendar-day .ad-date {
-            position: absolute;
-            bottom: 3px;
-            right: 3px;
-            font-size: 0.65rem;
-            color: #6c757d;
-            padding: 1px 4px;
-            border-radius: 2px;
+            font-size: var(--cal-ad-size);
+            color: #B4B2A9;
+            text-align: right;
+            padding: 2px 0 0;
+            margin-top: auto;
+            font-variant-numeric: tabular-nums;
         }
 
-        .calendar-day.today .ad-date {
-            color: #dc3545;
-            font-weight: 600;
-        }
+        .calendar-day.today .ad-date    { color: var(--cal-today-border); font-weight: 500; }
+        .calendar-day.selected .ad-date { color: var(--cal-selected-fg);  }
 
-        .calendar-day[data-nepali-date] {
-            border: 1px solid green;
-            /* Temporary for debugging */
-        }
-
+        /* ─── Meeting count badge ───────────────────────────────────────── */
         .meeting-count-wrapper {
             position: absolute;
-            top: 5px;
-            right: 5px;
+            top: 4px;
+            right: 4px;
             z-index: 10;
-            /* Ensure tooltip appears above other elements */
         }
 
-        /* Existing meeting-count styles (unchanged) */
         .meeting-count {
             position: relative;
-            background-color: #dc3545;
-            color: white;
+            background: #E24B4A;
+            color: #fff;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width:  var(--cal-badge-size);
+            height: var(--cal-badge-size);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
+            font-size: 0.72rem;
             font-weight: 600;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
             cursor: pointer;
-            /* Indicate hoverability */
+            box-shadow: 0 1px 3px rgba(226,75,74,0.35);
+            transition: transform 0.12s ease;
+        }
+        .meeting-count:hover {
+            transform: scale(1.12);
         }
 
-        /* Meeting List Styles */
-        .meeting-list-item {
-            border-left: 4px solid #0d6efd;
-            background-color: #f8f9fa;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
+        /* Tooltip */
+        .meeting-count::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 50%;
+            transform: translateX(50%);
+            background: #2C2C2A;
+            color: #fff;
+            padding: 4px 9px;
+            border-radius: 4px;
+            font-size: 0.68rem;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.15s ease, visibility 0.15s ease;
+            z-index: 20;
+        }
+        .meeting-count::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 50%;
+            transform: translateX(50%);
+            border: 4px solid transparent;
+            border-bottom-color: #2C2C2A;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.15s ease, visibility 0.15s ease;
+            z-index: 20;
+        }
+        .meeting-count:hover::after,
+        .meeting-count:hover::before {
+            opacity: 1;
+            visibility: visible;
         }
 
-        .meeting-list-item:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
+        /* Today's badge is blue */
+        .calendar-day.today .meeting-count {
+            background: var(--cal-today-border);
+            box-shadow: 0 1px 3px rgba(216,90,48,0.4);
         }
 
-        .meeting-list-item.completed {
-            border-left-color: #198754;
+        /* Selected badge is green */
+        .calendar-day.selected .meeting-count {
+            background: var(--cal-selected-border);
+            box-shadow: 0 1px 3px rgba(15,110,86,0.35);
         }
 
-        .meeting-list-item.cancelled {
-            border-left-color: #dc3545;
-        }
+        /* ─── Bootstrap row reset ───────────────────────────────────────── */
+        .row.g-0 { margin: 0; }
 
-        .meeting-list-item.pending {
-            border-left-color: #fd7e14;
-        }
-
-        .meeting-time {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-
-        .meeting-location {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-
-        .no-meetings {
-            padding: 30px;
-            text-align: center;
-            color: #6c757d;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        /* Dropdown Styling */
-        .dropdown-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .form-select {
-            padding: 0.5rem;
-            font-size: 0.9rem;
-            min-width: 80px;
-        }
-
-        .form-label {
-            margin-bottom: 0;
-            font-size: 0.9rem;
-        }
-
-        /* Card Enhancements */
-        .card {
-            border: none;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 991.98px) {
-            .calendar-header {
-                padding: 0.75rem;
+        /* ─── Responsive ────────────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            :root {
+                --cal-cell-min-h: 78px;
+                --cal-np-size:    1.05rem;
+                --cal-en-size:    0.62rem;
+                --cal-ad-size:    0.58rem;
+                --cal-ev-size:    0.6rem;
+                --cal-badge-size: 18px;
             }
 
-            .dropdown-container {
-                margin-bottom: 0.5rem;
-            }
+            .calendar-day { padding: 5px 5px 4px; }
 
-            #monthYearRange {
-                font-size: 0.9rem;
-            }
+            .calendar-header .nepali-weekday  { font-size: 11px; }
+            .calendar-header .english-weekday { font-size: 9px;  }
+
+            .meeting-count { font-size: 0.65rem; }
         }
 
-        @media (max-width: 767.98px) {
-            .calendar-day {
-                min-height: 60px;
-                padding: 0.3rem;
+        @media (max-width: 480px) {
+            :root {
+                --cal-cell-min-h: 62px;
+                --cal-np-size:    0.9rem;
             }
-
-            .calendar-day .nepali-date {
-                font-size: 1rem;
-            }
-
-            .calendar-day .english-date,
-            .calendar-day .event,
-            .calendar-day .ad-date {
-                font-size: 0.6rem;
-            }
-
-            .form-select {
-                font-size: 0.85rem;
-            }
-
-            #monthYearRange {
-                font-size: 0.85rem;
-            }
-        }
-
-        @media (max-width: 575.98px) {
-            .container-fluid {
-                margin: 1rem !important;
-            }
-
-            .calendar-day {
-                min-height: 50px;
-                padding: 0.2rem;
-            }
-
-            .calendar-header .weekday {
-                padding: 0.3rem;
-            }
-
-            .nepali-weekday {
-                font-size: 0.85rem;
-            }
-
-            .english-weekday {
-                font-size: 0.65rem;
-            }
-
-            .form-label {
-                font-size: 0.8rem;
-            }
-
-            #monthYearRange {
-                font-size: 0.75rem;
-            }
+            .calendar-header .english-weekday { display: none; }
+            .calendar-day .english-date       { display: none; }
         }
     </style>
+
+
 

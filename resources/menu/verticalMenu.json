@@ -18,14 +18,8 @@
                     "name": "menu.meetings",
                     "icon": "menu-icon tf-icons bx bx bxs-check-shield",
                     "slug": ["admin.meetings.*", "admin.meeting-attendees.*"],
-                    "submenu": [
-                        {
-                            "url": "admin.meetings.index",
-                            "name": "menu.meetings",
-                            "slug": "admin.meetings.*",
-                            "permission": "view-meetings"
-                        }
-                    ]
+                    "url": "admin.meetings.index",
+                    "permission": "view-meetings"
                 }
             ]
         },
@@ -52,7 +46,8 @@
                             "url": "admin.organizations.index",
                             "name": "menu.organizations",
                             "slug": "admin.organizations.*",
-                            "permission": "view-organizations"
+                            "permission": "view-organizations",
+                            "icon": "bx bx-buildings"
                         }
                     ]
                 },
@@ -69,18 +64,21 @@
                             "url": "admin.email-configurations.index",
                             "name": "menu.email-configurations",
                             "slug": "admin.email-configurations.*",
+                            "icon": "bx bx-envelope",
                             "permission": "view-email-configurations"
                         },
                         {
                             "url": "admin.sms-configurations.index",
                             "name": "menu.sms-configurations",
                             "slug": "admin.sms-configurations*",
+                            "icon": "bx bx-phone",
                             "permission": "view-sms-configurations"
                         },
                         {
                             "url": "admin.nepali-calendars.index",
                             "name": "menu.nepali-calendars",
                             "slug": "admin.nepali-calendars.*",
+                            "icon": "bx bx-calendar",
                             "permission": "view-calendar"
                         }
                     ]
@@ -104,18 +102,21 @@
                             "url": "admin.users.index",
                             "name": "menu.users",
                             "slug": "admin.users.*",
+                            "icon": "bx bx-group",
                             "permission": "view-users"
                         },
                         {
                             "url": "admin.roles.index",
                             "name": "menu.roles",
                             "slug": "admin.roles.*",
+                            "icon": "bx bx-shield",
                             "permission": "view-roles"
                         },
                         {
                             "url": "admin.permissions.index",
                             "name": "menu.permissions",
                             "slug": "admin.permissions.*",
+                            "icon": "bx bx-key",
                             "permission": "view-permissions"
                         }
                     ]

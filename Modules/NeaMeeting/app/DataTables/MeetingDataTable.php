@@ -30,6 +30,7 @@ class MeetingDataTable extends DataTable
         return datatables()
             ->eloquent($query)
             ->addColumn('checkbox', fn ($row) => $this->renderCheckbox('meeting_ids[]', $row->id))
+
             ->addColumn('meeting_room', function ($row) {
                 return isset($row->meetingRoom) ? $row->meetingRoom->name : null;
             })
@@ -221,26 +222,13 @@ class MeetingDataTable extends DataTable
                 )
             )
             ->parameters([
+                'pageLength' => 25,
                 'initComplete' => 'function() {
-                    '.$this->initBulkDeleteScript('meeting_ids[]').'
-                    '.$this->initDeleteScript().'
-                    '.$this->initColumnSearch().'
-                    '.$this->initStickyColumnsStyles().'
+                    ' . $this->initBulkDeleteScript('meeting_ids[]') . '
+                    ' . $this->initDeleteScript() . '
+                    ' . $this->initColumnSearch() . '
+                    ' . $this->initStickyColumnsStyles() . '
                 }',
-                'headerCallback' => 'function(thead) {
-                    $(thead).find("th").css({
-                        "font-weight": "800",
-                        "font-size": "0.85rem",
-                        "text-transform": "uppercase",
-                        "letter-spacing": "0.5px"
-                    });
-                }',
-                'columnDefs' => [
-                    [
-                        'targets' => '_all', // Applies to all columns
-                        'className' => 'dt-head-nowrap', // Prevents text wrapping in headers
-                    ],
-                ],
             ]);
     }
 

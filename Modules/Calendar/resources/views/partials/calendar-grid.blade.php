@@ -4,7 +4,15 @@
     <div class="calendar">
         <div class="calendar-header">
             <div class="row g-0">
-                @foreach ([['nepali' => 'आइत', 'english' => 'Sun'], ['nepali' => 'सोम', 'english' => 'Mon'], ['nepali' => 'मंगल', 'english' => 'Tue'], ['nepali' => 'बुध', 'english' => 'Wed'], ['nepali' => 'बिही', 'english' => 'Thu'], ['nepali' => 'शुक्र', 'english' => 'Fri'], ['nepali' => 'शनि', 'english' => 'Sat']] as $index => $day)
+                @foreach ([
+                    ['nepali' => 'आइत', 'english' => 'Sun'],
+                    ['nepali' => 'सोम',  'english' => 'Mon'],
+                    ['nepali' => 'मंगल','english' => 'Tue'],
+                    ['nepali' => 'बुध',  'english' => 'Wed'],
+                    ['nepali' => 'बिही', 'english' => 'Thu'],
+                    ['nepali' => 'शुक्र','english' => 'Fri'],
+                    ['nepali' => 'शनि',  'english' => 'Sat'],
+                ] as $index => $day)
                     <div class="col weekday {{ $index == 0 ? 'sunday' : '' }} {{ $index == 6 ? 'saturday' : '' }}">
                         <div class="nepali-weekday">{{ $day['nepali'] }}</div>
                         <div class="english-weekday">{{ $day['english'] }}</div>
@@ -17,85 +25,72 @@
             <div class="row g-0">
                 @php
                     $daysInMonth = $calendarData['days'] ?? 30;
-                    $startDate = Carbon\Carbon::parse($calendarData['start_date']);
-                    $startDay = $startDate->dayOfWeek; // 0 (Sun) to 6 (Sat)
-                    $today = Carbon\Carbon::now();
-                    $currentDay = $today->day;
-                    $currentMonth = $today->month;
+                    $startDate   = Carbon\Carbon::parse($calendarData['start_date']);
+                    $startDay    = $startDate->dayOfWeek; // 0 (Sun) – 6 (Sat)
+                    $today       = Carbon\Carbon::now();
+                    $currentDay  = $today->day;
+                    $currentMonth= $today->month;
                     $currentYear = $today->year;
                     $isCurrentMonth = $startDate->month == $currentMonth && $startDate->year == $currentYear;
 
                     $totalDaysDisplayed = $daysInMonth + $startDay;
                     $totalWeeks = ceil($totalDaysDisplayed / 7);
 
-                    // Get Nepali year and month from calendarData
-                    $nepaliYear =
-                        $calendarData['bs_year'] ?? NepaliDateConverter::gregorianToNepaliYear($startDate->year);
-                    $nepaliMonth =
-                        $calendarData['month'] ?? NepaliDateConverter::gregorianToNepaliMonth($startDate->month);
+                    $nepaliYear  = $calendarData['bs_year']  ?? NepaliDateConverter::gregorianToNepaliYear($startDate->year);
+                    $nepaliMonth = $calendarData['month']    ?? NepaliDateConverter::gregorianToNepaliMonth($startDate->month);
 
                     for ($week = 0; $week < $totalWeeks; $week++) {
                         for ($dayOfWeek = 1; $dayOfWeek <= 7; $dayOfWeek++) {
                             $currentPosition = $week * 7 + $dayOfWeek;
                             $isSaturday = $dayOfWeek == 7;
-                            $isSunday = $dayOfWeek == 1;
+                            $isSunday   = $dayOfWeek == 1;
 
                             if ($currentPosition <= $startDay) {
-                                echo '<div class="col calendar-day other-month ' .
-                                    ($isSaturday ? 'saturday' : '') .
-                                    ($isSunday ? 'sunday' : '') .
-                                    '"></div>';
+                                // Empty leading cell
+                                echo '<div class="col calendar-day other-month'
+                                    . ($isSaturday ? ' saturday' : '')
+                                    . ($isSunday   ? ' sunday'   : '')
+                                    . '"></div>';
+
                             } elseif ($currentPosition <= $totalDaysDisplayed) {
-                                $day = $currentPosition - $startDay;
+                                $day       = $currentPosition - $startDay;
                                 $nepaliDay = NepaliDateConverter::toNepaliDigits($day);
 
-                                $isToday = $startDate
-                                    ->copy()
-                                    ->addDays($day - 1)
-                                    ->isToday();
-                                // @dd($isToday);
-                                $englishDate = isset($calendarData['english_dates'][$day])
-                                    ? $calendarData['english_dates'][$day]
-                                    : '';
-                                $events = isset($calendarData['events'][$day]) ? $calendarData['events'][$day] : [];
-                                $adDay = $startDate->copy()->addDays($day - 1)->day;
-                                $eventCount = count($events); // Calculate the number of events
-                                $meetingCount = isset($calendarData['meeting_counts'][$day])
-                                    ? $calendarData['meeting_counts'][$day]
-                                    : 0;
+                                $isToday      = $startDate->copy()->addDays($day - 1)->isToday();
+                                $englishDate  = $calendarData['english_dates'][$day] ?? '';
+                                $events       = $calendarData['events'][$day] ?? [];
+                                $adDay        = $startDate->copy()->addDays($day - 1)->day;
+                                $meetingCount = $calendarData['meeting_counts'][$day] ?? 0;
 
-                                // @dd($calendarData);
-
-                                // Format Nepali date as YYYY-MM-DD
                                 $nepaliDate = sprintf('%s-%s-%02d', $nepaliYear, $nepaliMonth, $day);
 
-                                // Add data-nepali-date attribute
-                                echo '<div class="col calendar-day ' .
-                                    ($isToday ? 'today ' : '') .
-                                    ($isSunday ? 'sunday ' : '') .
-                                    ($isSaturday ? 'saturday ' : '') .
-                                    '" data-nepali-date="' .
-                                    $nepaliDate .
-                                    '">';
+                                $classes = 'col calendar-day'
+                                    . ($isToday    ? ' today'    : '')
+                                    . ($isSunday   ? ' sunday'   : '')
+                                    . ($isSaturday ? ' saturday' : '');
+
+                                echo '<div class="' . $classes . '" data-nepali-date="' . $nepaliDate . '">';
                                 echo '<div class="day-content">';
-                                //  @dd($calendarData);
-                                // Add meeting count in top-right corner
-                                // Inside the calendar-day loop where meeting-count is rendered
+
+                                // Meeting badge
                                 if ($meetingCount > 0) {
                                     echo '<div class="meeting-count-wrapper">';
-                                    echo '<div class="meeting-count" data-tooltip="' .
-                                        $meetingCount .
-                                        ' Upcoming Meeting' .
-                                        ($meetingCount > 1 ? 's' : '') .
-                                        '">' .
-                                        $meetingCount .
-                                        '</div>';
+                                    echo '<div class="meeting-count" data-tooltip="'
+                                        . $meetingCount . ' Upcoming Meeting'
+                                        . ($meetingCount > 1 ? 's' : '') . '">'
+                                        . $meetingCount . '</div>';
                                     echo '</div>';
                                 }
+
+                                // Nepali date number
                                 echo '<div class="nepali-date">' . $nepaliDay . '</div>';
+
+                                // English date label
                                 if (!empty($englishDate)) {
                                     echo '<div class="english-date">' . $englishDate . '</div>';
                                 }
+
+                                // Events
                                 if (!empty($events)) {
                                     echo '<div class="events">';
                                     foreach ($events as $event) {
@@ -103,16 +98,21 @@
                                     }
                                     echo '</div>';
                                 }
+
+                                // AD date (bottom-right)
                                 echo '<div class="ad-date">' . $adDay . '</div>';
-                                echo '</div>';
-                                echo '</div>';
+                                echo '</div>'; // .day-content
+                                echo '</div>'; // .calendar-day
+
                             } else {
-                                echo '<div class="col calendar-day other-month ' .
-                                    ($isSaturday ? 'saturday' : '') .
-                                    ($isSunday ? 'sunday' : '') .
-                                    '"></div>';
+                                // Empty trailing cell
+                                echo '<div class="col calendar-day other-month'
+                                    . ($isSaturday ? ' saturday' : '')
+                                    . ($isSunday   ? ' sunday'   : '')
+                                    . '"></div>';
                             }
                         }
+
                         if ($week < $totalWeeks - 1) {
                             echo '</div><div class="row g-0">';
                         }
@@ -126,292 +126,353 @@
         Calendar data not available. Please select a valid year and month.
     </div>
 @endif
-@section('page-style')
-    <style>
-        .calendar {
-            width: 100%;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-            background: #fff;
+
+@push('vendor-style')
+<style>
+        /* ─── Root tokens ───────────────────────────────────────────────── */
+        :root {
+            --cal-accent:          #D85A30;
+            --cal-accent-hover:    #B84A22;
+            --cal-accent-soft:     #FAECE7;
+            --cal-accent-mid:      #F0997B;
+            --cal-today-bg:        #FFF7F4;
+            --cal-today-border:    #D85A30;
+            --cal-red-fg:          #993C1D;
+            --cal-selected-bg:     #E1F5EE;
+            --cal-selected-border: #0F6E56;
+            --cal-selected-fg:     #085041;
+            --cal-header-bg:       #2C2C2A;
+            --cal-header-border:   #444441;
+            --cal-cell-border:     rgba(0,0,0,0.08);
+            --cal-other-bg:        #F8F7F5;
+            --cal-weekend-bg:      #FFF9F8;
+            --cal-radius:          10px;
+            --cal-cell-min-h:      108px;
+            --cal-np-size:         1.4rem;
+            --cal-en-size:         0.72rem;
+            --cal-ad-size:         0.68rem;
+            --cal-ev-size:         0.7rem;
+            --cal-badge-size:      20px;
         }
 
+        /* ─── Wrapper ───────────────────────────────────────────────────── */
+        .calendar {
+            width: 100%;
+            border-radius: var(--cal-radius);
+            overflow: hidden;
+            border: 1px solid var(--cal-cell-border);
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+        }
+
+        /* ─── Header row (weekday labels) ───────────────────────────────── */
         .calendar-header {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-bottom: 1px solid #e0e0e0;
-            padding: 5px 0;
+            background: var(--cal-header-bg);
+            padding: 0;
         }
 
         .calendar-header .weekday {
-            padding: 12px 5px;
+            padding: 11px 4px;
             text-align: center;
-            font-weight: 600;
-            color: #333;
-            text-transform: uppercase;
-            font-size: 0.9rem;
         }
 
-        .weekday.sunday,
-        .weekday.saturday {
-            color: #dc3545;
+        .calendar-header .nepali-weekday {
+            font-size: 13px;
+            font-weight: 500;
+            color: #B4B2A9;
+            display: block;
+            line-height: 1;
+            letter-spacing: 0.02em;
+        }
+
+        .calendar-header .english-weekday {
+            font-size: 10px;
+            color: #888780;
+            display: block;
+            margin-top: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .calendar-header .weekday.sunday .nepali-weekday,
+        .calendar-header .weekday.saturday .nepali-weekday {
+            color: var(--cal-accent-mid);
+        }
+
+        .calendar-header .weekday.sunday .english-weekday,
+        .calendar-header .weekday.saturday .english-weekday {
+            color: var(--cal-accent-hover);
+            opacity: 0.7;
+        }
+
+        /* ─── Calendar body / cells ─────────────────────────────────────── */
+        .calendar-body {
+            background: #fff;
         }
 
         .calendar-day {
-            border: 1px solid #e9ecef;
-            padding: 5px;
+            border-right: 1px solid var(--cal-cell-border);
+            border-bottom: 1px solid var(--cal-cell-border);
+            padding: 8px 8px 6px;
+            min-height: var(--cal-cell-min-h);
             position: relative;
-            min-height: 100px;
-            transition: all 0.2s ease;
-        }
-
-        .calendar-day:hover {
-            background-color: #f8f9fa;
+            background: #fff;
+            transition: background 0.12s ease;
             cursor: pointer;
         }
 
-        .calendar-day.today {
-            background-color: #e6f0ff;
-            border: 2px solid #0d6efd;
-            border-radius: 4px;
-            box-shadow: 0 0 8px rgba(13, 110, 253, 0.3);
+        .calendar-day:hover {
+            background: #FAFAF9;
         }
 
-        .calendar-day.sunday {
-            background-color: rgba(220, 53, 69, 0.03);
-        }
-
+        /* Weekends */
+        .calendar-day.sunday,
         .calendar-day.saturday {
-            background-color: rgba(220, 53, 69, 0.03);
+            background: var(--cal-weekend-bg);
+        }
+        .calendar-day.sunday:hover,
+        .calendar-day.saturday:hover {
+            background: var(--cal-accent-soft);
         }
 
+        /* Empty / other-month cells */
         .calendar-day.other-month {
-            background-color: #f8f9fa;
-            color: #adb5bd;
+            background: var(--cal-other-bg);
+            cursor: default;
+            pointer-events: none;
+        }
+        .calendar-day.other-month:hover {
+            background: var(--cal-other-bg);
         }
 
-        /* Add styles for selected date */
+        /* Today */
+        .calendar-day.today {
+            background: var(--cal-today-bg);
+            outline: 2px solid var(--cal-today-border);
+            outline-offset: -2px;
+            border-radius: 2px;
+            z-index: 1;
+        }
+
+        /* Selected */
         .calendar-day.selected {
-            background-color: #28a745;
-            /* Green background for selected date */
-            border: 2px solid #218838;
-            /* Darker green border */
-            border-radius: 4px;
-            box-shadow: 0 0 8px rgba(40, 167, 69, 0.3);
-            color: #fff;
-            /* White text for contrast */
+            background: var(--cal-selected-bg);
+            outline: 2px solid var(--cal-selected-border);
+            outline-offset: -2px;
+            border-radius: 2px;
+            z-index: 1;
         }
 
-        .calendar-day.selected .nepali-date,
-        .calendar-day.selected .english-date,
-        .calendar-day.selected .ad-date,
-        .calendar-day.selected .meeting-count {
-            color: #fff;
-            /* White text for child elements */
-        }
-
-        .calendar-day.selected .event {
-            background-color: #218838;
-            /* Slightly darker green for events */
-        }
-
+        /* ─── Day content layout ────────────────────────────────────────── */
         .day-content {
             display: flex;
             flex-direction: column;
             height: 100%;
             position: relative;
-            /* For positioning meeting-count */
         }
 
+        /* ─── Nepali date number ────────────────────────────────────────── */
         .calendar-day .nepali-date {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #2c3e50;
-            text-align: center;
-            padding: 5px 0;
+            font-size: var(--cal-np-size);
+            font-weight: 500;
+            color: #2C2C2A;
+            line-height: 1;
+            padding: 2px 0 3px;
+            /* leave room for badge on the right */
+            padding-right: 26px;
         }
 
-        .calendar-day.today .nepali-date {
-            color: #0d6efd;
-        }
+        .calendar-day.today .nepali-date     { color: var(--cal-today-border); }
+        .calendar-day.selected .nepali-date  { color: var(--cal-selected-fg);  }
+        .calendar-day.sunday .nepali-date,
+        .calendar-day.saturday .nepali-date  { color: var(--cal-red-fg);       }
 
+        /* Today overrides weekend colour */
+        .calendar-day.today.sunday .nepali-date,
+        .calendar-day.today.saturday .nepali-date { color: var(--cal-today-border); }
+
+        /* ─── English date label ────────────────────────────────────────── */
         .calendar-day .english-date {
-            font-size: 0.8rem;
-            color: #6c757d;
-            text-align: center;
-            margin-bottom: 5px;
+            font-size: var(--cal-en-size);
+            color: #888780;
+            margin-bottom: 4px;
+            letter-spacing: 0.015em;
         }
 
+        /* ─── Events list ───────────────────────────────────────────────── */
         .calendar-day .events {
-            flex-grow: 1;
-            margin: 5px 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin: 2px 0;
         }
 
         .calendar-day .event {
-            background-color: #52bd8b;
-            color: white;
+            background: var(--cal-accent-soft);
+            color: var(--cal-accent);
             border-radius: 3px;
             padding: 2px 5px;
-            margin: 2px 0;
-            display: block;
-            font-size: 0.75rem;
+            font-size: var(--cal-ev-size);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            display: block;
+            font-weight: 500;
+            letter-spacing: 0.01em;
         }
 
+        .calendar-day.selected .event {
+            background: #9FE1CB;
+            color: var(--cal-selected-fg);
+        }
+
+        /* ─── AD date (bottom-right) ────────────────────────────────────── */
         .calendar-day .ad-date {
-            font-size: 0.7rem;
-            color: #6c757d;
+            font-size: var(--cal-ad-size);
+            color: #B4B2A9;
             text-align: right;
-            padding: 2px 5px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 3px;
+            padding: 2px 0 0;
+            margin-top: auto;
+            font-variant-numeric: tabular-nums;
         }
 
-        .calendar-day.today .ad-date {
-            color: #0d6efd;
-            font-weight: 600;
-        }
+        .calendar-day.today .ad-date    { color: var(--cal-today-border); font-weight: 500; }
+        .calendar-day.selected .ad-date { color: var(--cal-selected-fg);  }
 
-        /* New styles for meeting count */
-        /* Meeting count wrapper for positioning */
+        /* ─── Meeting count badge ───────────────────────────────────────── */
         .meeting-count-wrapper {
             position: absolute;
-            top: 5px;
-            right: 5px;
+            top: 4px;
+            right: 4px;
             z-index: 10;
-            /* Ensure tooltip appears above other elements */
         }
 
-        /* Existing meeting-count styles (unchanged) */
         .meeting-count {
             position: relative;
-            background-color: #dc3545;
-            color: white;
+            background: #E24B4A;
+            color: #fff;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width:  var(--cal-badge-size);
+            height: var(--cal-badge-size);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
+            font-size: 0.72rem;
             font-weight: 600;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
             cursor: pointer;
-            /* Indicate hoverability */
+            box-shadow: 0 1px 3px rgba(226,75,74,0.35);
+            transition: transform 0.12s ease;
+        }
+        .meeting-count:hover {
+            transform: scale(1.12);
         }
 
-        /* Tooltip styles */
-        .meeting-count:hover:after {
+        /* Tooltip */
+        .meeting-count::after {
             content: attr(data-tooltip);
-            /* Use data-tooltip attribute for content */
             position: absolute;
-            top: 100%;
-            /* Position below the circle */
+            top: calc(100% + 6px);
             right: 50%;
             transform: translateX(50%);
-            /* Center horizontally */
-            background-color: #333;
-            /* Dark background for tooltip */
-            color: white;
-            padding: 5px 10px;
+            background: #2C2C2A;
+            color: #fff;
+            padding: 4px 9px;
             border-radius: 4px;
-            font-size: 0.75rem;
+            font-size: 0.68rem;
             white-space: nowrap;
-            z-index: 20;
+            pointer-events: none;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.2s ease, visibility 0.2s ease;
+            transition: opacity 0.15s ease, visibility 0.15s ease;
+            z-index: 20;
         }
-
-        .meeting-count:hover:before {
+        .meeting-count::before {
             content: '';
             position: absolute;
             top: 100%;
-            /* Triangle pointing up */
             right: 50%;
             transform: translateX(50%);
-            border: 5px solid transparent;
-            border-bottom-color: #333;
-            /* Match tooltip background */
-            z-index: 20;
+            border: 4px solid transparent;
+            border-bottom-color: #2C2C2A;
+            pointer-events: none;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.2s ease, visibility 0.2s ease;
+            transition: opacity 0.15s ease, visibility 0.15s ease;
+            z-index: 20;
         }
-
-        .meeting-count:hover:after,
-        .meeting-count:hover:before {
+        .meeting-count:hover::after,
+        .meeting-count:hover::before {
             opacity: 1;
             visibility: visible;
         }
 
-        /* Adjust tooltip for today */
+        /* Today's badge is blue */
         .calendar-day.today .meeting-count {
-            background-color: #0d6efd;
+            background: var(--cal-today-border);
+            box-shadow: 0 1px 3px rgba(216,90,48,0.4);
         }
 
-        .calendar-day.today .meeting-count:hover:after {
-            background-color: #0d6efd;
-            /* Match today's color */
+        /* Selected badge is green */
+        .calendar-day.selected .meeting-count {
+            background: var(--cal-selected-border);
+            box-shadow: 0 1px 3px rgba(15,110,86,0.35);
         }
 
-        .calendar-day.today .meeting-count:hover:before {
-            border-bottom-color: #0d6efd;
-            /* Match today's color */
-        }
+        /* ─── Bootstrap row reset ───────────────────────────────────────── */
+        .row.g-0 { margin: 0; }
 
-        /* Responsive adjustments */
+        /* ─── Responsive ────────────────────────────────────────────────── */
         @media (max-width: 768px) {
-            .meeting-count {
-                width: 20px;
-                height: 20px;
-                font-size: 0.8rem;
+            :root {
+                --cal-cell-min-h: 78px;
+                --cal-np-size:    1.05rem;
+                --cal-en-size:    0.62rem;
+                --cal-ad-size:    0.58rem;
+                --cal-ev-size:    0.6rem;
+                --cal-badge-size: 18px;
             }
 
-            .meeting-count:hover:after {
-                font-size: 0.65rem;
-                padding: 4px 8px;
-            }
+            .calendar-day { padding: 5px 5px 4px; }
+
+            .calendar-header .nepali-weekday  { font-size: 11px; }
+            .calendar-header .english-weekday { font-size: 9px;  }
+
+            .meeting-count { font-size: 0.65rem; }
         }
 
-        .calendar-day.today .meeting-count {
-            background-color: #0d6efd;
-            /* Blue for today */
-        }
-
-        .row.g-0 {
-            margin: 0;
-        }
-
-        @media (max-width: 768px) {
-            .calendar-day {
-                min-height: 80px;
-                padding: 3px;
+        @media (max-width: 480px) {
+            :root {
+                --cal-cell-min-h: 62px;
+                --cal-np-size:    0.9rem;
             }
-
-            .calendar-day .nepali-date {
-                font-size: 1.1rem;
-            }
-
-            .calendar-day .english-date {
-                font-size: 0.7rem;
-            }
-
-            .calendar-day .event {
-                font-size: 0.65rem;
-            }
-
-            .calendar-day .ad-date {
-                font-size: 0.6rem;
-            }
-
-            .meeting-count {
-                width: 20px;
-                height: 20px;
-                font-size: 0.8rem;
-            }
+            .calendar-header .english-weekday { display: none; }
+            .calendar-day .english-date       { display: none; }
         }
     </style>
-@endsection
+@endpush
+
+
+@push('page-script')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const days = document.querySelectorAll('.calendar-day:not(.other-month)');
+            let selected = null;
+
+            days.forEach(function (cell) {
+                cell.addEventListener('click', function () {
+                    if (selected && selected !== cell) {
+                        selected.classList.remove('selected');
+                    }
+                    if (selected === cell) {
+                        cell.classList.remove('selected');
+                        selected = null;
+                    } else {
+                        cell.classList.add('selected');
+                        selected = cell;
+                    }
+                });
+            });
+        });
+    </script>
+@endpush

@@ -1,6 +1,7 @@
 @extends('pages.resources.form')
 @push('vendor-style')
     @vite('resources/assets/vendor/libs/dropzone5/dropzone.css')
+    @vite('resources/assets/vendor/libs/flatpickr/flatpickr.css')
 @endpush
 @section('form-fields')
     <div class="accordion" id="meetingFormAccordion">
@@ -106,7 +107,7 @@
                                 multiple />
                         </div>
 
-                        
+
                         <div class="mb-3 col-md-2">
                             <x-forms.input-switch name="is_external" :label="__('is_external')" :value="old('is_external', $model->is_external ?? 0)" />
                         </div>
@@ -425,6 +426,7 @@
 </style>
 @push('vendor-script')
     @vite('resources/assets/vendor/libs/dropzone5/dropzone.js')
+    @vite('resources/assets/vendor/libs/flatpickr/flatpickr.js')
 @endpush
 @push('scripts')
     <script type="module">
@@ -458,18 +460,18 @@
                 <td>
                     <div class="input-group">
                         <span class="input-group-text">+977</span>
-                        <input type="number" name="external_contacts[${rowCount}][mobile]" class="form-control" 
-                            placeholder="{{ __('Enter Mobile') }}" 
-                            minlength="10" maxlength="10" pattern="\d{10}" 
+                        <input type="number" name="external_contacts[${rowCount}][mobile]" class="form-control"
+                            placeholder="{{ __('Enter Mobile') }}"
+                            minlength="10" maxlength="10" pattern="\d{10}"
                             oninput="this.value = this.value.slice(0, 10)" />
                     </div>
                 </td>
                 <td>
                     <div class="input-group">
                         <span class="input-group-text">+977</span>
-                        <input type="number" name="external_contacts[${rowCount}][phone]" class="form-control" 
-                            placeholder="{{ __('Enter Phone') }}" 
-                            minlength="7" maxlength="8" pattern="\d{7,8}" 
+                        <input type="number" name="external_contacts[${rowCount}][phone]" class="form-control"
+                            placeholder="{{ __('Enter Phone') }}"
+                            minlength="7" maxlength="8" pattern="\d{7,8}"
                             oninput="this.value = this.value.slice(0, 8)" />
                     </div>
                 </td>

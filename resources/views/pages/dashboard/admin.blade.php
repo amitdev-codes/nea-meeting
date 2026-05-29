@@ -15,7 +15,6 @@
     </div>
 
     <!-- Total Counts Section -->
-        <!-- Total Counts Section -->
         <div class="container-xxl py-4">
             <div class="row g-4 mb-4">
                 <!-- Yesterday's Meetings -->
@@ -89,10 +88,8 @@
                     </a>
                 </div>
             </div>
-        </div>
-
         <!-- Charts Section -->
-        <div class="row g-4">
+          <div class="row g-4">
                 <!-- Meetings Per Month Bar Chart for Admin/Superadmin -->
                 <div class="col-md-6">
                     <div class="card chart-card">
@@ -117,44 +114,7 @@
                     </div>
                 </div>
         </div>
-    </div>
-@endsection
-
-@section('page-style')
-    <style>
-        .chart-card {
-            height: 400px; /* Fixed height for both cards */
-            display: flex;
-            flex-direction: column;
-        }
-        .chart-card .card-body {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem;
-        }
-        .chart-canvas {
-            width: 100% !important;
-            height: 300px !important;
-            max-width: 400px; /* Match canvas width */
-            max-height: 300px; /* Match canvas height */
-        }
-        @media (max-width: 768px) {
-            .chart-canvas {
-                max-width: 100%;
-                height: 250px !important; /* Slightly smaller for mobile */
-            }
-            .chart-card {
-                height: 350px;
-            }
-        }
-        .card-yesterday { background: linear-gradient(135deg, #ff6b6b, #ff8e53); }
-        .card-today { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-        .card-upcoming { background: linear-gradient(135deg, #2ecc71, #27ae60); }
-        .card-this-month { background: linear-gradient(135deg, #1e90ff, #00b7eb); }
-        .card-total { background: linear-gradient(135deg, #f1c40f, #f39c12); }
-    </style>
+        </div>
 @endsection
 
 @push('scripts')

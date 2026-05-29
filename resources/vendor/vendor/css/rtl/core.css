@@ -3,7 +3,7 @@
  * Copyright 2011-2024 The Bootstrap Authors
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
- :root,[data-bs-theme=light] {
+:root,[data-bs-theme=light] {
     --bs-blue: #007bff;
     --bs-indigo: #6610f2;
     --bs-purple: #696cff;
@@ -4746,7 +4746,7 @@ textarea.form-control-lg {
     align-items: center;
     width: 100%;
     padding: var(--bs-accordion-btn-padding-y) var(--bs-accordion-btn-padding-x);
-    font-size: 0.9375rem;
+    font-size: 0.8rem;
     color: var(--bs-accordion-btn-color);
     text-align: left;
     background-color: var(--bs-accordion-btn-bg);
@@ -6470,13 +6470,15 @@ textarea.form-control-lg {
 
 .carousel-caption {
     position: absolute;
-    right: 15%;
-    bottom: 1.25rem;
     left: 15%;
-    padding-top: 1.25rem;
-    padding-bottom: 1.25rem;
     color: #fff;
-    text-align: center
+    text-align: center;
+    background: #231e1e;
+    width: 70%;
+    opacity: .8;
+    padding: 19px;
+    bottom: 38px;
+
 }
 
 .carousel-dark .carousel-control-prev-icon,.carousel-dark .carousel-control-next-icon {
@@ -11847,8 +11849,8 @@ html:not([dir=rtl]) .form-select:focus,html:not([dir=rtl]) .was-validated .form-
     padding-inline-end:calc(3.9375rem - var(--bs-border-width))}
 
 html: not([dir=rtl]) .form-select.form-select-lg:focus,html:not([dir=rtl]) .was-validated .form-select.form-select-lg {
-    padding:calc(.7075rem - 2px) calc(3.9375rem - 2px) calc(.7075rem - 2px) calc(1.3125rem - 2px)
-}
+                         padding:calc(.7075rem - 2px) calc(3.9375rem - 2px) calc(.7075rem - 2px) calc(1.3125rem - 2px)
+                     }
 
 [dir=rtl] .form-select.form-select-lg:focus,[dir=rtl] .was-validated .form-select.form-select-lg {
     padding: calc(.7075rem - 2px) calc(1.3125rem - 2px) calc(.7075rem - 2px) calc(3.9375rem - 2px)
@@ -11861,8 +11863,8 @@ html: not([dir=rtl]) .form-select.form-select-lg:focus,html:not([dir=rtl]) .was-
     padding-inline-end:calc(2.4375rem - var(--bs-border-width))}
 
 html: not([dir=rtl]) .form-select.form-select-sm:focus,html:not([dir=rtl]) .was-validated .form-select.form-select-sm {
-    padding:calc(.3165rem - 2px) calc(2.4375rem - 2px) calc(.3165rem - 2px) calc(.8125rem - 2px)
-}
+                         padding:calc(.3165rem - 2px) calc(2.4375rem - 2px) calc(.3165rem - 2px) calc(.8125rem - 2px)
+                     }
 
 [dir=rtl] .form-select.form-select-sm:focus,[dir=rtl] .was-validated .form-select.form-select-sm {
     padding: calc(.3165rem - 2px) calc(.8125rem - 2px) calc(.3165rem - 2px) calc(2.4375rem - 2px)

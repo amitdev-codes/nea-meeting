@@ -45,7 +45,7 @@ class UserController extends BaseAdminController
      */
     public function create()
     {
-        $roles = Role::get(['id', 'name','name_np']);
+        $roles = Role::get(['id', 'name','name_np'])->where('id','!=',1);
         return $this->renderForm($this->formView, null,['roles' => $roles]);
     }
 
@@ -53,12 +53,12 @@ class UserController extends BaseAdminController
     {
         // $this->authorizeResource('view-users');
         // $user->load('addresses.province', 'addresses.district', 'addresses.localLevel','component','subComponent');
-    
+
         $activities = Activity::where('subject_id', $user->id)
             ->orWhere('causer_id', $user->id)
             ->latest()
             ->paginate(5);
-    
+
         return view('pages.users.show', ['resource' => $user, 'activities' => $activities]);
     }
 
@@ -101,7 +101,7 @@ class UserController extends BaseAdminController
             if ($request->filled('password')) {
                 $userData['password'] = bcrypt($request->password);
             }
-            
+
             $user->update($userData);
             $user->syncRoles($request->rolename);
         }, 'admin.users.index');

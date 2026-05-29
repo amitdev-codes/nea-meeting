@@ -25,4 +25,11 @@
             <span class="tab-text">{{ __('field.dashboard') }}</span>
         </button>
     </li>
+
+    <li class="nav-item" role="presentation">
+        <button class="nav-link fw-semibold" id="google-calendar-tab" data-bs-toggle="tab" data-bs-target="#google-calendar" type="button" role="tab" aria-controls="google-calendar" aria-selected="false">
+            <i class="bx bxl-google"></i>
+            <span class="tab-text">{{ __('Google Calendar') }}</span>
+        </button>
+    </li>
 </ul>

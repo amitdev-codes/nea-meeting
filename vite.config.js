@@ -59,6 +59,7 @@ export default defineConfig({
                 "resources/css/app.css",
                 "resources/assets/css/demo.css",
                 "resources/js/app.js",
+                "resources/js/laravel-datatables.js",
                 ...pageJsFiles,
                 ...vendorJsFiles,
                 ...vendorCssFiles,
@@ -86,29 +87,29 @@ export default defineConfig({
             },
             refresh: true,
         }),
-        ViteImageOptimizer({
-            png: {
-                quality: 100,
-            },
-            jpeg: {
-                quality: 50,
-            },
-            jpg: {
-                quality: 50,
-            },
-            tiff: {
-                quality: 100,
-            },
-            gif: {},
-            webp: {
-                lossless: true,
-            },
-            avif: {
-                lossless: true,
-            },
-            cache: false,
-            cacheLocation: undefined,
-        }),
+        // ViteImageOptimizer({
+        //     png: {
+        //         quality: 100,
+        //     },
+        //     jpeg: {
+        //         quality: 50,
+        //     },
+        //     jpg: {
+        //         quality: 50,
+        //     },
+        //     tiff: {
+        //         quality: 100,
+        //     },
+        //     gif: {},
+        //     webp: {
+        //         lossless: true,
+        //     },
+        //     avif: {
+        //         lossless: true,
+        //     },
+        //     cache: false,
+        //     cacheLocation: undefined,
+        // }),
 
     ],
     optimizeDeps: {

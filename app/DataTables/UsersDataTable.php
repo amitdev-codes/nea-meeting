@@ -17,7 +17,7 @@ class UsersDataTable extends DataTable
 {
     use CommonDataTableFunctions;
 
-    protected array $searchableColumns = ['code', 'username', 'email', 'role_name', 'mobile_no', 'organization_name','role_name'];
+    protected array $searchableColumns = ['username', 'email', 'role_name', 'mobile_no', 'organization_name','role_name'];
     protected array $dropdownColumns = [
 
     ];
@@ -30,7 +30,7 @@ class UsersDataTable extends DataTable
 
     protected function roleOptions(): array
     {
-        return Role::pluck('name', 'name')->all(); 
+        return Role::pluck('name', 'name')->all();
     }
 
     public function dataTable(QueryBuilder $query): EloquentDataTable
@@ -40,8 +40,8 @@ class UsersDataTable extends DataTable
             ->addColumn('checkbox', fn ($user) => $this->renderCheckbox('user_ids[]', $user->id))
             ->addColumn('role_name', fn ($user) => $this->generateBadges($user->roles->pluck('name')))
             ->addColumn('organization_name', function ($user) {
-                return $user->organization_id 
-                    ? $user->organizations->name . ' (' . ($user->organizations->name_np ?? 'N/A') . ')' 
+                return $user->organization_id
+                    ? $user->organizations->name . ' (' . ($user->organizations->name_np ?? 'N/A') . ')'
                     : 'N/A';
             })
             ->addColumn('status', fn ($row) => $this->getStatusBadge($row->status))
@@ -56,13 +56,14 @@ class UsersDataTable extends DataTable
     public function query(User $model): QueryBuilder
     {
         $query = $model->newQuery()->with('roles');
-        
+        $query->withoutRole('superadmin');
+
         $dropdownFields = [
             'organization_name' => 'organization_id',
             'section_name' => 'section_id',
             'role_name' => 'roles.name',
         ];
-    
+
         // Global search (top search bar)
         if (request()->has('search') && request('search')['value']) {
             $search = request('search')['value'];
@@ -78,14 +79,14 @@ class UsersDataTable extends DataTable
                 });
             });
         }
-    
+
         // Column-specific search (filter row)
         if (request()->has('columns')) {
             foreach (request('columns') as $i => $column) {
                 if (isset($column['search']['value']) && $column['search']['value'] !== '') {
                     $value = $column['search']['value'];
                     $columnData = $column['data'];
-                    
+
                     if (in_array($columnData, $this->searchableColumns)) {
                         if ($columnData == 'role_name') {
                             $query->whereHas('roles', function ($q) use ($value) {
@@ -100,10 +101,10 @@ class UsersDataTable extends DataTable
                 }
             }
         }
-    
+
         return $query;
     }
-    
+
 
     public function html(): HtmlBuilder
     {
@@ -124,7 +125,7 @@ class UsersDataTable extends DataTable
                     ' . $this->initBulkDeleteScript('user_ids[]') . '
                     ' . $this->initDeleteScript() . '
                     ' . $this->initColumnSearch() . '
-                    ' . $this->initStickyColumnsStyles() . ' 
+                    ' . $this->initStickyColumnsStyles() . '
                 }',
                 'headerCallback' => 'function(thead) {
                     $(thead).find("th").css({

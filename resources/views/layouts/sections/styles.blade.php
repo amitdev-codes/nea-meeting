@@ -3,10 +3,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
  <link
     href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-    rel="stylesheet"> 
+    rel="stylesheet">
 
 @vite(['resources/assets/vendor/fonts/boxicons.scss'])
-@vite('resources/css/app.css')
+{{--@vite('resources/css/app.css')--}}
 
 
 <link href="{{ Vite::asset('resources/assets/vendor/css/core.css') }}" rel="stylesheet" class="core-css">
@@ -19,7 +19,7 @@
 <!-- Vendor Styles -->
 @vite(['resources/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css'])
 @yield('vendor-style')
-<!-- @vite('resources/css/stylesheets/style.css') -->
+
 
 <!-- Page Styles -->
 @yield('page-style')

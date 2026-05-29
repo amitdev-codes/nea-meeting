@@ -11842,8 +11842,8 @@ html:not([dir=rtl]) .form-select:focus,html:not([dir=rtl]) .was-validated .form-
     padding-inline-end:calc(3.9375rem - var(--bs-border-width))}
 
 html: not([dir=rtl]) .form-select.form-select-lg:focus,html:not([dir=rtl]) .was-validated .form-select.form-select-lg {
-    padding:calc(.7075rem - 2px) calc(3.9375rem - 2px) calc(.7075rem - 2px) calc(1.3125rem - 2px)
-}
+                         padding:calc(.7075rem - 2px) calc(3.9375rem - 2px) calc(.7075rem - 2px) calc(1.3125rem - 2px)
+                     }
 
 [dir=rtl] .form-select.form-select-lg:focus,[dir=rtl] .was-validated .form-select.form-select-lg {
     padding: calc(.7075rem - 2px) calc(1.3125rem - 2px) calc(.7075rem - 2px) calc(3.9375rem - 2px)
@@ -11856,8 +11856,8 @@ html: not([dir=rtl]) .form-select.form-select-lg:focus,html:not([dir=rtl]) .was-
     padding-inline-end:calc(2.4375rem - var(--bs-border-width))}
 
 html: not([dir=rtl]) .form-select.form-select-sm:focus,html:not([dir=rtl]) .was-validated .form-select.form-select-sm {
-    padding:calc(.3165rem - 2px) calc(2.4375rem - 2px) calc(.3165rem - 2px) calc(.8125rem - 2px)
-}
+                         padding:calc(.3165rem - 2px) calc(2.4375rem - 2px) calc(.3165rem - 2px) calc(.8125rem - 2px)
+                     }
 
 [dir=rtl] .form-select.form-select-sm:focus,[dir=rtl] .was-validated .form-select.form-select-sm {
     padding: calc(.3165rem - 2px) calc(.8125rem - 2px) calc(.3165rem - 2px) calc(2.4375rem - 2px)

@@ -1,6 +1,5 @@
 <?php use App\Helpers\NepaliDateConverter; ?>
 @extends('layouts/contentNavbarLayout')
-
 @section('content')
     <div class="container-fluid m-1 p-4">
         <!-- Calendar Grid -->
@@ -57,7 +56,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Meeting Schedule Section -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center flex-wrap">
@@ -77,7 +75,7 @@
         </div>
     </div>
 @endsection
-@push('scripts')
+@push('page-script')
     <script type="module">
         const NepaliDateConverter = {
             nepaliMonths: @json(\App\Helpers\NepaliDateConverter::$nepaliMonths),
@@ -218,15 +216,15 @@
                             data.meetingDates = meetingDates;
 
                             fetch(`/calendar/get-calendar-grid-partial`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify({
-                                        calendarData: data
-                                    })
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    calendarData: data
                                 })
+                            })
                                 .then(response => response.text())
                                 .then(html => {
                                     document.getElementById('calendarGrid').innerHTML = html;
@@ -301,10 +299,10 @@
                                         <i class="bx bx-time-five me-1"></i> ${startTime}${endTime ? ` - ${endTime}` : ''}
                                     </div>
                                     <div class="meeting-location">
-                                        ${meeting.is_virtual ? 
-                                            `<i class="bx bx-video me-1"></i> Virtual Meeting` : 
-                                            `<i class="bx bx-map me-1"></i> ${meeting.meeting_location || meeting.meeting_room?.name || 'Location not specified'}`
-                                        }
+                                        ${meeting.is_virtual ?
+                                `<i class="bx bx-video me-1"></i> Virtual Meeting` :
+                                `<i class="bx bx-map me-1"></i> ${meeting.meeting_location || meeting.meeting_room?.name || 'Location not specified'}`
+                            }
                                     </div>
                                 </a>
                             `;
@@ -353,7 +351,7 @@
         }
     </script>
 @endpush
-@section('page-style')
+@push('page-style')
     <style>
         /* Enhanced Nepali Calendar Styling */
         .calendar {
@@ -650,4 +648,5 @@
             }
         }
     </style>
-@endsection
+@endpush
+

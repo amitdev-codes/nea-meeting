@@ -78,9 +78,7 @@ html[lang="np"] body {
     }
 }
 
-.app-brand-text {
-    font-size: $font-size-sm;
-}
+// Sidebar brand — see resources/css/stylesheets/style.css
 
 .badge-notifications {
     animation: bling 1.5s infinite;
@@ -220,7 +218,8 @@ table.table-bordered.dataTable > :not(caption) > * > * {
             display: none;
         }
     }
-    .fiscal-date{
+    .sidebar-fiscal-block,
+    .sidebar-brand-text {
         display: none;
     }
 }
@@ -231,6 +230,10 @@ table.table-bordered.dataTable > :not(caption) > * > * {
         .menu-header-text{
             display: block;
         }
+    }
+    .sidebar-fiscal-block,
+    .sidebar-brand-text {
+        display: block;
     }
 }
 

@@ -5,6 +5,17 @@
     App::setLocale('np');
 @endphp
     <div class="authentication-wrapper authentication-cover auth-main position-relative">
+        <!-- Background Image -->
+        <img src="{{ Vite::asset('resources/assets/img/illustrations/nea-login-front.png') }}"
+             alt="Background Image"
+             class="w-100 h-100 position-absolute inset-0 login-bg object-fit-cover">
+
+        <!-- Arrow / Decorative Image -->
+        <div class="arrow-bg d-none d-lg-block">
+            <img src="{{ Vite::asset('resources/assets/img/illustrations/login-bg.jpg') }}"
+                 alt="Background Image"
+                 class="arrow-img w-100">
+        </div>
         <div class="auth-content border p-4 rounded-2 bg-white mt-12">
             <div class="auth-form">
                 <div class="auth-header text-center mb-4">
