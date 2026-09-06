@@ -31,9 +31,17 @@ class SyncMeetingToGoogleCalendar implements ShouldQueue
             return;
         }
 
-        $users = User::whereIn('organization_id', $this->organizationIds)
-            ->whereNotNull('google_access_token')
-            ->get();
+        $users = User::whereNotNull('google_access_token')
+            ->where(function ($query) {
+                $query->where('id', $this->meeting->created_by);
+
+                if (!empty($this->organizationIds)) {
+                    $query->orWhereIn('organization_id', $this->organizationIds);
+                }
+            })
+            ->get()
+            ->sortByDesc(fn (User $user) => $user->id === $this->meeting->created_by)
+            ->values();
 
         if ($users->isEmpty()) {
             return;
@@ -47,9 +55,16 @@ class SyncMeetingToGoogleCalendar implements ShouldQueue
             'attendees'   => $users->pluck('email')->toArray(),
         ];
 
-        $googleEvent = $googleCalendarService->createEventForMultipleUsers($users, $eventData);
+        $googleEvents = $googleCalendarService->createEventForMultipleUsers($users, $eventData);
 
-        if ($googleEvent) {
+        $createdEvent = collect($googleEvents)->first(fn ($event) => $event);
+
+        if ($createdEvent) {
+            $this->meeting->update([
+                'google_calendar_event_id' => $createdEvent->getId(),
+                'google_calendar_link' => $createdEvent->getHtmlLink(),
+            ]);
+
             Log::info('Google Calendar event created for meeting #' . $this->meeting->id);
         }
     }

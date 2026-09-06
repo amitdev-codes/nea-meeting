@@ -26,7 +26,7 @@
                        aria-expanded="false">
 
                         <span class="gcal-icon-wrap gcal-icon-wrap--connected">
-                            @include('__partials._google-icon')
+                            @include('_partials._google-icon')
                         </span>
 
                         <span class="gcal-text">

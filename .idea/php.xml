@@ -187,7 +187,7 @@
       <path value="$PROJECT_DIR$/vendor/_laravel_idea" />
     </include_path>
   </component>
-  <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
+  <component name="PhpProjectSharedConfiguration" php_language_level="8.4" />
   <component name="PhpStan">
     <PhpStan_settings>
       <phpstan_by_interpreter asDefaultInterpreter="true" interpreter_id="a42e76ed-2853-4697-8e58-40d24d33af29" timeout="60000" />

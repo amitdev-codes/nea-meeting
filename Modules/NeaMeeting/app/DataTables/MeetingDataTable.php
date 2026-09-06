@@ -204,7 +204,10 @@ class MeetingDataTable extends DataTable
         }
 
         // Custom status ordering: Ongoing, Scheduled, Completed, Cancelled
-        $query->orderByRaw("FIELD(status, 'Ongoing', 'Scheduled', 'Completed', 'Cancelled')")->orderBy('start_time', 'asc');
+        $query->orderByRaw("FIELD(status, 'Ongoing', 'Scheduled', 'Completed', 'Cancelled')")
+            ->orderByDesc('meeting_date_ad')
+                ->orderByDesc('start_time','asc');
+//            ->orderBy('start_time', 'asc');
 
         return $query;
     }
@@ -240,7 +243,7 @@ class MeetingDataTable extends DataTable
             Column::make('meeting_location')->title(__('field.meeting_location')),
             Column::make('meeting_date')->title(__('field.meeting_date')),
             Column::make('start_time')->title(__('field.start_time')),
-            Column::make('end_time')->title(__('field.end_time')),
+//            Column::make('end_time')->title(__('field.end_time')),
             Column::make('meeting_type')->title(__('field.meeting_type')),
             Column::make('status')->title(__('field.status')),
             $this->actionColumn('admin.meetings'),

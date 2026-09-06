@@ -2,35 +2,28 @@
 
 namespace Modules\NeaMeeting\Http\Controllers;
 
+use App\Events\MeetingEvent;
+use App\Helpers\NepaliDateConverter;
+use App\Http\Controllers\BaseAdminController;
 use App\Jobs\SendMeetingNotifications;
 use App\Jobs\SyncMeetingToGoogleCalendar;
-use Carbon\Carbon;
 use App\Models\User;
-use App\Enums\MeetingStatus;
-use App\Events\MeetingEvent;
-use Illuminate\Http\Request;
-use App\Events\MeetingCreated;
-use App\Events\MeetingUpdated;
-use App\Events\MeetingCancelled;
 use App\Services\ResponseService;
-use App\Traits\HandlesExceptions;
 use App\Traits\BulkDeletableTrait;
-use Illuminate\Support\Facades\DB;
+use App\Traits\HandlesExceptions;
 use App\Traits\InlineEditableTrait;
-use Illuminate\Support\Facades\Log;
-use App\Helpers\NepaliDateConverter;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Modules\NeaMeeting\Models\Meeting;
-use Modules\Master\Models\Organization;
-use App\Notifications\MeetingNotification;
-use Illuminate\Support\Facades\Notification;
-use App\Http\Controllers\BaseAdminController;
-use App\Notifications\ExternalMeetingNotification;
-use Modules\NeaMeeting\DataTables\MeetingDataTable;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Modules\NeaMeeting\Http\Requests\StoreMeetingRequest;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\GoogleCalendar\Services\GoogleCalendarService;
+use Modules\Master\Models\Organization;
+use Modules\NeaMeeting\DataTables\MeetingDataTable;
+use Modules\NeaMeeting\Http\Requests\StoreMeetingRequest;
 use Modules\NeaMeeting\Http\Requests\UpdateMeetingRequest;
+use Modules\NeaMeeting\Models\Meeting;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MeetingController extends BaseAdminController
 {
@@ -39,14 +32,20 @@ class MeetingController extends BaseAdminController
     use InlineEditableTrait;
 
     protected $model = Meeting::class;
+
     protected string $resourcePermission = 'meetings';
+
     protected string $resourceName = 'meetings';
+
     protected string $formView = 'neameeting::pages.meetings.meetingForm';
+
     protected $googleCalendarService;
+
     protected $emailService;
+
     protected $smsService;
 
-    public function __construct(ResponseService $responseService,GoogleCalendarService $googleCalendarService,$emailService = null, $smsService = null)
+    public function __construct(ResponseService $responseService, GoogleCalendarService $googleCalendarService, $emailService = null, $smsService = null)
     {
         parent::__construct($responseService);
         $this->googleCalendarService = $googleCalendarService;
@@ -61,132 +60,26 @@ class MeetingController extends BaseAdminController
 
     public function create(Request $request)
     {
-        $users=User::all();
+        $users = User::all();
         $organizations = Organization::all();
 
         // Convert JSON to array if needed
         $selectedOrganizations = [];
-        if (!empty($model->organizations)) {
+        if (! empty($model->organizations)) {
             if (is_string($model->organizations)) {
                 $selectedOrganizations = json_decode($model->organizations, true) ?? [];
             } else {
-                $selectedOrganizations = (array)$model->organizations;
+                $selectedOrganizations = (array) $model->organizations;
             }
         }
-        return $this->renderForm($this->formView,null,['users' => $users,'googleCalendarEnabled' => app(GoogleCalendarService::class)->isEnabled(),
-        'organizations' => $organizations,'selectedOrganizations' => $selectedOrganizations]);
+
+        return $this->renderForm($this->formView, null, ['users' => $users, 'googleCalendarEnabled' => app(GoogleCalendarService::class)->isEnabled(),
+            'organizations' => $organizations, 'selectedOrganizations' => $selectedOrganizations]);
     }
-    // public function store(StoreMeetingRequest $request)
-    // {
-    //     return $this->handleRequest($request, function () use ($request) {
-    //         DB::beginTransaction();
 
-    //         try {
-    //             $validated = $request->validated();
-    //             $meeting = Meeting::create($validated);
-
-    //             // Handle external contacts
-    //             $this->handleExternalContacts($meeting, $validated);
-
-    //             // Handle media uploads
-    //             $this->handleMediaUploads($request, $meeting);
-    //             $this->handleMeetingDocuments($request, $meeting);
-
-    //             // Handle Google Calendar integration
-    //             $this->handleGoogleCalendarIntegration($request, $meeting);
-
-    //             // Send notifications
-    //             $this->handleNotifications($request, $meeting);
-
-    //             DB::commit();
-
-    //             return $this->handleSuccessRedirect($request);
-
-    //         } catch (\Exception $e) {
-    //             DB::rollBack();
-    //             throw $e;
-    //         }
-    //     }, 'admin.meetings.index', 'Meeting created successfully.', 'Failed to create the Meeting.');
-    // }
-
-
-//    public function store(StoreMeetingRequest $request)
-//    {
-//        return $this->handleRequest($request, function () use ($request) {
-//            DB::beginTransaction();
-//            try {
-//                $validated=$request->validated();
-////                 dd($validated,$request->all());
-//
-//                $meeting = Meeting::create($validated);
-//
-//                if ($validated['is_external'] && isset($validated['external_contacts'])) {
-//                    foreach ($validated['external_contacts'] as $contact) {
-//                        $meeting->externalContacts()->create($contact);
-//                    }
-//                }
-//
-//                // Handle media upload if present
-//                $this->handleMediaUploads($request, $meeting);
-//
-//                if ($request->hasFile('meetingDocuments')) {
-//                    $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
-//                }
-//
-//                // dd($meeting);
-//
-//                // Add Google Calendar integration - Only if enabled in settings
-//                if ($this->googleCalendarService->isEnabled() && $request->boolean('add_to_google_calendar', true)) {
-//                    try {
-//                        $organizationIds = $request->organizations ?? [];
-//                        $users = User::whereIn('organization_id', $organizationIds)->whereNotNull('google_access_token')->get();
-//                        $usersArray = $users->toArray();
-//                        $eventData = [
-//                            'title' => $meeting->title,
-//                            'description' => $meeting->description,
-//                            'start_time' => $meeting->start_time,
-//                            'end_time' => $meeting->end_time,
-//                            'attendees' => $users->pluck('email')->toArray()
-//                        ];
-//                        $googleEvent = $this->googleCalendarService->createEventForMultipleUsers($users, $eventData);
-//
-//                        if ($googleEvent) {
-//                            Log::info('Google Calendar event created for meeting #' . $meeting->id);
-//                        }
-//                    } catch (\Exception $e) {
-//                        Log::error('Failed to create Google Calendar event: ' . $e->getMessage());
-//                    }
-//                }
-//
-//
-//
-//                // Trigger the meeting created event
-//                if ($request->boolean('send_notifications', true)) {
-//                    // dd('test');
-//                    event(new MeetingEvent($meeting,'scheduled',  [
-//                        'send_email' => $request->boolean('send_email', true),
-//                        'send_sms' => $request->boolean('send_sms', true),
-//                        'organization_ids' => $request->organizations ?? [],
-//                    ]));
-//                }
-//
-//
-//
-//                DB::commit();
-//                if ($request->has('save_and_add_more')) {
-//                    return redirect()
-//                        ->route('admin.meetings.create')
-//                        ->with('success', 'Meeting created successfully. Add another one.');
-//                }
-//            } catch (\Exception $e) {
-//                DB::rollBack();
-//                throw $e;
-//            }
-//        }, 'admin.meetings.index', 'Meeting created successfully.', 'Failed to create the Meeting.');
-//    }
-//after queue and jobs
     public function store(StoreMeetingRequest $request)
     {
+        //        dd($request->all());
         return $this->handleRequest($request, function () use ($request) {
             DB::beginTransaction();
             try {
@@ -227,10 +120,11 @@ class MeetingController extends BaseAdminController
 
             if ($request->boolean('send_notifications', true)) {
                 SendMeetingNotifications::dispatch($meeting, [
-                    'send_email'       => $request->boolean('send_email', true),
-                    'send_sms'         => $request->boolean('send_sms', true),
+                    'send_email' => $request->boolean('send_email', true),
+                    'send_sms' => $request->boolean('send_sms', true),
                     'organization_ids' => $request->organizations ?? [],
                 ]);
+
             }
 
         }, 'admin.meetings.index', 'Meeting created successfully.', 'Failed to create the Meeting.');
@@ -238,21 +132,22 @@ class MeetingController extends BaseAdminController
 
     public function show(Meeting $meeting)
     {
-        $meeting->load(['media' => function($query) {
+        $meeting->load(['media' => function ($query) {
             $query->where('collection_name', 'meetings');
         }]);
+
         // dd($meeting);
         return view('neameeting::pages.meetings.show', ['resource' => $meeting]);
     }
 
     public function edit(Meeting $meeting)
     {
-        $meeting->load(['media' => function($query) {
+        $meeting->load(['media' => function ($query) {
             $query->where('collection_name', 'meetings');
         }, 'externalContacts']);
-        return $this->renderForm($this->formView, $meeting,['googleCalendarEnabled' => app(GoogleCalendarService::class)->isEnabled(),]);
-    }
 
+        return $this->renderForm($this->formView, $meeting, ['googleCalendarEnabled' => app(GoogleCalendarService::class)->isEnabled()]);
+    }
 
     public function update(UpdateMeetingRequest $request, Meeting $meeting)
     {
@@ -260,73 +155,84 @@ class MeetingController extends BaseAdminController
         return $this->handleRequest($request, function () use ($request, $meeting) {
             DB::beginTransaction();
             try {
-            $validated = $request->validated();
+                $validated = $request->validated();
 
-            if (empty($validated['end_time'])) {
-                $validated['end_time'] = null;
-            }
-
-            // Update meeting details
-            $meeting->update($validated);
-            if ($validated['is_external'] && isset($validated['external_contacts'])) {
-                $meeting->externalContacts()->delete();
-                foreach ($validated['external_contacts'] as $contact) {
-                    $meeting->externalContacts()->create($contact);
+                if (empty($validated['end_time'])) {
+                    $validated['end_time'] = null;
                 }
-             }else{
-                $meeting->externalContacts()->delete();
-            }
-            //documents
-            $this->handleMediaUploads($request, $meeting);
-            if ($request->hasFile('meetingDocuments')) {
-                $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
-            }
 
-             // Update Google Calendar event if enabled
-            if ($this->googleCalendarService->isEnabled() && $request->boolean('update_google_calendar', true)) {
-                try {
-                    $googleEvent = $this->googleCalendarService->updateEvent($meeting);
-                    if ($googleEvent) {
-                        Log::info('Google Calendar event updated for meeting #' . $meeting->id);
+                // Update meeting details
+                $meeting->update($validated);
+                if ($validated['is_external'] && isset($validated['external_contacts'])) {
+                    $meeting->externalContacts()->delete();
+                    foreach ($validated['external_contacts'] as $contact) {
+                        $meeting->externalContacts()->create($contact);
                     }
-                } catch (\Exception $e) {
-                    Log::error('Failed to update Google Calendar event: ' . $e->getMessage());
+                } else {
+                    $meeting->externalContacts()->delete();
                 }
-            }
-            // trigger the evnts
-            if ($request->boolean('send_notifications', true)) {
-                $notificationType = $validated['status'] === 'Cancelled' ? 'cancellation' : 'rescheduled';
-                event(new MeetingEvent($meeting, $notificationType, [
-                    'send_email' => $request->boolean('send_email', true),
-                    'send_sms' => $request->boolean('send_sms', true),
-                    'reason' => $request->input('remarks', ''),
-                    'organization_ids' => $request->organizations ?? [],
-                ]));
-            }
+                // documents
+                $this->handleMediaUploads($request, $meeting);
+                if ($request->hasFile('meetingDocuments')) {
+                    $meeting->addMedia($request->file('meetingDocuments'))->toMediaCollection('meetingDocuments');
+                }
 
-             DB::commit();
+                // Update Google Calendar event if enabled
+                if ($this->googleCalendarService->isEnabled() && ($request->boolean('update_google_calendar') || $request->boolean('add_to_google_calendar'))) {
+                    try {
+                        $googleEvent = $this->googleCalendarService->updateEvent($meeting);
+                        if ($googleEvent) {
+                            Log::info('Google Calendar event updated for meeting #'.$meeting->id);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Failed to update Google Calendar event: '.$e->getMessage());
+                    }
+                }
+                // trigger the evnts
+                if ($request->boolean('send_notifications', true)) {
+                    $notificationType = $validated['status'] === 'Cancelled' ? 'cancellation' : 'rescheduled';
+                    event(new MeetingEvent($meeting, $notificationType, [
+                        'send_email' => $request->boolean('send_email', true),
+                        'send_sms' => $request->boolean('send_sms', true),
+                        'reason' => $request->input('remarks', ''),
+                        'organization_ids' => $request->organizations ?? [],
+                    ]));
+                }
+
+                DB::commit();
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;
             }
         }, 'admin.meetings.index', 'Meeting updated successfully.', 'Failed to update the Meeting.');
     }
+
     public function destroy(Request $request, Meeting $meeting)
     {
         return $this->handleRequest($request, function () use ($meeting) {
 
             $organizations = $meeting->organizations;
+
+            if ($this->googleCalendarService->isEnabled() && $meeting->google_calendar_event_id) {
+                try {
+                    $this->googleCalendarService->deleteEvent($meeting);
+                } catch (\Exception $e) {
+                    Log::error('Failed to delete Google Calendar event: '.$e->getMessage());
+                }
+            }
+
             event(new MeetingEvent($meeting, 'cancellation', [
                 'send_email' => true,
                 'send_sms' => true,
                 'reason' => '',
-                'organization_ids' =>$organizations??[],
+                'organization_ids' => $organizations ?? [],
             ]));
 
             $meeting->delete();
 
         }, 'admin.meetings.index', 'Meeting deleted successfully.', 'Failed to delete the Meeting.');
     }
+
     private function handleMediaUploads(Request $request, Meeting $meeting)
     {
         // Handle media deletion requests
@@ -342,7 +248,7 @@ class MeetingController extends BaseAdminController
         // Add new media uploads
         if ($request->has('meetingDocuments')) {
             foreach ($request->input('meetingDocuments', []) as $fileName) {
-                $filePath = storage_path('app/temp/dropzone/' . $fileName);
+                $filePath = storage_path('app/temp/dropzone/'.$fileName);
                 if (file_exists($filePath)) {
                     $meeting->addMedia($filePath)->toMediaCollection('meetings');
                 }
@@ -352,19 +258,19 @@ class MeetingController extends BaseAdminController
 
     public function getByDate($year, $month, $day)
     {
-        $converter = new NepaliDateConverter();
+        $converter = new NepaliDateConverter;
         $adDate = $converter->toGregorianDate($year, $month, $day);
-        $formattedDate=$adDate['gregorian_date'];
-        $user=Auth::user();
+        $formattedDate = $adDate['gregorian_date'];
+        $user = Auth::user();
         $today = Carbon::today()->toDateString();
 
         $meetings = DB::table('meetings')
-        ->whereDate('meeting_date_ad', '=', $formattedDate)
-        ->when(!$user->hasAnyRole(['admin', 'superadmin']), function ($query) use ($user) {
-            return $query->whereJsonContains('meetings.organizations', (string) $user->organization_id);
-        })
-        ->orderBy('start_time')
-        ->get();
+            ->whereDate('meeting_date_ad', '=', $formattedDate)
+            ->when(! $user->hasAnyRole(['admin', 'superadmin']), function ($query) use ($user) {
+                return $query->whereJsonContains('meetings.organizations', (string) $user->organization_id);
+            })
+            ->orderBy('start_time')
+            ->get();
 
         // dd($meetings);
 
@@ -376,15 +282,15 @@ class MeetingController extends BaseAdminController
                     'year' => $year,
                     'month' => $month,
                     'day' => $day,
-                    'formatted' => $year . '-' . $month . '-' . $day
+                    'formatted' => $year.'-'.$month.'-'.$day,
                 ],
                 'ad' => [
                     'year' => $adDate['year'],
                     'month' => $adDate['month'],
                     'day' => $adDate['day'],
-                    'formatted' => $formattedDate
-                ]
-            ]
+                    'formatted' => $formattedDate,
+                ],
+            ],
         ]);
     }
 
@@ -394,7 +300,7 @@ class MeetingController extends BaseAdminController
     public function getMeetingDates($year, $month)
     {
 
-        $converter = new NepaliDateConverter();
+        $converter = new NepaliDateConverter;
         // Get first day of the month
         $firstDayAd = $converter->toGregorianDate($year, $month, 1);
         $firstDay = Carbon::create($firstDayAd['year'], $firstDayAd['month'], $firstDayAd['day']);
@@ -407,8 +313,8 @@ class MeetingController extends BaseAdminController
 
         // Get all meetings in this date range
         $meetings = Meeting::whereBetween('meeting_date_ad', [$today->format('Y-m-d'), $lastDay->format('Y-m-d')])
-        ->orderBy('meeting_date_ad')
-        ->get();
+            ->orderBy('meeting_date_ad')
+            ->get();
 
         // Group dates that have meetings
         $meetingDates = [];
@@ -417,51 +323,53 @@ class MeetingController extends BaseAdminController
             $adDate = Carbon::parse($meeting->meeting_date_ad);
             $bsDate = $converter->toNepaliDate($adDate->year, $adDate->month, $adDate->day);
 
-            $dateKey = $bsDate['year'] . '-' . $bsDate['month'] . '-' . $bsDate['day'];
+            $dateKey = $bsDate['year'].'-'.$bsDate['month'].'-'.$bsDate['day'];
 
-            if (!in_array($dateKey, $meetingDates)) {
+            if (! in_array($dateKey, $meetingDates)) {
                 $meetingDates[] = $dateKey;
             }
         }
 
         return response()->json($meetingDates);
     }
+
     public function checkConflict(Request $request)
     {
-        $request->validate(['meeting_date' => 'required|date','start_time' => 'required']);
+        $request->validate(['meeting_date' => 'required|date', 'start_time' => 'required']);
 
         $meetingDate = $request->meeting_date;
         $startTime = $request->start_time;
 
         // Convert Nepali date to AD date
-       $date=explode('-',$meetingDate);
-       $year=$date[0];
-       $month=$date[1];
-       $day=$date[2];
-       $converter = new NepaliDateConverter();
-       $adDate = $converter->toGregorianDate($year, $month, $day);
-       $meetingDateAd = $adDate['gregorian_date'];
+        $date = explode('-', $meetingDate);
+        $year = $date[0];
+        $month = $date[1];
+        $day = $date[2];
+        $converter = new NepaliDateConverter;
+        $adDate = $converter->toGregorianDate($year, $month, $day);
+        $meetingDateAd = $adDate['gregorian_date'];
 
-       $startTime = Carbon::createFromFormat('h:i A', $startTime)->format('H:i:s');
-       $startDateTime = Carbon::createFromFormat('Y-m-d H:i:s', "$meetingDateAd $startTime");
-       $conflictingMeeting = Meeting::where('start_time', $startDateTime)->where('status', '!=', 'cancelled')->first();
+        $startTime = Carbon::createFromFormat('h:i A', $startTime)->format('H:i:s');
+        $startDateTime = Carbon::createFromFormat('Y-m-d H:i:s', "$meetingDateAd $startTime");
+        $conflictingMeeting = Meeting::where('start_time', $startDateTime)->where('status', '!=', 'cancelled')->first();
 
         return response()->json([
-            'conflict' => !is_null($conflictingMeeting),
+            'conflict' => ! is_null($conflictingMeeting),
             'meeting' => $conflictingMeeting ? [
                 'title' => $conflictingMeeting->title,
                 'id' => $conflictingMeeting->id,
                 'start_time' => $conflictingMeeting->start_time,
-                'end_time' => $conflictingMeeting->end_time
-            ] : null
+                'end_time' => $conflictingMeeting->end_time,
+            ] : null,
         ]);
     }
+
     public function checkTimeValidation(Request $request)
     {
         $request->validate([
             'meeting_date' => 'required|date',
             'start_time' => 'required',
-            'end_time' => 'required'
+            'end_time' => 'required',
         ]);
 
         $meetingDate = $request->meeting_date;
@@ -473,7 +381,7 @@ class MeetingController extends BaseAdminController
         $year = $date[0];
         $month = $date[1];
         $day = $date[2];
-        $converter = new NepaliDateConverter();
+        $converter = new NepaliDateConverter;
         $adDate = $converter->toGregorianDate($year, $month, $day);
         $meetingDateAd = $adDate['gregorian_date'];
 
@@ -481,7 +389,7 @@ class MeetingController extends BaseAdminController
         $meetingDateCarbon = Carbon::createFromFormat('Y-m-d', $meetingDateAd);
         if ($meetingDateCarbon->lt(Carbon::today())) {
             return response()->json([
-                'error' => 'Meeting date must be today or in the future'
+                'error' => 'Meeting date must be today or in the future',
             ], 422);
         }
 
@@ -493,40 +401,41 @@ class MeetingController extends BaseAdminController
         // Validate end time is after start time
         if ($endDateTime->lte($startDateTime)) {
             return response()->json([
-                'error' => 'End time must be after start time'
+                'error' => 'End time must be after start time',
             ], 422);
         }
 
         $conflictingMeeting = Meeting::where('start_time', $startDateTime)->where('status', '!=', 'cancelled')->first();
 
         return response()->json([
-            'conflict' => !is_null($conflictingMeeting),
+            'conflict' => ! is_null($conflictingMeeting),
             'meeting' => $conflictingMeeting ? [
                 'title' => $conflictingMeeting->title,
                 'id' => $conflictingMeeting->id,
                 'start_time' => $conflictingMeeting->start_time,
-                'end_time' => $conflictingMeeting->end_time
-            ] : null
+                'end_time' => $conflictingMeeting->end_time,
+            ] : null,
         ]);
     }
+
     public function cancel(Request $request, $id)
     {
         // Find the meeting
         $meeting = Meeting::find($id);
         $organizations = $meeting->organizations;
 
-        if (!$meeting) {
+        if (! $meeting) {
             return response()->json([
                 'success' => false,
-                'message' => 'Meeting not found.'
+                'message' => 'Meeting not found.',
             ], 404);
         }
 
         // Check if the user has the 'md' role
-        if (!Auth::user()->hasRole('md')) {
+        if (! Auth::user()->hasRole('md')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized action.'
+                'message' => 'Unauthorized action.',
             ], 403);
         }
 
@@ -534,7 +443,7 @@ class MeetingController extends BaseAdminController
         if ($meeting->status === 'Cancelled') {
             return response()->json([
                 'success' => false,
-                'message' => 'Meeting is already cancelled.'
+                'message' => 'Meeting is already cancelled.',
             ], 400);
         }
 
@@ -546,28 +455,30 @@ class MeetingController extends BaseAdminController
             'send_email' => true,
             'send_sms' => true,
             'reason' => $request->input('cancellation_reason', ''),
-            'organization_ids' =>$organizations??[],
+            'organization_ids' => $organizations ?? [],
         ]));
 
         return response()->json([
             'success' => true,
-            'message' => 'Meeting cancelled successfully.'
+            'message' => 'Meeting cancelled successfully.',
         ]);
     }
+
     public function sendNotifications($id)
     {
         try {
-            $meeting_id = (int)$id;
+            $meeting_id = (int) $id;
             $meeting = Meeting::with(['externalContacts'])->find($meeting_id);
 
-            if (!$meeting) {
-                Log::error('Meeting not found for ID: ' . $meeting_id);
+            if (! $meeting) {
+                Log::error('Meeting not found for ID: '.$meeting_id);
+
                 return redirect()->back()->with('error', 'Meeting not found.');
             }
 
             $notificationType = 'reminder';
             $organization_ids = $meeting->organizations ?? [];
-            Log::info('Firing MeetingEvent for meeting ID: ' . $meeting->id . ' with type: ' . $notificationType, [
+            Log::info('Firing MeetingEvent for meeting ID: '.$meeting->id.' with type: '.$notificationType, [
                 'organization_ids' => $organization_ids,
                 'external_contacts_count' => $meeting->externalContacts->count(),
             ]);
@@ -578,13 +489,13 @@ class MeetingController extends BaseAdminController
                 'organization_ids' => is_string($organization_ids) ? json_decode($organization_ids, true) : $organization_ids,
             ]));
 
-            Log::info('MeetingEvent fired successfully for meeting ID: ' . $meeting->id);
+            Log::info('MeetingEvent fired successfully for meeting ID: '.$meeting->id);
+
             return redirect()->back()->with('successrogens', 'Notifications sent successfully.');
         } catch (\Exception $e) {
-            Log::error('Error sending meeting notifications: ' . $e->getMessage(), ['exception' => $e]);
+            Log::error('Error sending meeting notifications: '.$e->getMessage(), ['exception' => $e]);
+
             return redirect()->back()->with('error', 'Failed to send notifications. Please try again.');
         }
     }
-
-
 }

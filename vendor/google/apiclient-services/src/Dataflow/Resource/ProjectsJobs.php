@@ -35,7 +35,8 @@ class ProjectsJobs extends \Google\Service\Resource
 {
   /**
    * List the jobs of a project across all regions. **Note:** This method doesn't
-   * support filtering the list of jobs by name. (jobs.aggregated)
+   * support filtering the list of jobs by name. # IAM Permissions Requires the
+   * `dataflow.jobs.list` permission on the project. (jobs.aggregated)
    *
    * @param string $projectId The project which owns the jobs.
    * @param array $optParams Optional parameters.
@@ -62,13 +63,15 @@ class ProjectsJobs extends \Google\Service\Resource
     return $this->call('aggregated', [$params], ListJobsResponse::class);
   }
   /**
-   * A Job is a multi-stage computation graph run by the Cloud Dataflow service.
-   * Creates a Cloud Dataflow job. To create a job, we recommend using
+   * Creates a Dataflow job. To create a job, we recommend using
    * `projects.locations.jobs.create` with a [regional endpoint]
    * (https://cloud.google.com/dataflow/docs/concepts/regional-endpoints). Using
    * `projects.jobs.create` is not recommended, as your job will always start in
    * `us-central1`. Do not enter confidential information when you supply string
-   * values using the API. (jobs.create)
+   * values using the API. # IAM Permissions 1. Requires the
+   * `dataflow.jobs.create` permission on the project. 2.
+   * `resourcemanager.projects.get` (Specifically required for regional endpoints
+   * to resolve regional resource metadata) (jobs.create)
    *
    * @param string $projectId The ID of the Cloud Platform project that the job
    * belongs to.
@@ -95,7 +98,8 @@ class ProjectsJobs extends \Google\Service\Resource
    * job, we recommend using `projects.locations.jobs.get` with a [regional
    * endpoint] (https://cloud.google.com/dataflow/docs/concepts/regional-
    * endpoints). Using `projects.jobs.get` is not recommended, as you can only get
-   * the state of jobs that are running in `us-central1`. (jobs.get)
+   * the state of jobs that are running in `us-central1`. # IAM Permissions
+   * Requires the `dataflow.jobs.get` permission on the job. (jobs.get)
    *
    * @param string $projectId The ID of the Cloud Platform project that the job
    * belongs to.
@@ -120,7 +124,8 @@ class ProjectsJobs extends \Google\Service\Resource
    * `projects.locations.jobs.getMetrics` with a [regional endpoint]
    * (https://cloud.google.com/dataflow/docs/concepts/regional-endpoints). Using
    * `projects.jobs.getMetrics` is not recommended, as you can only request the
-   * status of jobs that are running in `us-central1`. (jobs.getMetrics)
+   * status of jobs that are running in `us-central1`. # IAM Permissions Requires
+   * the `dataflow.metrics.get` permission on the job. (jobs.getMetrics)
    *
    * @param string $projectId A project id.
    * @param string $jobId The job to get metrics for.
@@ -149,7 +154,9 @@ class ProjectsJobs extends \Google\Service\Resource
    * `projects.jobs.list` is not recommended, because you can only get the list of
    * jobs that are running in `us-central1`. `projects.locations.jobs.list` and
    * `projects.jobs.list` support filtering the list of jobs by name. Filtering by
-   * name isn't supported by `projects.jobs.aggregated`. (jobs.listProjectsJobs)
+   * name isn't supported by `projects.jobs.aggregated`. # IAM Permissions
+   * Requires the `dataflow.jobs.list` permission on the project.
+   * (jobs.listProjectsJobs)
    *
    * @param string $projectId The project which owns the jobs.
    * @param array $optParams Optional parameters.
@@ -176,7 +183,8 @@ class ProjectsJobs extends \Google\Service\Resource
     return $this->call('list', [$params], ListJobsResponse::class);
   }
   /**
-   * Snapshot the state of a streaming job. (jobs.snapshot)
+   * Snapshot the state of a streaming job. # IAM Permissions Requires the
+   * `dataflow.jobs.snapshot` permission on the job. (jobs.snapshot)
    *
    * @param string $projectId The project which owns the job to be snapshotted.
    * @param string $jobId The job to be snapshotted.
@@ -197,7 +205,10 @@ class ProjectsJobs extends \Google\Service\Resource
    * [regional endpoint]
    * (https://cloud.google.com/dataflow/docs/concepts/regional-endpoints). Using
    * `projects.jobs.update` is not recommended, as you can only update the state
-   * of jobs that are running in `us-central1`. (jobs.update)
+   * of jobs that are running in `us-central1`. # IAM Permissions 1. Requires the
+   * `dataflow.jobs.cancel` permission to cancel a job. 2. Requires the
+   * `dataflow.jobs.updateContents` permission to update runtime parameters.
+   * (jobs.update)
    *
    * @param string $projectId The ID of the Cloud Platform project that the job
    * belongs to.

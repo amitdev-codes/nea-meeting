@@ -43,7 +43,9 @@ class Meeting extends Model implements HasMedia
         'status',
         'created_by',
         'organizations',
-        'remarks'
+        'remarks',
+        'google_calendar_event_id',
+        'google_calendar_link',
     ];
 
     protected $casts = [

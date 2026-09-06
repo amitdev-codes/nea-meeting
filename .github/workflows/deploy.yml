@@ -1,0 +1,75 @@
+name: Deploy Laravel
+on:
+  push:
+    branches: [ main ]
+jobs:
+  deploy-own-server:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: 'Babbal Host'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Composer Dependencies
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/app -w /app php:8.4-cli-alpine sh -c "apk add --no-cache git unzip \
+            && curl -sSLf -o /usr/local/bin/install-php-extensions https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions \
+            && chmod +x /usr/local/bin/install-php-extensions \
+            && install-php-extensions zip gd exif \
+            && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+            && composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts"
+
+      - name: Fix file ownership after composer
+        run: sudo chown -R $(id -u):$(id -g) .
+
+      - name: Build Frontend Assets (Yarn)
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/app -w /app node:24-alpine sh -c "apk add --no-cache php84-cli php84-tokenizer php84-mbstring php84-openssl php84-phar php84-fileinfo php84-ctype php84-xml php84-dom php84-simplexml php84-xmlwriter php84-session php84-pdo php84-curl \
+            && ln -sf /usr/bin/php84 /usr/bin/php \
+            && yarn install && yarn build"
+
+      - name: Fix file ownership after build
+        run: sudo chown -R $(id -u):$(id -g) .
+
+      - name: Package build for transfer
+        run: |
+          rm -rf .git .github node_modules
+          rm -f .env .env.example
+          tar -czf ../deploy.tar.gz --exclude=storage .
+          mv ../deploy.tar.gz ./deploy.tar.gz
+
+      - name: Upload archive via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          source: "deploy.tar.gz"
+          target: "~/"
+          strip_components: 0
+
+      - name: Extract archive and run post-deploy Artisan commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            mkdir -p ${{ secrets.DEPLOY_PATH }}
+            cd ${{ secrets.DEPLOY_PATH }} && php artisan down || true
+            rm -rf ${{ secrets.DEPLOY_PATH }}/public/build
+            tar -xzf ~/deploy.tar.gz -C ${{ secrets.DEPLOY_PATH }}
+            rm -f ~/deploy.tar.gz
+            cd ${{ secrets.DEPLOY_PATH }}
+            php artisan package:discover --ansi
+            php artisan migrate --force
+            php artisan config:clear
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan storage:link || true
+            php artisan queue:restart || true
+            php artisan up
